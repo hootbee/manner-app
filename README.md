@@ -4,6 +4,7 @@
 
 ```
 app/                      Flutter 앱 (Android 전용, applicationId com.hootbee.mannerfit)
+  assets/content.json     콘텐츠 원본 (ADR 0003. 아직 없음, 지금은 docs/prototype/content.json)
   lib/content/            번들 JSON + Storage 새 버전 로드
   lib/engine/             XP, 연속 학습일, Leitner 계산 (기록 집합만 입력)
   lib/sync/               sync(table) 하나로 attempts, day_completions 동기화
@@ -12,7 +13,6 @@ app/                      Flutter 앱 (Android 전용, applicationId com.hootbee
 supabase/
   migrations/             DB 스키마와 RLS (ADR 0001)
   functions/delete-account/  탈퇴 Edge Function (ADR 0001)
-content/                  콘텐츠 JSON 원본 (아직 없음. 지금은 docs/prototype/content.json)
 pipeline/                 Claude 문제 생성·검토 스크립트 (아직 없음)
 .github/workflows/        콘텐츠 파이프라인 (아직 없음)
 docs/                     기획서, ADR, 견본, 디자인. GitHub Pages 소스
