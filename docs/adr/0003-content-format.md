@@ -87,7 +87,7 @@ cd app && flutter pub get && dart run tool/validate_content.dart assets/content.
 | 은퇴하지 않은 매너의 출제 가능한 기본 시나리오가 3개 미만(기획서: 다시 풀기·복습은 다른 상황으로) | 경고 |
 | choice의 `best` 보기가 가장 김(기획서 콘텐츠 원칙) | 경고 |
 
-경고는 출력만 하고 종료 코드는 0이다. 지금 견본으로 돌리면 매너 3(A-stairs 하나)이 경고를 낸다. `--previous`는 PR 기준 브랜치의 파일이다(`git show origin/$BASE:app/assets/content.json`). 처음 만드는 PR이라 없으면 비교 검사를 건너뛴다.
+경고는 출력만 하고 종료 코드는 0이다. 2026-10-25 현재 콘텐츠로 돌리면 경고 두 개가 나온다(매너 3의 기본 시나리오 1개, `A-umbrella-01`의 best 보기가 가장 김). 경고는 콘텐츠가 바뀌면 달라지므로 현재 파일 테스트는 오류가 없는지만 확인하고, 경고 검사는 작은 예시 데이터로 테스트한다. `--previous`는 PR 기준 브랜치의 파일이다(`git show origin/$BASE:app/assets/content.json`). 처음 만드는 PR이라 없으면 비교 검사를 건너뛴다.
 
 ## 고려한 대안
 - 축 보기의 화면 문구를 key로 쓰기(`A-sidewalk~연인.오른쪽`): 문구를 고치면 id가 바뀐다.
@@ -111,7 +111,7 @@ cd app && flutter pub get && dart run tool/validate_content.dart assets/content.
 | 1 | 견본을 새 형식으로 옮겨 `app/assets/content.json`(`schema: 1`, `version: 1`)으로, 스키마를 `app/assets/content.schema.json`으로 둔다. 빈 `day-03`은 장면이 3개가 아니므로 뺀다(첫 공개 전이라 지워도 된다). 후보 매너 31과 그 시나리오 3개(`A-subway-01`, `A-bus-01`, `A-elevator-01`), 매너 31을 쓰는 `day-02`도 옮기지 않는다. 견본에는 그대로 남긴다 | ajv 명령이 옮긴 파일에 `valid`를 내고, `weekly`를 다시 넣은 파일은 거절한다 |
 | 2 | `lib/content/`: `parseContent(String)`와 `expand()`. Flutter import 금지(`boundaries_test`에 추가) | `A-sidewalk`가 8개로 펼쳐지고 id가 `A-sidewalk~partner.right` 꼴로 모두 다르다. `A-stairs~grandma.up`의 `feedback.title`이 "오를 땐 한 칸 아래, 뒤에서"다 |
 | 3 | 은퇴와 조회 | 은퇴한 보기를 포함한 펼친 문제는 출제 목록에 없지만 `lookup(id)`로는 찾힌다. 콘텐츠에 없는 `A-sidewalk~new.right`는 `~` 앞으로 매너 1을 찾는다 |
-| 4 | 파일 하나 검사(참조, 자리 표시, choice `best` 하나, 매너당 3문제) | 장면이 콘텐츠에 없는 매너 99를 가리키면 오류다. 견본 그대로면 매너 3 경고 하나에 종료 코드 0이다 |
+| 4 | 파일 하나 검사(참조, 자리 표시, choice `best` 하나, 매너당 3문제) | 장면이 콘텐츠에 없는 매너 99를 가리키면 오류다. 현재 `app/assets/content.json`은 오류가 없고 종료 코드 0이다 |
 | 5 | 비교 검사(`--previous`) | 이전 파일에 있던 `A-alley~child`를 지우면 오류 이름과 id를 출력하고 종료 코드 1. 내용만 바꾸고 `version`을 그대로 두면 오류 |
 | 6 | CI `.github/workflows/content.yml`: `dev`로 가는 PR에서 `content/**`, `app/lib/content/**`, `app/tool/**`가 바뀌면 6절 두 명령 실행 | `day-01`의 `id`를 바꾼 PR에서 워크플로가 실패한다(초안 PR로 확인) |
 | 7 | Storage 버킷 마이그레이션 | pgTAP: `authenticated` 역할로 `storage.objects`에 `bucket_id='content'` insert가 거부된다 |
