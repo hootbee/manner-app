@@ -1,0 +1,23 @@
+# 비밀 값 (예시 파일만 올린다)
+.env
+.env.*
+!.env.example
+
+# 앱 서명 키: 잃어버리거나 공개되면 플레이 스토어 업데이트가 막힌다
+*.jks
+*.keystore
+key.properties
+
+# DB 덤프: 사용자 개인정보가 들어 있다
+*.dump
+*.sql.gz
+backup.tgz
+
+# Supabase CLI 로컬 상태
+supabase/.temp/
+supabase/.branches/
+
+# 개인 설정
+.claude/settings.local.json
+.idea/
+.DS_Store

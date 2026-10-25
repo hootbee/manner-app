@@ -1,0 +1,339 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>매너 앱 화면 흐름</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
+<style>
+/* Layout: wireframe board — three flows (first run, daily loop, growth & settings), each a wrapping row of phone screens with redline notes. Greys plus one annotation blue. */
+:root {
+  --bg: #e9ebee; --screen: #ffffff; --frame: #3b3f46; --ink: #1f2328; --muted: #6a717c;
+  --box: #e3e6ea; --box-2: #cfd4da; --line: #c4c9d0; --me: #d7dbe1;
+  --note: #2f6fd6; --good: #1f8a4c; --bad: #c2412d; --warn: #a86d12;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15171b; --screen: #1f2228; --frame: #8b929c; --ink: #e6e9ee; --muted: #9aa2ad;
+  --box: #2b2f36; --box-2: #3a3f47; --line: #444a53; --me: #353b44;
+  --note: #7aa8f5; --good: #5ccc8a; --bad: #f07a62; --warn: #e2b04c; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #15171b; --screen: #1f2228; --frame: #8b929c; --ink: #e6e9ee; --muted: #9aa2ad;
+  --box: #2b2f36; --box-2: #3a3f47; --line: #444a53; --me: #353b44;
+  --note: #7aa8f5; --good: #5ccc8a; --bad: #f07a62; --warn: #e2b04c; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
+.page { max-width: 1240px; margin: 0 auto; padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 36px; }
+.tagline { font-family: var(--font-mono); font-size: 12px; color: var(--note); letter-spacing: .04em; }
+h1 { margin: 2px 0 4px; font-size: 26px; }
+.sub { margin: 0; color: var(--muted); max-width: 70ch; }
+.flow > h2 { margin: 0 0 4px; font-size: 18px; }
+.flow > p { margin: 0 0 16px; color: var(--muted); }
+.row { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 28px 20px; justify-items: center; }
+.cell { width: 100%; max-width: 270px; display: flex; flex-direction: column; gap: 8px; }
+.cell header { display: flex; align-items: baseline; gap: 8px; }
+.id { font-family: var(--font-mono); font-size: 12px; color: var(--note); }
+.cell h3 { margin: 0; font-size: 15px; }
+.notes { margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 11px; color: var(--note); display: flex; flex-direction: column; gap: 3px; }
+.notes li::before { content: "↳ "; }
+
+.phone { width: 100%; height: 540px; border: 2px solid var(--frame); border-radius: 28px; background: var(--screen); padding: 10px 12px 10px;
+  display: flex; flex-direction: column; gap: 10px; overflow: hidden; font-size: 12.5px; position: relative; }
+.status { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--muted); padding: 0 6px; }
+.grow { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.center { align-items: center; justify-content: center; text-align: center; }
+.box { background: var(--box); border-radius: 12px; padding: 10px; }
+.img { background: repeating-linear-gradient(135deg, var(--box) 0 8px, var(--box-2) 8px 9px); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 11px; }
+.btn { border-radius: 12px; padding: 10px; text-align: center; font-weight: 600; background: var(--frame); color: var(--screen); position: relative; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.danger { background: var(--bad); color: #fff; }
+.link { color: var(--muted); text-align: center; font-size: 12px; text-decoration: underline; position: relative; }
+.go { position: absolute; right: -4px; top: -9px; font-family: var(--font-mono); font-size: 10px; background: var(--note); color: var(--screen); border-radius: 6px; padding: 0 5px; font-weight: 500; }
+.chip { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 8px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); }
+.chip.hot { background: var(--warn); border-color: var(--warn); color: #fff; }
+.title { font-size: 16px; font-weight: 600; margin: 0; }
+.big { font-size: 28px; font-weight: 600; line-height: 1.1; }
+.muted { color: var(--muted); }
+.bar { height: 6px; border-radius: 99px; background: var(--box); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--frame); }
+.list { display: flex; flex-direction: column; }
+.list > div { display: flex; justify-content: space-between; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--box-2); gap: 8px; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--box-2); padding-top: 8px; text-align: center; font-size: 11px; color: var(--muted); }
+.tabs .on { color: var(--ink); font-weight: 600; }
+.dots { display: flex; gap: 5px; justify-content: center; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--box-2); } .dots i.on { background: var(--frame); width: 16px; border-radius: 99px; }
+.social { border-radius: 12px; padding: 10px; text-align: center; font-weight: 600; border: 1.5px solid var(--line); }
+.social.k { background: var(--box-2); border-color: var(--box-2); }
+.fb { border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 5px; border: 2px solid; }
+.fb.good { border-color: var(--good); } .fb.bad { border-color: var(--bad); }
+.fb .h { font-weight: 600; font-size: 14px; } .fb.good .h { color: var(--good); } .fb.bad .h { color: var(--bad); }
+.motto { font-weight: 600; }
+.combo { position: absolute; right: 18px; top: 120px; transform: rotate(8deg); background: var(--warn); color: #fff; font-weight: 600; padding: 4px 10px; border-radius: 10px; font-size: 13px; }
+.b { max-width: 82%; padding: 6px 9px; border-radius: 11px; background: var(--screen); font-size: 12px; }
+.b.me { background: var(--me); align-self: flex-end; }
+.chat { display: flex; flex-direction: column; gap: 5px; }
+.opt { border: 1.5px dashed var(--box-2); border-radius: 10px; padding: 7px 9px; }
+.opt.pick { border: 2px solid var(--bad); } .opt.ans { border: 2px solid var(--good); }
+.hex svg { width: 100%; height: auto; display: block; }
+.skill { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; font-size: 11.5px; }
+.skill .bar { grid-column: 1 / -1; }
+.scene { height: 150px; border-radius: 12px; background: var(--box); position: relative; overflow: hidden; }
+.scene .road { position: absolute; right: 0; top: 0; bottom: 0; width: 34%; background: var(--box-2); }
+.scene .tok { position: absolute; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; }
+.scene .splash { position: absolute; right: 22%; top: 30%; font-family: var(--font-mono); font-size: 10px; color: var(--note); }
+.unit { background: var(--frame); color: var(--screen); border-radius: 12px; padding: 7px 10px; display: flex; flex-direction: column; }
+.unit .muted { color: var(--box-2); }
+.unit.lock { background: var(--box); color: var(--muted); } .unit.lock .muted { color: var(--muted); }
+.path { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 4px 0; }
+.node { width: 48px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; transform: translateX(var(--x));
+  background: var(--frame); color: var(--screen); box-shadow: 0 5px 0 var(--muted); position: relative; }
+.node.lock { background: var(--box); color: var(--muted); box-shadow: 0 5px 0 var(--box-2); }
+.node.now { width: 58px; height: 52px; margin-top: 24px; outline: 4px solid var(--box-2); outline-offset: 4px; }
+.bubble { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: var(--screen); color: var(--ink); border: 1.5px solid var(--frame); border-radius: 8px; padding: 1px 8px; font-size: 11px; white-space: nowrap; }
+.pop { border: 2px solid var(--frame); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 4px; position: relative; }
+.pop::before { content: ""; position: absolute; top: -9px; left: 38%; width: 14px; height: 14px; background: var(--screen); border-left: 2px solid var(--frame); border-top: 2px solid var(--frame); transform: rotate(45deg); }
+.tie { display: inline-block; width: 7px; height: 11px; background: currentColor; clip-path: polygon(25% 0, 75% 0, 100% 75%, 50% 100%, 0 75%); margin-right: 4px; vertical-align: -1px; }
+.day { display: flex; flex-direction: column; gap: 5px; position: relative; padding-left: 4px; }
+.day::before { content: ""; position: absolute; left: 44px; top: 8px; bottom: 8px; width: 2px; background: var(--box-2); }
+.slot { display: grid; grid-template-columns: 36px 1fr; gap: 14px; align-items: center; }
+.slot .t { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-align: right; }
+.sc { border: 1.5px solid var(--frame); border-radius: 10px; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 11.5px; position: relative; background: var(--screen); }
+.sc span { color: var(--muted); font-size: 10.5px; white-space: nowrap; }
+.slot.done .sc { background: var(--box); border-color: var(--box-2); }
+.slot.now .sc { border-width: 2.5px; padding: 7px 8px; }
+.slot.now .sc span { color: var(--ink); font-weight: 600; }
+.slot.lock .sc { border-style: dashed; border-color: var(--box-2); color: var(--muted); }
+.slot.gift .sc { border-color: var(--warn); color: var(--warn); }
+.suit { width: 120px; height: 130px; border-radius: 18px; background: var(--frame); position: relative; overflow: hidden; margin: 6px 0; }
+.sv-collar { position: absolute; left: 22px; right: 22px; top: 30px; bottom: -10px; background: var(--screen); clip-path: polygon(0 0, 50% 30%, 100% 0, 100% 100%, 0 100%); }
+.sv-tie { position: absolute; left: 50%; top: 40px; width: 20px; height: 80px; transform: translateX(-50%); background: var(--muted); clip-path: polygon(20% 0, 80% 0, 100% 80%, 50% 100%, 0 80%); }
+.sv-pin { position: absolute; left: 50%; top: 82px; transform: translateX(-50%); background: var(--warn); color: #fff; font-size: 9px; padding: 0 5px; border-radius: 4px; white-space: nowrap; }
+.card { border: 2px solid var(--frame); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; }
+.icon-ph { width: 72px; height: 72px; border-radius: 22%; background: var(--frame); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+.icon-ph i { width: 16px; height: 46px; background: var(--box-2); clip-path: polygon(20% 0, 80% 0, 100% 80%, 50% 100%, 0 80%); }
+.toggle { width: 30px; height: 18px; border-radius: 99px; background: var(--frame); position: relative; } .toggle::after { content: ""; position: absolute; right: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--screen); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--screen); border-top: 2px solid var(--frame); border-radius: 20px 20px 0 0; padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.dim { position: absolute; inset: 0; background: color-mix(in srgb, var(--frame) 45%, transparent); }
+</style>
+
+<div class="page">
+  <header>
+    <span class="tagline">WIREFRAME · 앱 화면 흐름 16개</span>
+    <h1>매너 트레이닝 앱 화면 흐름</h1>
+    <p class="sub">기획서의 MVP 화면을 처음 실행, 매일 학습, 성장·설정 세 흐름으로 나눴어요. 파란 태그(→ B1)는 그 버튼을 누르면 가는 화면이에요.</p>
+  </header>
+
+  <section class="flow" aria-labelledby="fa">
+    <h2 id="fa">A. 처음 실행</h2>
+    <p>로그인 없이 첫 세트부터 풀게 하고, 끝난 뒤에 계정 연동을 권해요.</p>
+    <div class="row">
+      <div class="cell"><header><span class="id">A1</span><h3>스플래시</h3></header>
+        <div class="phone"><div class="status"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="grow center"><div class="icon-ph"><i></i></div><p class="title">매너 트레이닝 (가칭)</p><p class="muted" style="margin:0">하루 5분, 몸에 배는 매너</p>
+            <p class="muted" style="margin:24px 0 0;font-size:11px">Manners Maketh Man</p></div></div>
+        <ul class="notes"><li>아이콘 시안 확정 후 교체</li><li>"Manners Maketh Man" 문구는 여기 위치</li></ul></div>
+
+      <div class="cell"><header><span class="id">A2</span><h3>온보딩</h3></header>
+        <div class="phone"><div class="status"><span>9:41</span><span>▮▮▮</span></div>
+          <div class="grow"><div class="img" style="height:200px">장면 일러스트</div>
+            <p class="title">아는 것과 몸에 밴 것은 달라요</p>
+            <p class="muted" style="margin:0">원칙 하나를 여러 상황으로 반복해서, 처음 보는 상황에서도 바로 나오게 훈련해요.</p>
+            <div class="dots"><i class="on"></i><i></i><i></i></div>
+            <div style="flex:1"></div>
+            <div class="btn">첫 세트 풀어보기<span class="go">→ A3</span></div>
+            <div class="link">이미 계정이 있어요<span class="go">→ A5</span></div></div></div>
+        <ul class="notes"><li>3장. 반복 훈련, 그림 문제, 스탯 소개</li><li>로그인 없이 시작 (iOS 심사 5.1.1)</li></ul></div>
+
+      <div class="cell"><header><span class="id">A3</span><h3>첫 세트 (체험)</h3></header>
+        <div class="phone"><div class="status"><span>9:42</span><span>▮▮▮</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><span class="muted">✕</span><div class="bar" style="flex:1"><i style="width:40%"></i></div><span class="muted" style="font-family:var(--font-mono);font-size:10px">2/5</span></div>
+          <div class="grow"><span><span class="chip">체험</span> <span class="chip">위치</span></span>
+            <p class="title">연인과 인도를 걷는다. 나는 어느 쪽?</p>
+            <div class="scene"><div class="road"></div>
+              <div class="tok" style="left:30%;top:40%;background:var(--box-2);color:var(--ink);border:2px dashed var(--frame)">?</div>
+              <div class="tok" style="left:52%;top:40%;background:var(--box-2);color:var(--ink);border:2px dashed var(--frame)">?</div></div>
+            <p class="muted" style="margin:0">[나] 자리를 탭하세요. [연인]은 남은 자리로 가요.</p></div></div>
+        <ul class="notes"><li>쉬운 5문제. 형식 4종을 한 번씩 맛보기</li><li>기록은 기기에만 저장</li></ul></div>
+
+      <div class="cell"><header><span class="id">A4</span><h3>첫 세트 완료</h3></header>
+        <div class="phone"><div class="status"><span>9:45</span><span>▮▮▮</span></div>
+          <div class="grow center"><p class="muted" style="margin:0">첫 세트 완료</p><div class="big">4 / 5</div><p style="margin:0">+45 XP · 연속 1일째</p>
+            <div class="box" style="width:100%;text-align:left">기록을 저장하면 내일 틀린 매너를 다른 상황으로 다시 내줘요.</div>
+            <div style="flex:1"></div>
+            <div class="btn" style="width:100%">기록 저장하고 계속하기<span class="go">→ A5</span></div>
+            <div class="link">나중에 할게요<span class="go">→ B1</span></div></div></div>
+        <ul class="notes"><li>로그인 권유는 여기서 처음</li><li>"나중에"는 로컬 기록만으로 홈 진입</li><li>연속 3일째에 한 번 더 권유</li></ul></div>
+
+      <div class="cell"><header><span class="id">A5</span><h3>로그인</h3></header>
+        <div class="phone"><div class="status"><span>9:45</span><span>▮▮▮</span></div>
+          <div class="grow"><div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px">
+            <p class="title">기록을 안전하게 보관할게요</p><p class="muted" style="margin:0">폰을 바꿔도 연속 학습일과 스탯이 그대로 남아요.</p></div>
+            <div class="social k">카카오로 계속하기<span class="go" style="position:relative;right:auto;top:auto;margin-left:6px">→ B1</span></div>
+            <div class="social">Google로 계속하기</div>
+            <div class="social">Apple로 계속하기</div>
+            <p class="muted" style="margin:4px 0 0;font-size:11px;text-align:center">닉네임만 받아요. 개인정보처리방침</p></div></div>
+        <ul class="notes"><li>이메일·비밀번호 가입 없음</li><li>로그인하면 기기 기록을 서버에 합침 (UUID 기준)</li></ul></div>
+    </div>
+  </section>
+
+  <section class="flow" aria-labelledby="fb">
+    <h2 id="fb">B. 매일 학습</h2>
+    <p>경로는 "하루 일과"예요. 하루(장)를 따라 출근길, 점심, 퇴근 장면을 하나씩 열고, 하루를 마치면 옷차림 아이템을 얻어요. 복습은 레슨 안에 섞이고, 틀린 매너는 레슨 끝에 다시 풀기로 돌아와요.</p>
+    <div class="row">
+      <div class="cell"><header><span class="id">B1</span><h3>홈 · 하루 일과 경로</h3></header>
+        <div class="phone"><div class="status"><span>21:03</span><span>▮▮▮</span></div>
+          <div class="grow" style="gap:8px"><div style="display:flex;justify-content:space-between;align-items:center"><span class="chip hot"><i class="tie"></i>7일</span><span class="chip">복습 2</span><span style="font-family:var(--font-mono);font-size:11px">1,240 XP</span></div>
+            <div class="unit"><span class="muted" style="font-size:10.5px">1일차 · 중심 원칙 A, E</span><b>평범한 화요일</b></div>
+            <div class="day">
+              <div class="slot done"><span class="t">08:10</span><div class="sc"><b>출근길 인도</b><span>A · ✓</span></div></div>
+              <div class="slot done"><span class="t">08:30</span><div class="sc"><b>지하철 백팩</b><span>E · ✓</span></div></div>
+              <div class="slot now"><span class="t">12:40</span><div class="sc"><b>점심 후 계단</b><span>A · 시작</span><span class="go">→ B1a</span></div></div>
+              <div class="slot lock"><span class="t">18:50</span><div class="sc"><b>퇴근길 비</b><span>A</span></div></div>
+              <div class="slot lock"><span class="t">19:20</span><div class="sc"><b>버스 통화</b><span>E</span></div></div>
+              <div class="slot lock boss"><span class="t">21:00</span><div class="sc"><b>하루 돌아보기</b><span>⏱ 장면 찾기</span></div></div>
+              <div class="slot lock gift"><span class="t"></span><div class="sc"><b>보상 · 넥타이핀</b></div></div>
+            </div>
+            <div class="unit lock"><span class="muted" style="font-size:10.5px">2일차 · 중심 원칙 B, C</span><b>첫 출근 날</b></div>
+            <div class="tabs"><span class="on">홈</span><span>스탯</span><span>설정</span></div></div></div>
+        <ul class="notes"><li>장 = 하루, 노드 = 그날의 장면 (레슨 약 5문제)</li><li>하루마다 중심 원칙 1~2개만</li><li>마지막은 하루 돌아보기: 그날 장면을 섞어 시간 제한</li><li>연속 학습일은 불꽃 대신 넥타이 아이콘</li></ul></div>
+
+      <div class="cell"><header><span class="id">B1a</span><h3>장면 선택</h3></header>
+        <div class="phone"><div class="status"><span>21:03</span><span>▮▮▮</span></div>
+          <div class="grow" style="gap:8px"><div style="display:flex;justify-content:space-between;align-items:center"><span class="chip hot"><i class="tie"></i>7일</span><span class="chip">복습 2</span><span style="font-family:var(--font-mono);font-size:11px">1,240 XP</span></div>
+            <div class="unit"><span class="muted" style="font-size:10.5px">1일차 · 중심 원칙 A, E</span><b>평범한 화요일</b></div>
+            <div class="pop" style="margin-top:6px"><div class="img" style="height:110px">계단 장면 썸네일</div>
+              <span class="muted" style="font-size:11px">12:40 · 장면 3 / 6</span><b style="font-size:14px">점심 먹고 팀장님과 계단을 내려간다</b>
+              <span><span class="chip">원칙 A 위험은 내가</span> <span class="chip">#3 계단</span></span>
+              <span class="muted">새 문제 3 + 복습 2 · 약 4분</span>
+              <div class="btn">시작하기 +20 XP<span class="go">→ B2</span></div></div>
+            <div style="flex:1"></div>
+            <div class="tabs"><span class="on">홈</span><span>스탯</span><span>설정</span></div></div></div>
+        <ul class="notes"><li>장면을 탭하면 상황 한 줄 + 원칙 + 매너 번호</li><li>복습은 레슨 안에 자동으로 섞임</li><li>콘텐츠 팩 = 새로운 하루 ("비 오는 금요일", "명절")</li></ul></div>
+
+      <div class="cell"><header><span class="id">B2</span><h3>문제 · 정답 리액션</h3></header>
+        <div class="phone"><div class="status"><span>21:04</span><span>▮▮▮</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><span class="muted">✕</span><div class="bar" style="flex:1"><i style="width:50%"></i></div><span class="muted" style="font-family:var(--font-mono);font-size:10px">3/6</span></div>
+          <div class="grow"><span><span class="chip">위치</span> <span class="chip">어른·가족</span></span>
+            <p class="title">할머니와 걷는다. 차도가 왼쪽. 나는?</p>
+            <div class="scene"><div class="road" style="left:0;right:auto"></div>
+              <div class="tok" style="left:38%;top:40%;background:var(--frame)">나</div>
+              <div class="tok" style="left:60%;top:40%;background:var(--muted)">할머니</div>
+              <span class="splash" style="left:12%;right:auto">차가 물 튀김! →</span></div>
+            <div class="combo">3연속! +15 XP</div>
+            <div class="fb good"><span class="h">맞아요</span><span>기준은 오른쪽이 아니라 차도예요.</span><span class="motto">위험은 내가, 편한 건 상대가</span></div>
+            <div class="btn">계속</div></div></div>
+        <ul class="notes"><li>답하자마자 장면 연출: 차가 지나가며 나에게 물이 튐</li><li>효과음 + 진동 + 콤보 배지</li></ul></div>
+
+      <div class="cell"><header><span class="id">B3</span><h3>문제 · 오답 리액션</h3></header>
+        <div class="phone"><div class="status"><span>21:05</span><span>▮▮▮</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><span class="muted">✕</span><div class="bar" style="flex:1"><i style="width:66%"></i></div><span class="muted" style="font-family:var(--font-mono);font-size:10px">4/6</span></div>
+          <div class="grow"><span><span class="chip">메시지</span> <span class="chip">친구</span></span>
+            <div class="box chat"><div class="b">나 도착했어! 어디쯤이야?</div><div class="b me">헐 미안ㅠㅠ 금방 갈게</div></div>
+            <div class="opt pick">헐 미안ㅠㅠ 금방 갈게</div>
+            <div class="opt ans">미안, 15분쯤 늦어! 7시 20분 도착</div>
+            <div class="fb bad"><span class="h">도착 시각까지 알려요</span><span>"금방"으로는 얼마나 기다릴지 몰라요.</span>
+              <span class="link" style="text-align:left">근거 보기</span></div>
+            <div class="btn">계속</div></div></div>
+        <ul class="notes"><li>화면 살짝 흔들림. 하트(목숨) 없음</li><li>제목에 정답을 바로 씀</li><li>틀린 매너는 레슨 끝 다시 풀기에 추가</li></ul></div>
+
+      <div class="cell"><header><span class="id">B4</span><h3>다시 풀기</h3></header>
+        <div class="phone"><div class="status"><span>21:07</span><span>▮▮▮</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><span class="muted">✕</span><div class="bar" style="flex:1"><i style="width:100%"></i></div><span class="muted" style="font-family:var(--font-mono);font-size:10px">+1</span></div>
+          <div class="grow"><span><span class="chip hot">다시 풀기</span> <span class="chip">메시지</span> <span class="chip">직장</span></span>
+            <p class="title">출근길 지하철이 멈췄다. 팀장님께 보낼 말은?</p>
+            <div class="opt">지하철이 멈춰서 늦습니다. 죄송합니다</div>
+            <div class="opt">지하철 지연으로 9시 20분 도착 예정입니다</div>
+            <div class="opt">거의 다 왔습니다! 금방 가겠습니다</div></div></div>
+        <ul class="notes"><li>같은 매너(#26), 다른 영역의 상황</li><li>매너마다 상황 문제 3개 이상 필요</li></ul></div>
+
+      <div class="cell"><header><span class="id">B5</span><h3>레슨 완료</h3></header>
+        <div class="phone"><div class="status"><span>21:08</span><span>▮▮▮</span></div>
+          <div class="grow"><div class="center" style="display:flex;flex-direction:column;gap:4px"><span class="chip hot"><i class="tie"></i>8일째</span><div class="big">+85 XP</div><span class="muted">최고 콤보 4 · 한 번에 맞힘 5/6</span></div>
+            <div class="box" style="display:flex;justify-content:space-between"><span>연애 센스</span><b>62 → 65</b></div>
+            <div class="list"><div><span>#26 지각 연락</span><span style="color:var(--bad)">내일</span></div><div><span>#1 인도 안쪽</span><span style="color:var(--good)">3일 뒤</span></div><div><span>#2 우산</span><span style="color:var(--good)">7일 뒤</span></div></div>
+            <div style="flex:1"></div><div class="btn">홈으로<span class="go">→ B1</span></div></div></div>
+        <ul class="notes"><li>XP는 숫자가 올라가는 애니메이션</li><li>스탯 변화를 바로 보여줘 다음 날 동기 부여</li></ul></div>
+      <div class="cell"><header><span class="id">B6</span><h3>하루 완료 · 옷차림 보상</h3></header>
+        <div class="phone"><div class="status"><span>21:20</span><span>▮▮▮</span></div>
+          <div class="grow center"><span class="muted">1일차 평범한 화요일 완료</span>
+            <div class="suit"><div class="sv-collar"></div><div class="sv-tie"></div><div class="sv-pin">새 아이템</div></div>
+            <b style="font-size:18px">넥타이핀 획득</b><span class="muted">원칙 A, E를 하루 동안 지켰어요</span>
+            <div class="box" style="width:100%;display:flex;justify-content:space-between"><span>옷장</span><b>2 / 8</b></div>
+            <div style="flex:1"></div><div class="btn" style="width:100%">2일차 열기<span class="go">→ B1</span></div></div></div>
+        <ul class="notes"><li>하루를 마칠 때마다 의상 아이템 1개</li><li>아이템은 스탯 창 실루엣에 착용 (C1)</li><li>꾸미기 상점은 없음. 하루 완료로만 얻음</li></ul></div>
+
+    </div>
+  </section>
+
+  <section class="flow" aria-labelledby="fc">
+    <h2 id="fc">C. 성장과 설정</h2>
+    <p>스테이터스 창이 학습 리포트를 겸해요. 설정에는 출시에 필요한 항목을 모았어요.</p>
+    <div class="row">
+      <div class="cell"><header><span class="id">C1</span><h3>스테이터스 창</h3></header>
+        <div class="phone"><div class="status"><span>21:10</span><span>▮▮▮</span></div>
+          <div class="grow"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="title">나의 매너 스탯</span><span class="link">공유<span class="go">→ C2</span></span></div>
+            <div class="hex" style="width:78%;align-self:center" data-hex="62,71,55,23,85,40"></div>
+            <div class="box" style="display:flex;justify-content:space-between"><span><span class="muted">칭호</span> <b>든든한 동행러</b></span><span class="muted">옷장 2/8</span></div>
+            <div class="skill"><span>A 위험은 내가</span><b>Lv.3</b><div class="bar"><i style="width:75%"></i></div></div>
+            <div class="skill"><span>B 상대 먼저</span><b>Lv.1</b><div class="bar"><i style="width:25%"></i></div></div>
+            <div class="box" style="font-size:11.5px"><b>약한 매너</b> · #26 지각 연락, #24 늦은 밤 연락</div>
+            <div class="tabs"><span>홈</span><span class="on">스탯</span><span>설정</span></div></div></div>
+        <ul class="notes"><li>스탯 = 영역 매너들의 복습 단계. 복습 밀리면 내려감</li><li>"Lv.1" 대신 쌓이는 숫자 (연애 센스 12)</li><li>학습 리포트 화면을 이걸로 대체</li></ul></div>
+
+      <div class="cell"><header><span class="id">C2</span><h3>공유 카드</h3></header>
+        <div class="phone"><div class="status"><span>21:11</span><span>▮▮▮</span></div>
+          <div class="grow"><div class="card"><span class="muted" style="font-size:11px">나의 매너 스탯</span><div class="hex" style="width:80%" data-hex="62,71,55,23,85,40"></div><b style="font-size:16px">든든한 동행러</b><span class="muted" style="font-size:11px">매너 트레이닝 · 연속 8일</span></div>
+            <div style="flex:1"></div><div class="btn">이미지로 저장</div><div class="btn ghost">공유하기</div></div></div>
+        <ul class="notes"><li>인스타 스토리 비율(9:16) 버전도 필요</li><li>비용 없는 홍보 수단</li></ul></div>
+
+      <div class="cell"><header><span class="id">C3</span><h3>설정</h3></header>
+        <div class="phone"><div class="status"><span>21:12</span><span>▮▮▮</span></div>
+          <div class="grow"><span class="title">설정</span>
+            <div class="list"><div><span>학습 알림</span><span style="display:flex;gap:8px;align-items:center"><span class="muted">오후 9시</span><span class="toggle"></span></span></div>
+              <div><span>계정</span><span class="muted">카카오 연결됨</span></div>
+              <div><span>해설 오류 신고</span><span class="muted">›</span></div>
+              <div><span>개인정보처리방침</span><span class="muted">›</span></div>
+              <div><span>오픈소스 라이선스</span><span class="muted">›</span></div>
+              <div style="position:relative"><span style="color:var(--bad)">회원 탈퇴</span><span class="go">→ C4</span></div></div>
+            <div style="flex:1"></div><div class="tabs"><span>홈</span><span>스탯</span><span class="on">설정</span></div></div></div>
+        <ul class="notes"><li>알림 시각 기본값은 저녁 (22시 이후 금지, 매너 앱이니까)</li><li>오류 신고 = Google Form 링크로 시작</li></ul></div>
+
+      <div class="cell"><header><span class="id">C4</span><h3>회원 탈퇴 확인</h3></header>
+        <div class="phone"><div class="status"><span>21:12</span><span>▮▮▮</span></div>
+          <div class="grow"><span class="title">설정</span><div class="list muted"><div><span>학습 알림</span></div><div><span>계정</span></div><div><span>해설 오류 신고</span></div></div></div>
+          <div class="dim"></div>
+          <div class="sheet"><span class="title">정말 탈퇴할까요?</span>
+            <span>계정과 풀이 기록, 스탯, 연속 학습일이 모두 삭제돼요. 되돌릴 수 없어요.</span>
+            <div class="btn danger">탈퇴하고 모두 삭제</div><div class="btn ghost">취소</div></div></div>
+        <ul class="notes"><li>앱 안에서 탈퇴 가능해야 함 (App Store 요건)</li><li>계정 삭제 시 풀이 기록도 cascade 삭제</li></ul></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* Hexagon stat chart: 6 domains, values 0–100. */
+const AXES = ['연애', '친구', '어른', '직장', '공공', '메시지'];
+const NS = 'http://www.w3.org/2000/svg';
+for (const host of document.querySelectorAll('[data-hex]')) {
+  const vals = host.dataset.hex.split(',').map(Number);
+  const small = host.hasAttribute('data-small');
+  const pad = small ? 6 : 30, R = 70, C = R + pad, size = C * 2;
+  const pt = (i, r) => { const a = -Math.PI / 2 + i * Math.PI / 3; return [C + r * Math.cos(a), C + r * Math.sin(a)]; };
+  const poly = (r) => AXES.map((_, i) => pt(i, typeof r === 'function' ? r(i) : r).join(',')).join(' ');
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', AXES.map((a, i) => `${a} ${vals[i]}`).join(', '));
+  let html = '';
+  for (const f of [1, 0.66, 0.33]) html += `<polygon points="${poly(R * f)}" fill="none" stroke="var(--box-2)" stroke-width="1.5"/>`;
+  html += `<polygon points="${poly((i) => R * vals[i] / 100)}" fill="var(--frame)" fill-opacity=".28" stroke="var(--frame)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  if (!small) AXES.forEach((a, i) => { const [x, y] = pt(i, R + 16); html += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="11" fill="var(--muted)">${a} ${vals[i]}</text>`; });
+  svg.innerHTML = html;
+  host.append(svg);
+}
+</script>
+
+</body></html>

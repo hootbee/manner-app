@@ -1,0 +1,170 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>매너 앱 아이콘 시안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
+<style>
+/* Layout: one row per icon direction — large icon, then the same icon at home-screen and settings sizes on a phone wallpaper strip. */
+:root {
+  --bg: #f2f1ee; --card: #ffffff; --ink: #1d1f24; --muted: #6b6f78; --line: #dedcd7;
+  --wall-a: #c9d6ea; --wall-b: #e8d9ef;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141519; --card: #1d1f25; --ink: #eceef2; --muted: #9a9fa9; --line: #2d3038;
+  --wall-a: #23314a; --wall-b: #3a2a45; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #141519; --card: #1d1f25; --ink: #eceef2; --muted: #9a9fa9; --line: #2d3038;
+  --wall-a: #23314a; --wall-b: #3a2a45; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.page { max-width: 960px; margin: 0 auto; padding-block: 28px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 20px; }
+h1 { margin: 0; font-size: 26px; text-wrap: balance; }
+.sub { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
+.row { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: grid; grid-template-columns: auto 1fr; gap: 20px 24px; align-items: center; }
+.big { width: 180px; height: 180px; }
+.icon { display: block; border-radius: 22.5%; overflow: hidden; box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 6px 18px rgb(0 0 0 / .10); }
+.icon svg { display: block; width: 100%; height: 100%; }
+.info { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.info h2 { margin: 0; font-size: 18px; }
+.info p { margin: 0; color: var(--muted); }
+.home { display: flex; align-items: flex-end; gap: 18px; padding: 14px 16px; border-radius: 16px; background: linear-gradient(135deg, var(--wall-a), var(--wall-b)); flex-wrap: wrap; }
+.app { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; color: var(--ink); }
+.s60 { width: 60px; height: 60px; } .s40 { width: 40px; height: 40px; } .s29 { width: 29px; height: 29px; }
+.ph { width: 60px; height: 60px; border-radius: 22.5%; background: rgb(255 255 255 / .35); }
+.group { margin: 8px 0 0; font-size: 14px; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+.notes { margin: 0; padding-left: 18px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 560px) { .row { grid-template-columns: 1fr; justify-items: center; } .info { width: 100%; } }
+</style>
+
+<div class="page">
+  <header>
+    <h1>매너 앱 아이콘 시안</h1>
+    <p class="sub">손은 빼고 깃과 넥타이만 남겼어요. 진지한 원본 포스터 대신 둥글고 두꺼운 도형, 밝은 색으로 캐주얼하게 바꿨어요. 각 시안은 홈 화면 크기에서 어떻게 보이는지도 같이 보여줘요.</p>
+  </header>
+  <main id="list" style="display:flex;flex-direction:column;gap:20px"></main>
+  <ul class="notes">
+    <li>아이콘 안에 "Manners Maketh Man" 글자는 넣지 않았어요. 홈 화면 크기에서는 읽히지 않아서, 스플래시 화면이나 스토어 이미지에 쓰는 게 좋아요.</li>
+    <li>모서리는 기기가 자동으로 둥글게 잘라요. 원본은 네모난 1024×1024로 만들어요.</li>
+  </ul>
+</div>
+
+<script>
+const SUITS = [
+  { name: '네이비 수트', note: '네이비 클래식에 밝은 남색 자켓을 입혔어요. 자켓, 셔츠, 넥타이 세 겹이 또렷하게 보여요.',
+    bg: '#1f2a44', deep: '#131a2c', glow: '#2b3a5c', shirt: '#ffffff', collar: '#e4e8f0', tie: '#ff6b5b', tieShade: '#e24f3f',
+    jacket: { body: '#4a6bb5', shade: '#3f5ea3', lapel: '#36518f', button: '#2a3f70' } },
+  { name: '차콜 수트 · 행커치프', note: '회색 자켓에 머스터드 넥타이, 가슴 주머니에 흰 행커치프. 가장 정장다운 느낌이에요.',
+    bg: '#1f2a44', deep: '#131a2c', glow: '#2b3a5c', shirt: '#ffffff', collar: '#e4e8f0', tie: '#ffb238', tieShade: '#e79a1c',
+    jacket: { body: '#5d6474', shade: '#525868', lapel: '#464b59', button: '#353945', square: true } },
+  { name: '카멜 자켓 · 캐주얼', note: '카멜색 자켓에 남색 도트 넥타이를 살짝 기울였어요. 정장보다 데이트룩에 가까운 캐주얼함이에요.',
+    bg: '#1f2a44', deep: '#131a2c', glow: '#2b3a5c', shirt: '#ffffff', collar: '#e4e8f0', tie: '#263a5e', tieShade: '#1a2945', dots: '#ff8a7a', tilt: -4,
+    jacket: { body: '#c8955a', shade: '#b8854b', lapel: '#a6763f', button: '#7d5629', square: true } }
+];
+const VARIANTS = [
+  { name: '네이비 클래식', note: '원본 포스터에 가장 가까운 시안. 어두운 배경에 산호색 넥타이 하나로 포인트를 줬어요.',
+    bg: '#1f2a44', deep: '#131a2c', glow: '#2b3a5c', shirt: '#ffffff', collar: '#e4e8f0', tie: '#ff6b5b', tieShade: '#e24f3f' },
+  { name: '민트 도트', note: '밝은 민트 배경에 남색 땡땡이 넥타이. 가장 가볍고 친근한 인상이에요.',
+    bg: '#2ec4a6', deep: '#1c9a82', glow: '#55d8be', shirt: '#ffffff', collar: '#e3f4f0', tie: '#263a5e', tieShade: '#1a2945', dots: '#ffd166' },
+  { name: '옐로 스윙', note: '넥타이가 살짝 흔들리는 모습. 노란 배경이라 홈 화면에서 가장 눈에 띄어요.',
+    bg: '#ffc93c', deep: '#e3a614', glow: '#ffd970', shirt: '#ffffff', collar: '#fbeecb', tie: '#2d2a32', tieShade: '#1d1b21', stripes: '#ff6b5b', tilt: 9, swing: true },
+  { name: '넥타이 캐릭터', note: '넥타이에 눈과 웃는 입을 그려 마스코트처럼 만들었어요. 듀오링고 아이콘에 가장 가까운 느낌이에요.',
+    bg: '#7b5cff', deep: '#5638db', glow: '#957cff', shirt: '#ffffff', collar: '#ebe6ff', tie: '#ff5d8f', tieShade: '#e04374', face: true, tilt: -5 }
+];
+
+let uid = 0;
+function iconSvg(v) {
+  const id = 'c' + (uid++);
+  const round = (fill) => `fill="${fill}" stroke="${fill}" stroke-width="30" stroke-linejoin="round"`;
+  const blade = 'M482,512 L542,512 L600,812 L512,892 L424,812 Z';
+  let pattern = '';
+  if (v.dots) pattern = [[470, 600], [540, 640], [490, 700], [560, 740], [460, 780], [530, 830]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="15" fill="${v.dots}"/>`).join('');
+  if (v.stripes) pattern = [560, 650, 740, 830].map((y) => `<path d="M400,${y + 40} L640,${y - 60}" stroke="${v.stripes}" stroke-width="26"/>`).join('');
+  const face = v.face ? `
+    <ellipse cx="486" cy="640" rx="19" ry="24" fill="#fff"/><ellipse cx="540" cy="640" rx="19" ry="24" fill="#fff"/>
+    <circle cx="490" cy="646" r="10" fill="#2a1840"/><circle cx="544" cy="646" r="10" fill="#2a1840"/>
+    <path d="M484,700 Q513,730 542,700" fill="none" stroke="#2a1840" stroke-width="11" stroke-linecap="round"/>
+    <ellipse cx="466" cy="690" rx="14" ry="8" fill="#fff" opacity=".35"/><ellipse cx="562" cy="690" rx="14" ry="8" fill="#fff" opacity=".35"/>` : '';
+  const swing = v.swing ? `<g fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" opacity=".85">
+    <path d="M680,760 q30,40 10,90"/><path d="M730,730 q40,60 12,130"/></g>` : '';
+  return `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${v.name} 아이콘">
+    <defs><clipPath id="${id}"><path d="${blade}"/></clipPath></defs>
+    <rect width="1024" height="1024" fill="${v.bg}"/>
+    <circle cx="512" cy="470" r="400" fill="${v.glow}"/>
+    <g transform="translate(512 470) scale(1.18) translate(-512 -470)">
+    <path d="M226,1024 C250,760 290,520 330,420 L694,420 C734,520 774,760 798,1024 Z" fill="${v.shirt}"/>
+    <path d="M512,420 L694,420 C734,520 774,760 798,1024 L512,1024 Z" fill="${v.collar}"/>
+    <path d="M346,318 C420,262 604,262 678,318 L512,470 Z" ${round(v.deep)}/>
+    ${swing}
+    <g transform="rotate(${v.tilt || 0} 512 440) translate(512 424) scale(${v.jacket ? 0.86 : 1.12} 1.12) translate(-512 -424)">
+      <path d="M458,424 L566,424 L544,516 L480,516 Z" ${round(v.tie)}/>
+      <path d="M512,424 L566,424 L544,516 L512,516 Z" fill="${v.tieShade}"/>
+      <path d="${blade}" ${round(v.tie)}/>
+      <g clip-path="url(#${id})">
+        <path d="M512,500 L560,500 L620,830 L512,910 Z" fill="${v.tieShade}"/>
+        ${pattern}
+      </g>
+      <rect x="462" y="548" width="20" height="78" rx="10" fill="#fff" opacity=".45" transform="rotate(-11 472 587)"/>
+      ${face}
+    </g>
+    <g fill="#000" opacity=".14" stroke="#000" stroke-width="30" stroke-linejoin="round">
+      <path d="M350,318 L470,418 L420,598 L330,398 Z"/><path d="M674,318 L554,418 L604,598 L694,398 Z"/>
+    </g>
+    <path d="M350,300 L470,400 L420,580 L330,380 Z" ${round(v.shirt)}/>
+    <path d="M674,300 L554,400 L604,580 L694,380 Z" ${round(v.collar)}/>
+    ${v.jacket ? jacketSvg(v.jacket) : ''}
+    </g>
+  </svg>`;
+}
+/* Jacket: two body panels open in a V over the shirt, notched lapels along the V, one button where the panels meet. */
+function jacketSvg(j) {
+  const r = (fill) => `fill="${fill}" stroke="${fill}" stroke-width="26" stroke-linejoin="round"`;
+  const mirror = (d) => d.replace(/(-?\d+),(-?\d+)/g, (_, x, y) => `${1024 - x},${y}`);
+  const bodyL = 'M96,1060 C126,800 166,574 266,474 L338,438 L492,904 L500,1060 Z';
+  const lapelL = 'M338,438 L272,476 L298,616 L264,656 L484,902 Z';
+  const square = j.square ? `<path d="M626,676 L664,628 L690,664 L718,632 L730,684 Z" fill="#fff" stroke="#fff" stroke-width="14" stroke-linejoin="round"/>
+    <path d="M604,690 L748,676" stroke="${j.lapel}" stroke-width="14" stroke-linecap="round"/>` : '';
+  return `<path d="${bodyL}" ${r(j.body)}/><path d="${mirror(bodyL)}" ${r(j.shade)}/>
+    <g fill="#000" opacity=".16"><path d="M338,454 L492,920 L476,920 L326,462 Z"/><path d="${mirror('M338,454 L492,920 L476,920 L326,462 Z')}"/></g>
+    <path d="${lapelL}" ${r(j.lapel)}/><path d="${mirror(lapelL)}" ${r(j.lapel)}/>
+    ${square}
+    <circle cx="512" cy="950" r="17" fill="${j.button}"/>`;
+}
+function iconEl(v, cls) { const d = document.createElement('div'); d.className = 'icon ' + cls; d.innerHTML = iconSvg(v); return d; }
+
+const list = document.getElementById('list');
+const heading = (t) => { const h = document.createElement('h2'); h.className = 'group'; h.textContent = t; list.append(h); };
+heading('추가 시안 · 자켓, 셔츠, 넥타이');
+SUITS.forEach(addRow);
+heading('1차 시안');
+VARIANTS.forEach(addRow);
+function addRow(v) {
+  const row = document.createElement('section');
+  row.className = 'row';
+  const info = document.createElement('div');
+  info.className = 'info';
+  info.innerHTML = `<h2></h2><p></p>`;
+  info.querySelector('h2').textContent = v.name;
+  info.querySelector('p').textContent = v.note;
+  const home = document.createElement('div');
+  home.className = 'home';
+  home.setAttribute('aria-label', '홈 화면 미리보기');
+  const app = document.createElement('div');
+  app.className = 'app';
+  app.append(iconEl(v, 's60'), Object.assign(document.createElement('span'), { textContent: '매너' }));
+  const ph1 = document.createElement('div'); ph1.className = 'app'; ph1.innerHTML = '<div class="ph"></div><span>&nbsp;</span>';
+  const ph2 = ph1.cloneNode(true);
+  const small = document.createElement('div'); small.className = 'app'; small.append(iconEl(v, 's40'), Object.assign(document.createElement('span'), { textContent: '알림' }));
+  const tiny = document.createElement('div'); tiny.className = 'app'; tiny.append(iconEl(v, 's29'), Object.assign(document.createElement('span'), { textContent: '설정' }));
+  home.append(ph1, app, ph2, small, tiny);
+  info.append(home);
+  row.append(iconEl(v, 'big'), info);
+  list.append(row);
+}
+</script>
+
+</body></html>

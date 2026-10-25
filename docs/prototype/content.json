@@ -1,0 +1,539 @@
+{
+  "version": 2,
+  "principles": [
+    {
+      "id": "A",
+      "name": "안전하고 편한 쪽을 상대에게",
+      "motto": "위험은 내가, 편한 건 상대가"
+    }
+  ],
+  "manners": [
+    {
+      "id": 1,
+      "name": "동행자를 인도 안쪽으로",
+      "principle": "A",
+      "places": [
+        "거리"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "우산은 상대 쪽으로",
+      "principle": "A",
+      "places": [
+        "거리"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "계단에서는 상대보다 아래 칸",
+      "principle": "A",
+      "places": [
+        "계단"
+      ]
+    },
+    {
+      "id": 31,
+      "name": "붐비는 곳에선 동행자를 벽·기둥 쪽으로",
+      "principle": "A",
+      "places": [
+        "지하철",
+        "버스"
+      ],
+      "candidate": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "A-sidewalk",
+      "manner": 1,
+      "format": "position",
+      "template": "sidewalk",
+      "subjectLabel": "나",
+      "prompt": "{other와} 인도를 걷는다. 차도는 {side}에 있다. 나는 어느 쪽에서 걸을까?",
+      "spots": [
+        {
+          "id": "inner",
+          "label": "건물 쪽"
+        },
+        {
+          "id": "outer",
+          "label": "차도 쪽"
+        }
+      ],
+      "answer": "outer",
+      "feedback": {
+        "title": "차도 쪽은 내 자리예요",
+        "why": "차가 물을 튀기면 맞는 건 차도 쪽이에요. 차도가 {side}에 있으면 나도 {side}."
+      },
+      "evidence": {
+        "level": "safety",
+        "summary": "'안쪽이 더 안전하다'는 공식 안전수칙이다. 그 자리를 상대에게 양보하는 것은 배려 관례다.",
+        "sources": [
+          {
+            "title": "봄철 어린이 보행자 교통사고 발생 주의 당부",
+            "publisher": "메디컬데일리 (질병관리본부 보행 안전수칙 인용)",
+            "date": "2019-03-05",
+            "locator": "안전수칙: 보도 이용, 보도가 없으면 길 안쪽으로 통행",
+            "url": "https://medicaldaily.co.kr/news/8529"
+          },
+          {
+            "title": "[기고문] 어린이 보행 교통사고 예방 우리 모두 동참하자",
+            "publisher": "쿠키뉴스 (삼척경찰서 경찰관 기고)",
+            "date": "2020-06-11",
+            "locator": "수칙 ④ 차도와 먼 안쪽 인도로 걷기",
+            "url": "https://www.kukinews.com/article/view/kuk202006110102"
+          }
+        ]
+      },
+      "vary": [
+        [
+          {
+            "other": "연인",
+            "domain": "연애"
+          },
+          {
+            "other": "할머니",
+            "domain": "어른·가족"
+          },
+          {
+            "other": "조카",
+            "domain": "친구·가족"
+          },
+          {
+            "other": "팀장님",
+            "domain": "직장"
+          }
+        ],
+        [
+          {
+            "mirror": false,
+            "side": "오른쪽"
+          },
+          {
+            "mirror": true,
+            "side": "왼쪽"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "A-alley",
+      "manner": 1,
+      "format": "position",
+      "template": "alley",
+      "subjectLabel": "나",
+      "prompt": "인도가 없는 골목길. 뒤에서 차가 다가온다. {other와} 나란히 비켜설 때 나는 어느 쪽에 설까?",
+      "spots": [
+        {
+          "id": "wall",
+          "label": "벽 쪽"
+        },
+        {
+          "id": "carside",
+          "label": "차 쪽"
+        }
+      ],
+      "answer": "carside",
+      "feedback": {
+        "title": "차 쪽은 내 자리예요",
+        "why": "인도가 없어도 같아요. {other은} 벽 쪽, 나는 {other와} 차 사이."
+      },
+      "evidence": {
+        "level": "safety",
+        "summary": "보도가 없으면 길 안쪽(가장자리)으로 다니라는 것이 공식 안전수칙이다. 그 자리를 상대에게 주고 내가 차 쪽을 맡는 것은 배려 관례다.",
+        "sources": [
+          {
+            "title": "봄철 어린이 보행자 교통사고 발생 주의 당부",
+            "publisher": "메디컬데일리 (질병관리본부 보행 안전수칙 인용)",
+            "date": "2019-03-05",
+            "locator": "안전수칙: 보도 이용, 보도가 없으면 길 안쪽으로 통행",
+            "url": "https://medicaldaily.co.kr/news/8529"
+          }
+        ]
+      },
+      "vary": [
+        [
+          {
+            "other": "친구",
+            "domain": "친구"
+          },
+          {
+            "other": "연인",
+            "domain": "연애"
+          },
+          {
+            "other": "아이",
+            "domain": "어른·가족"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "A-stairs",
+      "manner": 3,
+      "format": "position",
+      "template": "stairs",
+      "subjectLabel": "나",
+      "prompt": "{other와} 계단을 {verb}. 나는 어디에 있을까?",
+      "spots": [
+        {
+          "id": "above",
+          "label": "한 칸 위"
+        },
+        {
+          "id": "same",
+          "label": "같은 칸"
+        },
+        {
+          "id": "below",
+          "label": "한 칸 아래"
+        }
+      ],
+      "answer": "below",
+      "evidence": {
+        "level": "official",
+        "summary": "환자 보행을 돕는 의료 안내문의 기준이다. 보조자는 오를 때 뒤, 내려갈 때 앞에 선다. 일상 동행에도 같은 이유(넘어지는 쪽에서 받친다)가 적용된다.",
+        "sources": [
+          {
+            "title": "목발 보행 (Crutch Walking, 한국어판)",
+            "publisher": "UW Medicine 환자 안내문",
+            "date": "2013",
+            "locator": "2쪽 '계단 오르기': 도와주는 사람은 오를 때 뒤, 내려갈 때 앞",
+            "url": "https://healthonline.washington.edu/document/health_online/pdf/Crutch-Walking-KO.pdf"
+          }
+        ]
+      },
+      "vary": [
+        [
+          {
+            "other": "아버지",
+            "domain": "어른·가족"
+          },
+          {
+            "other": "연인",
+            "domain": "연애"
+          },
+          {
+            "other": "할머니",
+            "domain": "어른·가족"
+          },
+          {
+            "other": "팀장님",
+            "domain": "직장"
+          }
+        ],
+        [
+          {
+            "direction": "up",
+            "verb": "올라간다",
+            "feedback": {
+              "title": "오를 땐 한 칸 아래, 뒤에서",
+              "why": "{other가} 뒤로 넘어지면 아래에서 받쳐 줄 수 있어요."
+            }
+          },
+          {
+            "direction": "down",
+            "verb": "내려간다",
+            "feedback": {
+              "title": "내려갈 땐 한 칸 아래, 앞에서",
+              "why": "앞으로 넘어지기 쉬워요. 오를 때도 내려갈 때도 나는 항상 아래 칸이에요."
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "id": "A-crosswalk-01",
+      "manner": 1,
+      "domain": "공공장소",
+      "format": "ox",
+      "prompt": "횡단보도에서 신호를 기다린다. 동행자를 차도와 가장 가까운 맨 앞에 세운다.",
+      "answer": false,
+      "evidence": {
+        "level": "custom",
+        "summary": "횡단보도 대기 위치에 대한 공식 수칙은 찾지 못했다. 인도 안쪽 수칙을 대기 상황에 적용한 관례다.",
+        "sources": []
+      },
+      "feedback": {
+        "title": "동행자는 한 걸음 안쪽에서",
+        "why": "멈춰 서 있을 때도 차도 쪽은 내 자리예요."
+      }
+    },
+    {
+      "id": "A-park-01",
+      "manner": 1,
+      "domain": "친구",
+      "format": "ox",
+      "prompt": "자전거가 함께 다니는 공원 산책로. 자전거가 지나가는 쪽에서 내가 걷는다.",
+      "answer": true,
+      "evidence": {
+        "level": "custom",
+        "summary": "자전거 겸용 산책로의 동행 위치에 대한 공식 수칙은 찾지 못했다. 인도 안쪽 수칙을 적용한 관례다.",
+        "sources": []
+      },
+      "feedback": {
+        "title": "자전거 쪽은 내 자리예요",
+        "why": "차도가 자전거 길로 바뀌어도 같아요."
+      }
+    },
+    {
+      "id": "A-umbrella-01",
+      "manner": 2,
+      "domain": "연애",
+      "format": "choice",
+      "prompt": "비가 오는데 우산이 하나뿐이다. 둘이 같이 쓰고 걷는다. 어떻게 들까?",
+      "options": [
+        {
+          "text": "우산을 상대 쪽으로 기울이고 내 어깨는 좀 젖는다",
+          "grade": "best"
+        },
+        {
+          "text": "우산을 두 사람 가운데에 똑바로 세워 든다",
+          "grade": "ok",
+          "note": "나쁘진 않지만 바람이 불면 상대 쪽이 먼저 젖어요."
+        },
+        {
+          "text": "우산은 상대에게 주고 나는 먼저 뛰어간다",
+          "grade": "avoid",
+          "note": "같이 걷다 혼자 떠나면 상대가 더 불편해요."
+        },
+        {
+          "text": "키 큰 내가 드니까 내 쪽으로 기울여 든다",
+          "grade": "avoid",
+          "note": "누가 들든 마른 쪽은 상대에게 줘요."
+        }
+      ],
+      "evidence": {
+        "level": "custom",
+        "summary": "공식 근거가 없는 일반 관례다. '가장 무난한 선택' 기준으로 채점한다.",
+        "sources": []
+      },
+      "feedback": {
+        "title": "우산은 상대 쪽으로 기울여요",
+        "why": "마른 쪽도 편한 쪽이에요. 내 바깥 어깨는 좀 젖어도 괜찮아요."
+      }
+    },
+    {
+      "id": "A-umbrella-02",
+      "manner": 2,
+      "domain": "어른·가족",
+      "format": "choice",
+      "prompt": "장 본 짐을 든 어머니와 비 오는 길을 걷는다. 우산은 하나다. 어떻게 할까?",
+      "options": [
+        {
+          "text": "짐을 받아 들고 우산을 어머니 쪽으로 기울인다",
+          "grade": "best"
+        },
+        {
+          "text": "짐은 어머니가 들고 나는 우산을 똑바로 든다",
+          "grade": "avoid",
+          "note": "짐 부담도 그대로고 우산도 내 쪽이에요."
+        },
+        {
+          "text": "우산을 어머니께 드리고 나는 비를 맞고 걷는다",
+          "grade": "avoid",
+          "note": "어머니 손에 짐과 우산이 다 들려요."
+        }
+      ],
+      "evidence": {
+        "level": "custom",
+        "summary": "공식 근거가 없는 일반 관례다. '가장 무난한 선택' 기준으로 채점한다.",
+        "sources": []
+      },
+      "feedback": {
+        "title": "짐은 내가, 우산은 어머니 쪽으로",
+        "why": "짐을 덜어 드리는 것과 마른 쪽을 드리는 건 같은 마음이에요."
+      }
+    },
+    {
+      "id": "A-umbrella-03",
+      "manner": 2,
+      "domain": "직장",
+      "format": "choice",
+      "prompt": "버스 정류장까지 우산 하나로 선배와 걷는다. 선배가 나보다 키가 크다. 어떻게 할까?",
+      "options": [
+        {
+          "text": "내가 우산을 높이 들고 선배 쪽으로 기울인다",
+          "grade": "best"
+        },
+        {
+          "text": "키 큰 선배에게 우산을 들어 달라고 부탁한다",
+          "grade": "ok",
+          "note": "실례는 아니지만, 내가 드는 쪽이 더 무난해요."
+        },
+        {
+          "text": "우산을 선배에게 드리고 나는 가방으로 비를 막는다",
+          "grade": "avoid",
+          "note": "같이 걷는데 혼자 비를 맞으면 선배가 더 불편해요."
+        }
+      ],
+      "feedback": {
+        "title": "우산은 내가 들고 선배 쪽으로",
+        "why": "키가 커도 선배 손을 빌리지 않아요. 높이 들고 기울이면 돼요."
+      },
+      "evidence": {
+        "level": "custom",
+        "summary": "공식 근거가 없는 일반 관례다.",
+        "sources": []
+      }
+    },
+    {
+      "id": "A-subway-01",
+      "manner": 31,
+      "domain": "공공장소",
+      "format": "choice",
+      "prompt": "붐비는 지하철에 아이와 함께 탔다. 어디에 서게 할까?",
+      "options": [
+        {
+          "text": "아이는 기둥 옆에, 나는 사람 다니는 쪽에 선다",
+          "grade": "best"
+        },
+        {
+          "text": "빨리 내리도록 아이를 문 바로 앞에 세운다",
+          "grade": "avoid",
+          "note": "문이 열리면 가장 먼저 밀려요."
+        },
+        {
+          "text": "아이에게 통로 가운데 손잡이를 잡게 한다",
+          "grade": "avoid",
+          "note": "손이 잘 안 닿고 흔들릴 때 기댈 곳이 없어요."
+        }
+      ],
+      "evidence": {
+        "level": "custom",
+        "summary": "공식 근거가 없는 일반 관례다. 문 앞이 혼잡하다는 경험적 이유에 기댄다.",
+        "sources": []
+      },
+      "feedback": {
+        "title": "아이는 기둥 쪽, 나는 사람 오가는 쪽",
+        "why": "붐비는 곳에선 사람의 흐름이 차도예요."
+      }
+    },
+    {
+      "id": "A-bus-01",
+      "manner": 31,
+      "domain": "어른·가족",
+      "format": "choice",
+      "prompt": "붐비는 버스에 할아버지와 탔다. 앉을 자리는 없다. 어떻게 설까?",
+      "options": [
+        {
+          "text": "할아버지는 기둥 가까이, 나는 통로 쪽에 선다",
+          "grade": "best"
+        },
+        {
+          "text": "내리기 쉽게 할아버지를 뒷문 계단 앞에 세운다",
+          "grade": "avoid",
+          "note": "문 앞은 흔들리고 밀리기 쉬워요."
+        },
+        {
+          "text": "둘 다 통로 가운데에서 손잡이를 잡고 선다",
+          "grade": "avoid",
+          "note": "손잡이만으로는 급정거 때 버티기 어려워요."
+        }
+      ],
+      "feedback": {
+        "title": "할아버지는 기둥 가까이, 나는 통로 쪽",
+        "why": "흔들릴 때 잡을 곳이 있고 덜 밀리는 자리를 드려요."
+      },
+      "evidence": {
+        "level": "custom",
+        "summary": "공식 근거가 없는 일반 관례다.",
+        "sources": []
+      }
+    },
+    {
+      "id": "A-elevator-01",
+      "manner": 31,
+      "domain": "공공장소",
+      "format": "ox",
+      "prompt": "꽉 찬 엘리베이터. 아이를 문 바로 앞에 세운다.",
+      "answer": false,
+      "feedback": {
+        "title": "아이는 안쪽 벽 쪽에",
+        "why": "문 앞은 타고 내리는 사람에게 가장 먼저 밀려요."
+      },
+      "evidence": {
+        "level": "custom",
+        "summary": "공식 근거가 없는 일반 관례다.",
+        "sources": []
+      }
+    }
+  ],
+  "days": [
+    {
+      "id": "day-01",
+      "title": "평범한 화요일",
+      "focus": [
+        "A"
+      ],
+      "scenes": [
+        {
+          "time": "08:10",
+          "title": "출근길 인도",
+          "manner": 1,
+          "intro": "회사 앞 인도. 같은 방향으로 가는 일행을 만났다.",
+          "short": "출근길"
+        },
+        {
+          "time": "12:40",
+          "title": "점심 후 계단",
+          "manner": 3,
+          "intro": "점심을 먹고 사무실로 돌아가는 계단.",
+          "short": "점심"
+        },
+        {
+          "time": "18:50",
+          "title": "퇴근길 비",
+          "manner": 2,
+          "intro": "퇴근하려는데 비가 쏟아진다. 우산은 하나뿐.",
+          "short": "퇴근길"
+        }
+      ]
+    },
+    {
+      "id": "day-02",
+      "title": "붐비는 수요일",
+      "focus": [
+        "A"
+      ],
+      "scenes": [
+        {
+          "time": "08:30",
+          "title": "지하철 출근",
+          "manner": 31,
+          "intro": "출근 시간 지하철은 오늘도 꽉 찼다.",
+          "short": "지하철"
+        },
+        {
+          "time": "12:30",
+          "title": "점심 먹으러 가는 길",
+          "manner": 1,
+          "intro": "인도가 좁은 식당 골목. 차가 자주 지나간다.",
+          "short": "점심"
+        },
+        {
+          "time": "20:10",
+          "title": "저녁 산책",
+          "manner": 3,
+          "intro": "동네 공원 계단을 지나 산책을 나섰다.",
+          "short": "산책"
+        }
+      ]
+    },
+    {
+      "id": "day-03",
+      "title": "첫 출근 날",
+      "focus": [
+        "B",
+        "C"
+      ],
+      "locked": true,
+      "scenes": []
+    }
+  ],
+  "weekly": {
+    "days": 7,
+    "reward": "넥타이핀"
+  }
+}

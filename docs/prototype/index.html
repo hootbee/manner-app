@@ -1,0 +1,1265 @@
+<title>매너핏 프로토타입</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
+<style>
+/* Layout: one phone-width column — header with progress, one question card, feedback under it. Street scenes use their own material tokens. */
+:root {
+  --bg: #eef1ee; --surface: #ffffff; --ink: #1c2420; --muted: #5a6760; --line: #d4dbd6;
+  --accent: #1f6f5c; --accent-ink: #ffffff;
+  --good: #1d8048; --ok: #a86d12; --bad: #bd3b27;
+  --me: #1f6f5c; --them: #c4610f; --token-ink: #ffffff;
+  --asphalt: #4b5352; --lane: #f1f1e8; --pave: #e6dfd2; --pave-line: #cdc4b3;
+  --wall: #b8b1a5; --window: #8ea2b2; --step: #dad4c8; --step-edge: #a39b8d;
+  --spot-fill: #ffffffd9; --stage: #dfe3e0;
+  --font-display: "Do Hyeon", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111614; --surface: #1a201d; --ink: #e5ebe7; --muted: #9aa8a1; --line: #2c3631;
+  --accent: #5bc3a3; --accent-ink: #0c1a15;
+  --good: #5ccc8a; --ok: #e2b04c; --bad: #f07a62;
+  --me: #5bc3a3; --them: #f0a24a; --token-ink: #0c1a15;
+  --asphalt: #2a302f; --lane: #9ea49e; --pave: #3a3832; --pave-line: #4b4840;
+  --wall: #575249; --window: #3e5060; --step: #3f3b34; --step-edge: #6b6558;
+  --spot-fill: #1a201dd9; --stage: #0a0d0c; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #111614; --surface: #1a201d; --ink: #e5ebe7; --muted: #9aa8a1; --line: #2c3631;
+  --accent: #5bc3a3; --accent-ink: #0c1a15;
+  --good: #5ccc8a; --ok: #e2b04c; --bad: #f07a62;
+  --me: #5bc3a3; --them: #f0a24a; --token-ink: #0c1a15;
+  --asphalt: #2a302f; --lane: #9ea49e; --pave: #3a3832; --pave-line: #4b4840;
+  --wall: #575249; --window: #3e5060; --step: #3f3b34; --step-edge: #6b6558;
+  --spot-fill: #1a201dd9; --stage: #0a0d0c; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.app { max-width: 480px; margin: 0 auto; padding-block: 20px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; }
+header { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-size: 12px; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1.25; margin: 0; text-wrap: balance; }
+.progress-row { display: flex; align-items: center; gap: 10px; }
+.progress { flex: 1; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.progress > div { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
+.count { font-family: var(--font-display); font-size: 16px; font-variant-numeric: tabular-nums; color: var(--muted); min-width: 3.2em; text-align: right; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+.chip.fmt { border-color: var(--accent); color: var(--accent); }
+.prompt { font-size: 17px; font-weight: 600; margin: 0; text-wrap: pretty; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+svg.scene { width: 100%; height: auto; display: block; border-radius: 12px; }
+.spot { cursor: pointer; outline: none; }
+.spot circle.ring { fill: var(--spot-fill); stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 5 4; transition: stroke-width .15s; }
+.spot text.q { fill: var(--accent); font-family: var(--font-display); font-size: 16px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.spot:hover circle.ring, .spot:focus-visible circle.ring { stroke-width: 4; }
+.spot:focus-visible circle.ring { stroke: var(--ink); }
+.locked .spot { cursor: default; }
+.spot.correct circle.ring { stroke: var(--good); stroke-dasharray: none; stroke-width: 4; }
+.spot.wrong circle.ring { stroke: var(--bad); stroke-dasharray: none; stroke-width: 4; }
+.spot-label { font-size: 11px; font-weight: 600; text-anchor: middle; font-family: var(--font-body); }
+.token circle { stroke: var(--surface); stroke-width: 2; }
+.token text { fill: var(--token-ink); font-weight: 600; text-anchor: middle; dominant-baseline: central; font-family: var(--font-body); }
+.scene-label { font-size: 11px; font-weight: 600; font-family: var(--font-body); }
+.legend { margin: 0; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.who { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px; padding: 0 8px; border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--token-ink); }
+.who.me { background: var(--me); } .who.them { background: var(--them); }
+.evidence { font-size: 13.5px; flex: 1; min-width: 0; }
+.evidence summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.evidence[open] { flex-basis: 100%; background: var(--bg); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.motto { margin: 0; font-family: var(--font-display); font-size: 18px; color: var(--accent); }
+.answer { margin: 0; font-weight: 600; }
+.why { margin: 0; }
+.chip.retry { background: var(--them); border-color: var(--them); color: var(--token-ink); }
+.evidence p { margin: 0; }
+.ev-head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
+.sources { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.sources a { color: var(--accent); font-weight: 600; overflow-wrap: anywhere; }
+.sources .meta { color: var(--muted); }
+.sources .loc { display: block; color: var(--muted); font-size: 12.5px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.opt { font: inherit; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.opt:disabled { cursor: default; }
+.opt.best { border-color: var(--good); }
+.opt.picked.ok { border-color: var(--ok); }
+.opt.picked.avoid { border-color: var(--bad); }
+.opt .tag { font-size: 12px; font-weight: 600; }
+.opt.best .tag { color: var(--good); } .opt.ok .tag { color: var(--ok); } .opt.avoid .tag { color: var(--bad); }
+.opt .note { font-size: 13px; color: var(--muted); }
+.ox { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ox .opt { align-items: center; text-align: center; padding: 18px 10px; }
+.ox .big { font-family: var(--font-display); font-size: 34px; line-height: 1; }
+.feedback { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.verdict { font-family: var(--font-display); font-size: 22px; line-height: 1.2; }
+.verdict.best { color: var(--good); } .verdict.ok { color: var(--ok); } .verdict.avoid { color: var(--bad); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.row > .btn { margin-left: auto; }
+.btn { font: inherit; font-weight: 600; padding: 10px 18px; border-radius: 12px; border: none; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.score { font-family: var(--font-display); font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+.score small { font-size: 20px; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; }
+td.when { white-space: nowrap; font-weight: 600; }
+td.when.soon { color: var(--bad); } td.when.later { color: var(--good); }
+.table-wrap { overflow-x: auto; }
+.foot { font-size: 12px; color: var(--muted); text-align: center; }
+.loading { color: var(--muted); }
+[hidden] { display: none !important; }
+/* Device frame: shown on wide screens; on a real phone the frame disappears and the app fills the screen. */
+html, body { height: 100%; }
+.stage { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding-block: 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--stage); }
+.device { position: relative; width: 390px; height: min(844px, calc(100dvh - 90px)); min-height: 600px; flex: none; border-radius: 56px; border: 12px solid #15171a;
+  background: var(--bg); overflow: hidden; transform: translateZ(0); box-shadow: 0 0 0 2px #3a3d42, 0 30px 60px rgb(0 0 0 / .25); }
+.screen { height: 100%; overflow-y: auto; padding-top: 50px; scrollbar-width: none; }
+.screen::-webkit-scrollbar { display: none; }
+.sb { position: absolute; top: 0; left: 0; right: 0; height: 50px; z-index: 25; display: flex; justify-content: space-between; align-items: center; padding: 4px 30px 0 36px;
+  font-size: 15px; font-weight: 600; background: var(--bg); color: var(--ink); font-variant-numeric: tabular-nums; }
+.sb-icons { display: flex; gap: 6px; align-items: center; }
+.sig { width: 17px; height: 11px; background: linear-gradient(to right, currentColor 0 3px, transparent 3px 4.5px, currentColor 4.5px 7.5px, transparent 7.5px 9px, currentColor 9px 12px, transparent 12px 13.5px, currentColor 13.5px); clip-path: polygon(0 75%, 100% 0, 100% 100%, 0 100%); }
+.bat { width: 25px; height: 12px; border: 1.5px solid currentColor; border-radius: 4px; position: relative; opacity: .9; }
+.bat::after { content: ""; position: absolute; inset: 1.5px; right: 5px; background: currentColor; border-radius: 1.5px; }
+.island { position: absolute; top: 11px; left: 50%; width: 122px; height: 35px; border-radius: 20px; background: #000; transform: translateX(-50%); z-index: 26; }
+.homebar { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; border-radius: 3px; background: var(--ink); opacity: .8; transform: translateX(-50%); z-index: 40; pointer-events: none; }
+.device .tabbar { padding-bottom: 26px; }
+.device .sheet { padding-bottom: 34px; }
+.device .toast { bottom: 100px; }
+.caption { margin: 0; font-size: 12px; color: var(--muted); }
+@media (max-width: 500px) {
+  .stage { display: block; padding: 0; min-height: 0; }
+  .device { width: 100%; height: 100dvh; min-height: 0; border: 0; border-radius: 0; box-shadow: none; }
+  .screen { padding-top: 0; }
+  .sb, .island, .homebar, .caption, .viewer { display: none; }
+  .device .tabbar { padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .device .sheet { padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .device .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
+
+.progress { position: relative; }
+#ticks i { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: var(--surface); }
+.exit { font: inherit; font-size: 16px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 2px 6px; }
+.btn.big { padding: 14px; font-size: 16px; }
+.weekly { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: var(--bg); font-size: 14px; }
+.weekly .progress > div { background: var(--them); }
+.tie.big-tie { width: 20px; height: 32px; margin-right: 8px; color: var(--them); vertical-align: -2px; }
+.weekly .progress { flex: none; }
+.appbar { display: flex; align-items: center; gap: 8px; }
+.appbar svg { width: 30px; height: 30px; border-radius: 8px; flex: none; }
+.appbar b { font-family: var(--font-display); font-weight: 400; font-size: 21px; letter-spacing: -.01em; }
+.appbar { position: relative; }
+.gear { margin-left: auto; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--muted); border-radius: 10px; cursor: pointer; }
+.gear svg { width: 24px; height: 24px; fill: currentColor; }
+.gear:focus-visible, .back:focus-visible { outline: 2px solid var(--ink); }
+.back { align-self: flex-start; font: inherit; font-size: 14px; font-weight: 600; color: var(--accent); background: none; border: none; padding: 0; cursor: pointer; }
+.set-group { display: flex; flex-direction: column; }
+.set-group > small { font-size: 12px; color: var(--muted); font-weight: 600; padding: 0 2px 4px; }
+.set-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.set-row.disabled > span:first-child { color: var(--muted); }
+.set-right { display: flex; align-items: center; gap: 10px; }
+.muted { color: var(--muted); font-size: 14px; }
+.switch { appearance: none; width: 42px; height: 24px; border-radius: 99px; background: var(--line); position: relative; cursor: pointer; flex: none; margin: 0; transition: background .2s; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); transition: left .2s; }
+.switch:checked { background: var(--accent); } .switch:checked::after { left: 21px; }
+.switch:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.account, .acc-pick { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--bg); }
+.acc-pick { font: inherit; color: inherit; border: 1.5px solid var(--line); background: var(--surface); cursor: pointer; text-align: left; width: 100%; }
+.acc-pick:hover { border-color: var(--accent); }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; font-weight: 600; flex: none; }
+.acc-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.acc-text small { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.ok-chip { border-color: var(--good); color: var(--good); white-space: nowrap; }
+.guest-cta { display: flex; flex-direction: column; gap: 8px; }
+.guest-cta .hint { text-align: center; }
+.set-row.link { font: inherit; font-size: 15px; color: var(--ink); background: none; border: none; border-bottom: 1px solid var(--line); width: 100%; text-align: left; cursor: pointer; }
+.set-row.link.danger > span:first-child { color: var(--bad); }
+.btn.danger { background: var(--bad); color: #fff; }
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 30; background: var(--ink); color: var(--surface); font-size: 14px; padding: 10px 16px; border-radius: 12px; max-width: calc(100% - 32px); }
+.topstat { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+.ts { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.ts .tie { width: 9px; height: 14px; color: var(--them); margin: 0; }
+.ts .ring { width: 18px; height: 18px; }
+.daytitle { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 30px; line-height: 1.15; text-wrap: balance; }
+.hint.center { text-align: center; margin: 0; }
+.hint.waiting { color: var(--accent); font-weight: 600; }
+.tl { list-style: none; margin: 8px 0 4px; padding: 0; display: grid; grid-template-columns: repeat(var(--n), 1fr); position: relative; }
+.tl::before { content: ""; position: absolute; top: 37px; left: calc(50% / var(--n)); right: calc(50% / var(--n)); height: 2px; background: var(--line); }
+.node { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+.node .ico svg { width: 24px; height: 24px; fill: none; stroke: var(--muted); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.node .dot { width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; background: var(--surface); border: 2px solid var(--line); z-index: 1; margin: 1px 0 3px; }
+.node .time { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.node b { font-size: 15px; }
+.node.now .dot { border: 4px solid var(--accent); }
+.node.now .ico svg { stroke: var(--accent); }
+.node.done .dot { background: var(--accent); border-color: var(--accent); }
+.node.done b, .node.done .time { color: var(--muted); }
+.node.next b { color: var(--muted); font-weight: 600; }
+.sheet { max-height: 85%; overflow-y: auto; }
+.viewer { display: flex; gap: 6px; padding: 4px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); }
+.viewer button { font: inherit; font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 99px; border: none; background: none; color: var(--muted); cursor: pointer; }
+.viewer button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.viewer button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.fx-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.fx-pills::-webkit-scrollbar { display: none; }
+.fx-pill { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface); color: var(--muted); white-space: nowrap; cursor: pointer; flex: none; }
+.fx-pill.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.fx-stage { display: flex; flex-direction: column; gap: 8px; }
+.fx-fb { min-height: 46px; border-radius: 12px; background: var(--bg); padding: 8px 12px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fx-fb b.best { color: var(--good); } .fx-fb b.ok { color: var(--ok); } .fx-fb b.avoid { color: var(--bad); }
+.fx-reset { font: inherit; font-size: 12px; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 8px; padding: 4px 8px; cursor: pointer; flex: none; }
+.fx-navrow { display: flex; gap: 8px; } .fx-navrow .btn { flex: 1; margin: 0; }
+.fx-chat { background: var(--bg); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; max-height: 230px; overflow-y: auto; }
+.fx-who { font-size: 11px; color: var(--muted); }
+.fx-b { max-width: 82%; padding: 7px 10px; border-radius: 12px; font-size: 14px; background: var(--surface); align-self: flex-start; }
+.fx-b.me { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); align-self: flex-end; }
+.fx-b small { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.fx-opts { display: flex; flex-direction: column; gap: 6px; }
+.fx-opt { font: inherit; font-size: 14px; text-align: left; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.fx-opt:hover:not(:disabled) { border-color: var(--accent); }
+.fx-opt:disabled { cursor: default; opacity: .5; } .fx-opt.best { border-color: var(--good); opacity: 1; }
+.fx-draft { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 15px; }
+.fx-tok { border: 1.5px dashed var(--muted); border-radius: 6px; padding: 2px 6px; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.fx-tok.hit { border: 1.5px solid var(--bad); text-decoration: line-through; color: var(--bad); }
+.fx-tok.fine { border-style: solid; border-color: var(--good); }
+.fx-counter { font-size: 12px; color: var(--muted); }
+.fx-clock { font-family: var(--font-display); font-size: 44px; text-align: center; line-height: 1; font-variant-numeric: tabular-nums; }
+.fx-clock small { display: block; font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px; }
+#fx-range { width: 100%; accent-color: var(--accent); }
+.fx-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.fx-table { position: relative; width: 100%; aspect-ratio: 1 / 0.86; background: var(--bg); border-radius: 14px; }
+.fx-plate { position: absolute; left: 50%; top: 56%; width: 34%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
+.fx-slot { position: absolute; width: 58px; height: 58px; border-radius: 12px; border: 2px dashed var(--muted); transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
+.fx-slot.over, .fx-slot.armed { border-color: var(--accent); }
+.fx-slot.right { border: 2px solid var(--good); } .fx-slot.wrong { border: 2px solid var(--bad); }
+.fx-tray { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 66px; padding: 6px; border: 1.5px dashed var(--line); border-radius: 12px; }
+.fx-item { width: 54px; height: 54px; border-radius: 10px; background: var(--surface); border: 1.5px solid var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 11px; cursor: grab; touch-action: none; user-select: none; color: var(--ink); }
+.fx-item svg { width: 26px; height: 22px; }
+.fx-item.sel { outline: 2px solid var(--accent); } .fx-item.dim { opacity: .35; }
+.fx-ghost { position: fixed; pointer-events: none; z-index: 50; transform: translate(-50%, -50%); }
+.fx-match { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 36px; }
+.fx-m { font: inherit; font-size: 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); cursor: pointer; padding: 6px; min-height: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative; z-index: 1; }
+.fx-m.sel { border-color: var(--accent); } .fx-m svg { width: 64px; height: 56px; }
+.fx-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.fx-scene { position: relative; }
+.fx-scene svg { width: 100%; height: auto; display: block; border-radius: 12px; }
+.fx-person { cursor: pointer; }
+.fx-timer { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.fx-timer > div { height: 100%; width: 100%; background: var(--them); transition: width .25s linear; }
+.fx-start { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--surface) 72%, transparent); border: none; font: inherit; font-size: 16px; font-weight: 600; color: var(--ink); cursor: pointer; border-radius: 12px; }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-top: 1px solid var(--line);
+  padding: 6px max(16px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.tabbar button { font: inherit; font-size: 12px; font-weight: 600; background: none; border: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px; cursor: pointer; border-radius: 10px; }
+.tabbar svg { width: 24px; height: 24px; fill: currentColor; }
+.tabbar button[aria-current] { color: var(--accent); }
+.tabbar button:focus-visible { outline: 2px solid var(--ink); }
+body.has-nav .app { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.titlebox { display: flex; flex-direction: column; align-items: center; padding: 10px; border-radius: 12px; background: var(--bg); }
+.titlebox small { color: var(--muted); font-size: 12px; } .titlebox b { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--accent); }
+.hex { width: 100%; max-width: 280px; align-self: center; height: auto; }
+.hex-label { font-size: 11px; fill: var(--muted); font-family: var(--font-body); }
+.skill { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.skill .progress { flex: none; }
+.weak { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--bg); font-size: 14px; }
+.weak span { color: var(--muted); }
+.btn:disabled { background: var(--bg); color: var(--good); cursor: default; }
+.sheet-wrap { position: fixed; inset: 0; z-index: 20; background: color-mix(in srgb, var(--ink) 40%, transparent); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: 100%; max-width: 480px; background: var(--surface); border-radius: 20px 20px 0 0; display: flex; flex-direction: column; gap: 10px;
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.sheet .hint { margin: 0; }
+.sheet .row > .btn { flex: 1; margin: 0; }
+.intro { display: flex; flex-direction: column; gap: 10px; padding: 24px 4px 4px; animation: rise .4s ease; }
+.clock { font-family: var(--font-display); font-size: 52px; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.intro-title { font-size: 20px; }
+@keyframes rise { from { opacity: .3; transform: translateY(10px); } }
+
+.statline { display: flex; gap: 6px; }
+.chip.hot { background: var(--them); border-color: var(--them); color: var(--token-ink); display: inline-flex; align-items: center; }
+.tie { display: inline-block; width: 7px; height: 11px; background: currentColor; clip-path: polygon(25% 0, 75% 0, 100% 75%, 50% 100%, 0 75%); margin-right: 5px; }
+.pool summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+.pool[open] { display: flex; flex-direction: column; gap: 8px; }
+.samples { margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.combo { background: var(--them); color: var(--token-ink); font-weight: 600; border-radius: 10px; padding: 2px 10px; transform: rotate(-3deg); }
+.gain { color: var(--good); font-weight: 600; }
+.shake { animation: shake .3s; }
+@keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } .shake, .intro { animation: none; } }
+</style>
+
+<div class="stage">
+<div class="device" id="device">
+  <div class="sb" aria-hidden="true"><span id="sb-time">9:41</span><span class="sb-icons"><i class="sig"></i><i class="bat"></i></span></div>
+  <div class="island" aria-hidden="true"></div>
+  <div class="screen" id="screen">
+<main class="app">
+  <div class="appbar" id="appbar" hidden>
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#1f2a44"/>
+      <path d="M14,64 C16,48 19,36 25,30 L39,30 C45,36 48,48 50,64 Z" fill="#fff"/>
+      <path d="M22,22 L31,31 L26,40 L20,27 Z M42,22 L33,31 L38,40 L44,27 Z" fill="#e4e8f0" stroke="#e4e8f0" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M29,29 L35,29 L34,35 L30,35 Z M30,34 L34,34 L37,54 L32,59 L27,54 Z" fill="#ff6b5b" stroke="#ff6b5b" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <b>매너핏</b>
+    <span class="topstat" id="topstat" hidden></span>
+    <button class="gear" id="gear" type="button" aria-label="설정" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg></button>
+  </div>
+  <header id="pagehead">
+    <div class="eyebrow" id="eyebrow">1일차</div>
+    <h1 id="pname">평범한 화요일</h1>
+    <div class="progress-row" id="progress-row" hidden>
+      <button class="exit" id="exit" type="button" aria-label="그만하고 하루 경로로">✕</button>
+      <div class="progress" aria-hidden="true"><div id="bar"></div><span id="ticks"></span></div>
+    </div>
+  </header>
+
+  <section class="card" id="card" aria-live="polite">
+    <p class="loading">문제를 불러오는 중이에요.</p>
+  </section>
+
+  <nav class="tabbar" id="tabbar" aria-label="화면 이동" hidden>
+    <button type="button" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg><span>홈</span></button>
+    <button type="button" data-tab="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg><span>프로필</span></button>
+  </nav>
+</main>
+  </div>
+  <div class="homebar" aria-hidden="true"></div>
+</div>
+<div class="viewer" role="group" aria-label="보기 전환">
+  <button type="button" data-view="app" aria-pressed="true">앱</button>
+  <button type="button" data-view="formats" aria-pressed="false">문제 형식 6종</button>
+</div>
+<p class="caption">매너핏 프로토타입 · 개발자 메뉴: 설정 › 버전을 길게 누르기</p>
+</div>
+
+<script>
+const FORMAT = { position: '위치', choice: '상황 선택', ox: 'OX' };
+const NS = 'http://www.w3.org/2000/svg';
+
+const $ = (id) => document.getElementById(id);
+const setCard = (...kids) => $('card').replaceChildren(...kids.filter((k) => k != null));
+
+function el(tag, attrs = {}, kids = []) {
+  const svg = ['svg','g','rect','circle','path','text','line','polygon'].includes(tag);
+  const n = svg ? document.createElementNS(NS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'text') n.textContent = v; else if (k === 'class') n.setAttribute('class', v); else n.setAttribute(k, v);
+  }
+  for (const c of [].concat(kids)) if (c) n.append(c);
+  return n;
+}
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* Scene templates: drawing lives in code, questions only name a template and spot ids. */
+const TEMPLATES = {
+  sidewalk(s) {
+    const m = s.mirror, X = (x, w = 0) => m ? 320 - x - w : x;
+    const g = el('g');
+    g.append(el('rect', { x: X(0, 70), y: 0, width: 70, height: 240, fill: 'var(--wall)' }));
+    for (const wy of [18, 68, 118, 168]) for (const wx of [14, 40]) g.append(el('rect', { x: X(wx, 16), y: wy, width: 16, height: 24, rx: 2, fill: 'var(--window)' }));
+    g.append(el('rect', { x: X(70, 130), y: 0, width: 130, height: 240, fill: 'var(--pave)' }));
+    for (let y = 30; y < 240; y += 30) g.append(el('line', { x1: X(70), y1: y, x2: X(200), y2: y, stroke: 'var(--pave-line)', 'stroke-width': 1.5 }));
+    g.append(el('rect', { x: X(200, 6), y: 0, width: 6, height: 240, fill: 'var(--step-edge)' }));
+    g.append(el('rect', { x: X(206, 114), y: 0, width: 114, height: 240, fill: 'var(--asphalt)' }));
+    for (let y = 6; y < 240; y += 48) g.append(el('rect', { x: X(262, 4), y, width: 4, height: 24, fill: 'var(--lane)' }));
+    g.append(car(X(224, 30), 150));
+    g.append(walkArrow(X(137), 228));
+    g.append(el('text', { x: X(35), y: 232, 'text-anchor': 'middle', class: 'scene-label', fill: 'var(--ink)', text: '건물' }));
+    g.append(el('text', { x: X(290), y: 232, 'text-anchor': 'middle', class: 'scene-label', fill: 'var(--lane)', text: '차도' }));
+    return { g, spots: { inner: [X(108), 112], outer: [X(168), 112] }, labelFill: 'var(--ink)', pair: true };
+  },
+  alley() {
+    const g = el('g');
+    g.append(el('rect', { x: 36, y: 0, width: 248, height: 240, fill: 'var(--asphalt)' }));
+    g.append(el('rect', { x: 0, y: 0, width: 36, height: 240, fill: 'var(--wall)' }));
+    g.append(el('rect', { x: 284, y: 0, width: 36, height: 240, fill: 'var(--wall)' }));
+    for (let y = 0; y < 240; y += 20) { g.append(el('line', { x1: 0, y1: y, x2: 36, y2: y, stroke: 'var(--step-edge)', 'stroke-width': 1 })); g.append(el('line', { x1: 284, y1: y, x2: 320, y2: y, stroke: 'var(--step-edge)', 'stroke-width': 1 })); }
+    g.append(car(196, 168));
+    for (const dx of [0, 10, 20]) g.append(el('line', { x1: 201 + dx, y1: 226, x2: 201 + dx, y2: 238, stroke: 'var(--lane)', 'stroke-width': 2, 'stroke-linecap': 'round' }));
+    g.append(el('text', { x: 211, y: 160, 'text-anchor': 'middle', class: 'scene-label', fill: 'var(--lane)', text: '차가 다가옴' }));
+    g.append(walkArrow(110, 228, 'var(--lane)'));
+    g.append(el('text', { x: 18, y: 14, 'text-anchor': 'middle', class: 'scene-label', fill: 'var(--ink)', text: '벽' }));
+    return { g, spots: { wall: [80, 96], carside: [142, 96] }, labelFill: 'var(--lane)', pair: true };
+  },
+  stairs(s) {
+    const g = el('g');
+    g.append(el('rect', { x: 0, y: 0, width: 320, height: 240, fill: 'var(--pave)' }));
+    g.append(el('path', { d: 'M10,240 V202 H70 V164 H130 V126 H190 V88 H250 V50 H310 V240 Z', fill: 'var(--step)', stroke: 'var(--step-edge)', 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+    const up = s.direction === 'up';
+    g.append(el('text', { x: 18, y: 28, class: 'scene-label', fill: 'var(--ink)', text: up ? '올라가는 중' : '내려가는 중' }));
+    g.append(el('path', { d: up ? 'M100,32 L136,10 M136,10 L124,10 M136,10 L132,21' : 'M136,10 L100,32 M100,32 L112,32 M100,32 L104,21', stroke: 'var(--accent)', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round' }));
+    g.append(token(146, 108, s.otherLabel || '상대', 'var(--them)'));
+    return { g, spots: { above: [220, 70], same: [177, 108], below: [100, 146] }, labelFill: 'var(--ink)', r: 13 };
+  }
+};
+function car(x, y) {
+  return el('g', {}, [
+    el('rect', { x, y, width: 30, height: 54, rx: 8, fill: 'var(--lane)', stroke: 'var(--asphalt)', 'stroke-width': 1.5 }),
+    el('rect', { x: x + 5, y: y + 8, width: 20, height: 11, rx: 3, fill: 'var(--window)' }),
+    el('rect', { x: x + 5, y: y + 36, width: 20, height: 8, rx: 3, fill: 'var(--window)' })
+  ]);
+}
+function walkArrow(x, y, color = 'var(--muted)') {
+  return el('g', {}, [
+    el('path', { d: `M${x},${y} V${y - 34} M${x - 7},${y - 26} L${x},${y - 34} L${x + 7},${y - 26}`, stroke: color, 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+    el('text', { x: x, y: y - 40, 'text-anchor': 'middle', class: 'scene-label', fill: color, text: '진행 방향' })
+  ]);
+}
+function token(x, y, label, color) {
+  return el('g', { class: 'token' }, [el('circle', { cx: x, cy: y, r: 15, fill: color }), el('text', { x, y, text: label, 'font-size': label.length > 2 ? 9 : 10.5 })]);
+}
+
+function renderPosition(s, stage, onAnswer) {
+  const t = TEMPLATES[s.template](s);
+  const svg = el('svg', { viewBox: '0 0 320 240', class: 'scene', role: 'group', 'aria-label': '장면 그림. 자리를 하나 고르세요.' }, [t.g]);
+  const r = t.r || 16;
+  const spotEls = {};
+  for (const sp of s.spots) {
+    const [x, y] = t.spots[sp.id];
+    const g = el('g', { class: 'spot', role: 'button', tabindex: 0, 'aria-label': sp.label }, [
+      el('circle', { class: 'ring', cx: x, cy: y, r }), el('text', { class: 'q', x, y, text: '?' })
+    ]);
+    const pick = () => { if (!svg.classList.contains('locked')) onAnswer(sp.id); };
+    g.addEventListener('click', pick);
+    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    svg.append(g, el('text', { x, y: y + r + 14, class: 'spot-label', fill: t.labelFill, text: sp.label }));
+    spotEls[sp.id] = { g, x, y };
+  }
+  stage.append(el('p', { class: 'legend' }, [
+    el('span', { class: 'who me', text: '나' }), document.createTextNode(' 자리를 탭하세요. '),
+    el('span', { class: 'who them', text: s.otherLabel }),
+    document.createTextNode((hasBatchim(s.otherLabel) ? '은' : '는') + (t.pair ? ' 남은 자리로 가요.' : ' 그림에 있어요.'))
+  ]), svg);
+  return (chosen) => {
+    svg.classList.add('locked');
+    const color = 'var(--me)';
+    spotEls[s.answer].g.classList.add('correct');
+    if (chosen !== s.answer) spotEls[chosen].g.classList.add('wrong');
+    const { x, y } = spotEls[chosen];
+    spotEls[chosen].g.querySelector('text.q').remove();
+    svg.append(token(x, y, s.subjectLabel, color));
+    if (t.pair) {
+      const other = s.spots.find((sp) => sp.id !== chosen).id;
+      spotEls[other].g.querySelector('text.q').remove();
+      svg.append(token(spotEls[other].x, spotEls[other].y, s.otherLabel, 'var(--them)'));
+    }
+    return chosen === s.answer ? 'best' : 'avoid';
+  };
+}
+
+function renderChoice(s, stage, onAnswer) {
+  const box = el('div', { class: 'options' });
+  const btns = shuffle(s.options).map((o) => {
+    const b = el('button', { class: 'opt', type: 'button' }, [el('span', { text: o.text })]);
+    b.addEventListener('click', () => onAnswer(o));
+    box.append(b);
+    return { b, o };
+  });
+  stage.append(box);
+  return (picked) => {
+    for (const { b, o } of btns) {
+      b.disabled = true;
+      b.classList.add(o.grade);
+      if (o === picked) b.classList.add('picked');
+      if (o.grade === 'best' || o === picked) {
+        b.prepend(el('span', { class: 'tag', text: o.grade === 'best' ? '가장 무난한 선택' : o.grade === 'ok' ? '괜찮은 선택' : '피해야 할 선택' }));
+        if (o.note && o.grade !== 'best') b.append(el('span', { class: 'note', text: o.note }));
+      }
+    }
+    return picked.grade;
+  };
+}
+
+function renderOX(s, stage, onAnswer) {
+  const box = el('div', { class: 'ox' });
+  const mk = (val, big, small) => {
+    const b = el('button', { class: 'opt', type: 'button' }, [el('span', { class: 'big', text: big }), el('span', { text: small })]);
+    b.addEventListener('click', () => onAnswer(val));
+    box.append(b);
+    return b;
+  };
+  const bo = mk(true, 'O', '맞다'), bx = mk(false, 'X', '아니다');
+  stage.append(box);
+  return (val) => {
+    for (const [b, v] of [[bo, true], [bx, false]]) {
+      b.disabled = true;
+      if (v === s.answer) b.classList.add('best');
+      else if (v === val) b.classList.add('picked', 'avoid');
+    }
+    return val === s.answer ? 'best' : 'avoid';
+  };
+}
+
+/* ---------- content: 3 layers (manners → scenarios with variation axes → days) ---------- */
+const hasBatchim = (w) => { const c = w.charCodeAt(w.length - 1); return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0; };
+const JOSA = { 와: ['과', '와'], 과: ['과', '와'], 은: ['은', '는'], 는: ['은', '는'], 이: ['이', '가'], 가: ['이', '가'], 을: ['을', '를'], 를: ['을', '를'] };
+const josa = (w, j) => w + JOSA[j][hasBatchim(w) ? 0 : 1];
+function fill(v, ctx) {
+  if (typeof v === 'string') return v.replace(/\{(\w+)(와|과|은|는|이|가|을|를)?\}/g, (m, k, j) => ctx[k] == null ? m : j ? josa(String(ctx[k]), j) : String(ctx[k]));
+  if (Array.isArray(v)) return v.map((x) => fill(x, ctx));
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, fill(x, ctx)]));
+  return v;
+}
+/* One base scenario × every combination of its axes = concrete questions. No axes = one question. */
+function expand(base) {
+  const { vary, ...rest } = base;
+  let combos = [{}];
+  for (const axis of vary || []) combos = combos.flatMap((c) => axis.map((a) => ({ ...c, ...a })));
+  return combos.map((c, i) => {
+    const s = { ...rest, ...c, base: base.id, id: vary ? `${base.id}~${i}` : base.id };
+    if (s.other) s.otherLabel = s.other;
+    return fill(s, s);
+  });
+}
+
+let data, pool, byManner, mannerName;
+document.getElementById('exit').addEventListener('click', () => quit());
+const tickClock = () => { const d = new Date(); $('sb-time').textContent = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+tickClock(); setInterval(tickClock, 30000);
+document.getElementById('gear').addEventListener('click', () => renderSettings());
+for (const b of document.querySelectorAll('.viewer button')) b.addEventListener('click', () => (b.dataset.view === 'formats' ? renderFormats() : leaveFormats()));
+for (const b of document.querySelectorAll('#tabbar button')) b.addEventListener('click', () => (b.dataset.tab === 'home' ? renderHome : renderProfile)());
+/* Bottom nav shows only on top-level screens; a running day is full-screen focus, like a lesson. */
+function setNav(tab) {
+  $('tabbar').hidden = !tab;
+  $('appbar').hidden = !tab;
+  $('gear').hidden = tab !== 'profile';
+  $('topstat').hidden = tab !== 'home';
+  document.body.classList.toggle('has-nav', !!tab);
+  for (const b of document.querySelectorAll('#tabbar button')) b.toggleAttribute('aria-current', b.dataset.tab === tab);
+}
+const state = { day: 0, scene: 0, xp: 0, streak: 0, daysDone: 0, doneToday: false, seen: new Set(), attempts: [], user: null };
+
+/* ---------- home: day overview, one button plays the whole day ---------- */
+function header(eyebrow, title, progress) {
+  $('pagehead').hidden = false;
+  $('eyebrow').textContent = eyebrow;
+  $('pname').textContent = title;
+  $('progress-row').hidden = progress == null;
+  if (progress != null) {
+    $('bar').style.width = `${progress * 100}%`;
+    const n = data.days[state.day].scenes.length;
+    $('ticks').replaceChildren(...Array.from({ length: n - 1 }, (_, i) => el('i', { style: `left:${(i + 1) / n * 100}%` })));
+  }
+}
+/* Home has one job: start today's day. One card, one timeline, one button; status lives in the top bar. */
+const ICONS = {
+  morning: '<path d="M3 17h18M7 17a5 5 0 0 1 10 0M12 5v3M5.5 9.5l2 2M18.5 9.5l-2 2"/>',
+  day: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',
+  evening: '<path d="M16 4a8 8 0 1 0 4 14 7 7 0 0 1-4-14z"/>'
+};
+const partOfDay = (time) => { const h = +time.slice(0, 2); return h < 11 ? 'morning' : h < 17 ? 'day' : 'evening'; };
+function svgIcon(name) { const s = el('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' }); s.innerHTML = ICONS[name]; return s; }
+function renderTopStat() {
+  const wk = data.weekly, f = state.daysDone / wk.days, C = 2 * Math.PI * 8;
+  const ring = el('svg', { viewBox: '0 0 20 20', class: 'ring', 'aria-hidden': 'true' });
+  ring.innerHTML = `<circle cx="10" cy="10" r="8" fill="none" stroke="var(--line)" stroke-width="3"/>
+    <circle cx="10" cy="10" r="8" fill="none" stroke="var(--them)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${C * f} ${C}" transform="rotate(-90 10 10)"/>`;
+  $('topstat').replaceChildren(
+    el('span', { class: 'ts', title: '연속 학습일', 'aria-label': `연속 ${state.streak}일` }, [el('i', { class: 'tie' }), document.createTextNode(String(state.streak))]),
+    el('span', { class: 'ts', title: `주간 보상 ${wk.reward}`, 'aria-label': `주간 보상 ${state.daysDone}/${wk.days}일` }, [ring, document.createTextNode(`${state.daysDone}/${wk.days}`)]));
+}
+function renderHome() {
+  setNav('home');
+  setView('app');
+  renderTopStat();
+  $('pagehead').hidden = true;
+  const day = data.days[state.day];
+  const tl = el('ol', { class: 'tl', style: `--n:${day.scenes.length}`, 'aria-label': '오늘의 장면' });
+  day.scenes.forEach((sc, i) => {
+    const status = state.doneToday || i < state.scene ? 'done' : i === state.scene ? 'now' : 'next';
+    tl.append(el('li', { class: `node ${status}` }, [
+      el('span', { class: 'ico' }, [svgIcon(partOfDay(sc.time))]),
+      el('span', { class: 'dot' }),
+      el('span', { class: 'time', text: sc.time }),
+      el('b', { text: sc.short || sc.title })
+    ]));
+  });
+  const go = el('button', { class: 'btn big', type: 'button', text: state.doneToday ? '오늘 하루 완료 ✓' : '하루 시작하기' });
+  if (state.doneToday) go.disabled = true; else go.addEventListener('click', startDay);
+  const next = data.days[state.day + 1], playable = next && !next.locked;
+  const foot = state.doneToday
+    ? (playable ? `내일 열려요 · ${next.title} · ${untilMidnight()} 남음` : '다음 하루를 준비 중이에요')
+    : `장면 ${day.scenes.length}개 · 약 3분`;
+  setCard(
+    el('span', { class: 'eyebrow', text: state.doneToday ? '오늘 하루 끝' : '오늘의 하루' }),
+    el('h2', { class: 'daytitle', text: day.title }),
+    tl, go,
+    el('p', { class: `hint center${state.doneToday ? ' waiting' : ''}`, text: foot }));
+}
+function untilMidnight() {
+  const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
+  const m = Math.ceil((mid - now) / 60000);
+  return m >= 60 ? `${Math.floor(m / 60)}시간 ${m % 60}분` : `${m}분`;
+}
+
+/* Shows the scaling lever: base scenarios vs. concrete questions after expansion. */
+function poolPanel() {
+  const rows = data.manners.map((m) => el('tr', {}, [
+    el('td', { text: `#${m.id} ${m.name}` }),
+    el('td', { text: String(data.scenarios.filter((s) => s.manner === m.id).length) }),
+    el('td', { text: String(byManner.get(m.id).length) })]));
+  return el('details', { class: 'pool' }, [
+    el('summary', { text: `문제 풀 · 작성 ${data.scenarios.length}개 → 실제 출제 ${pool.length}개` }),
+    el('div', { class: 'table-wrap' }, [el('table', {}, [
+      el('thead', {}, [el('tr', {}, [el('th', { text: '매너' }), el('th', { text: '작성' }), el('th', { text: '출제' })])]),
+      el('tbody', {}, rows)])]),
+    el('p', { class: 'hint', text: '인도 문제 1개가 동행자 4명 × 차도 방향 2개로 8문제가 돼요:' }),
+    el('ul', { class: 'samples' }, pool.filter((s) => s.base === 'A-sidewalk').map((s) => el('li', { text: s.prompt })))
+  ]);
+}
+
+/* ---------- the day plays as one continuous session: intro → questions → next scene ---------- */
+const PER_SCENE = 2;
+let run;
+function pickFor(manner, n, avoidBase, exclude = new Set()) {
+  const all = byManner.get(manner).filter((s) => !exclude.has(s.id));
+  const ordered = [...shuffle(all.filter((s) => !state.seen.has(s.id))), ...shuffle(all.filter((s) => state.seen.has(s.id)))];
+  const out = [], used = new Set(avoidBase ? [avoidBase] : []);
+  for (const s of ordered) if (out.length < n && !used.has(s.base)) { out.push(s); used.add(s.base); }
+  for (const s of ordered) if (out.length < n && !out.includes(s) && s.base !== avoidBase) out.push(s);
+  for (const s of ordered) if (out.length < n && !out.includes(s)) out.push(s);
+  return out;
+}
+function startDay() {
+  setNav(null);
+  run = run && run.day === state.day ? run : { day: state.day, xp: 0, combo: 0, best: 0, first: 0, total: 0, missed: new Set() };
+  enterScene();
+}
+function enterScene() {
+  const day = data.days[state.day];
+  if (state.scene >= day.scenes.length) return finishDay();
+  const sc = day.scenes[state.scene];
+  let queue;
+  if (sc.review) {
+    const manners = [...new Set(day.scenes.filter((x) => x.manner).map((x) => x.manner))];
+    const order = [...manners.filter((m) => run.missed.has(m)), ...shuffle(manners.filter((m) => !run.missed.has(m)))];
+    queue = order.slice(0, 3).flatMap((m) => pickFor(m, 1));
+  } else queue = pickFor(sc.manner, PER_SCENE);
+  run.scene = { sc, queue, idx: 0, retried: new Set() };
+  showIntro(sc);
+}
+function sceneProgress() {
+  const n = data.days[state.day].scenes.length, r = run.scene;
+  return (state.scene + (r ? r.idx / Math.max(r.queue.length, 1) : 0)) / n;
+}
+function showIntro(sc) {
+  header(`${sc.time} · ${data.days[state.day].title}`, sc.title, sceneProgress());
+  const cont = el('button', { class: 'btn', type: 'button', text: '계속' });
+  const card = $('card');
+  card.replaceChildren(el('div', { class: 'intro' }, [
+    el('div', { class: 'clock', text: sc.time }),
+    el('b', { class: 'intro-title', text: sc.title }),
+    el('p', { class: 'why', text: sc.intro }),
+    el('div', { class: 'row' }, [cont])
+  ]));
+  let moved = false;
+  const go = () => { if (!moved) { moved = true; clearTimeout(timer); renderQuestion(); } };
+  cont.addEventListener('click', go);
+  const timer = matchMedia('(prefers-reduced-motion: reduce)').matches ? null : setTimeout(go, 2200);
+  cont.focus({ preventScroll: true });
+}
+function renderQuestion() {
+  const r = run.scene, s = r.queue[r.idx];
+  header(`${r.sc.time} · ${r.sc.title}`, data.principles[0].motto, sceneProgress());
+  const card = $('card');
+  card.replaceChildren(
+    el('div', { class: 'chips' }, [
+      s.retry ? el('span', { class: 'chip retry', text: '다시 풀기' }) : null,
+      el('span', { class: 'chip fmt', text: FORMAT[s.format] }),
+      el('span', { class: 'chip', text: s.domain })
+    ]),
+    el('p', { class: 'prompt', text: s.prompt })
+  );
+  const stage = el('div');
+  card.append(stage);
+  let reveal;
+  const onAnswer = (choice) => showFeedback(s, reveal(choice), card);
+  reveal = ({ position: renderPosition, choice: renderChoice, ox: renderOX })[s.format](s, stage, onAnswer);
+}
+function showFeedback(s, grade, card) {
+  const r = run.scene;
+  state.seen.add(s.id);
+  state.attempts.push({ manner: s.manner, domain: s.domain, grade });
+  if (!s.retry) { run.total++; run.first += grade === 'best'; }
+  run.combo = grade === 'best' ? run.combo + 1 : 0;
+  run.best = Math.max(run.best, run.combo);
+  const gain = grade === 'best' ? 10 + (run.combo >= 3 ? 5 : 0) : grade === 'ok' ? 5 : 0;
+  run.xp += gain;
+  if (!s.retry && grade !== 'best') {
+    run.missed.add(s.manner);
+    if (!r.retried.has(s.manner)) {
+      r.retried.add(s.manner);
+      const [again] = pickFor(s.manner, 1, s.base, new Set(r.queue.map((q) => q.id)));
+      if (again) r.queue.push({ ...again, retry: true });
+    }
+  }
+  const lastInScene = r.idx + 1 >= r.queue.length;
+  const lastScene = state.scene + 1 >= data.days[state.day].scenes.length;
+  const nextScene = !lastScene && data.days[state.day].scenes[state.scene + 1];
+  const next = el('button', { class: 'btn', type: 'button', text: !lastInScene ? '계속' : lastScene ? '하루 마치기' : `${nextScene.time} ${nextScene.title} →` });
+  const head = grade === 'best'
+    ? [el('div', { class: 'row' }, [el('div', { class: 'verdict best', text: '맞아요' }), run.combo >= 2 ? el('span', { class: 'combo', text: `${run.combo}연속! +${gain} XP` }) : el('span', { class: 'gain', text: `+${gain} XP` })])]
+    : grade === 'ok'
+      ? [el('div', { class: 'verdict ok', text: '더 무난한 선택이 있어요' }), el('p', { class: 'answer', text: s.feedback.title })]
+      : [el('div', { class: 'verdict avoid', text: s.feedback.title })];
+  const fb = el('div', { class: 'feedback' }, [
+    ...head,
+    el('p', { class: 'why', text: s.feedback.why }),
+    el('p', { class: 'motto', text: data.principles[0].motto }),
+    el('div', { class: 'row' }, [evidenceBox(s.evidence) || el('span'), next])
+  ]);
+  if (grade !== 'best') card.classList.add('shake');
+  card.addEventListener('animationend', () => card.classList.remove('shake'), { once: true });
+  card.append(fb);
+  next.addEventListener('click', () => {
+    r.idx++;
+    if (r.idx < r.queue.length) return renderQuestion();
+    state.scene++;
+    enterScene();
+  });
+  next.focus({ preventScroll: true });
+  fb.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+function evidenceBox(ev) {
+  if (!ev || !ev.sources.length) return null;
+  return el('details', { class: 'evidence' }, [
+    el('summary', { text: '근거 보기' }),
+    el('p', { text: ev.summary }),
+    el('ul', { class: 'sources' }, ev.sources.map((src) => el('li', {}, [
+      el('a', { href: src.url, target: '_blank', rel: 'noopener', text: src.title }),
+      el('span', { class: 'meta', text: ` · ${src.publisher} · ${src.date}` }),
+      el('span', { class: 'loc', text: src.locator })
+    ])))
+  ]);
+}
+/* A finished day gives XP and a streak day; the outfit item comes once a week, not every day. */
+function finishDay() {
+  setNav(null);
+  const day = data.days[state.day], wk = data.weekly;
+  state.xp += run.xp;
+  state.streak++; state.daysDone++; state.doneToday = true;
+  const daysDone = state.daysDone;
+  header(`${state.day + 1}일차 완료`, `${day.title} 끝`, null);
+  const btn = el('button', { class: 'btn', type: 'button', text: '홈으로' });
+  btn.addEventListener('click', () => { run = null; renderHome(); });
+  setCard(
+    el('div', { class: 'score', style: 'text-align:center' }, [el('i', { class: 'tie big-tie' }), document.createTextNode(`${state.streak}일`), el('small', { text: ' 연속' })]),
+    el('p', { class: 'hint', style: 'text-align:center', text: `+${run.xp} XP · 한 번에 맞힘 ${run.first} / ${run.total} · 최고 콤보 ${run.best}` }),
+    el('div', { class: 'weekly' }, [
+      el('div', { class: 'row' }, [el('span', { text: `주간 보상 · ${wk.reward}` }), el('b', { text: `${daysDone} / ${wk.days}일` })]),
+      el('div', { class: 'progress' }, [el('div', { style: `width:${daysDone / wk.days * 100}%` })])
+    ]),
+    run.missed.size ? el('p', { class: 'hint', style: 'text-align:center', text: `내일 다른 상황으로 다시: ${[...run.missed].map((m) => `#${m} ${mannerName[m]}`).join(', ')}` }) : null,
+    el('div', { class: 'row' }, [btn])
+  );
+}
+/* ---------- profile: domain hexagon, title, principle skill, wardrobe, weak manners ---------- */
+const AXES = ['연애', '친구', '어른·가족', '직장', '공공장소', '메시지'];
+const AXIS_OF = { '친구·가족': '친구' };
+const TITLES = { 연애: '다정한 동행러', 친구: '든든한 친구', '어른·가족': '예의 바른 손주', 직장: '센스 있는 신입', 공공장소: '배려하는 시민', 메시지: '매너 있는 메신저' };
+// ponytail: sense = correct answers × 5, capped at 100. Real app derives it from Leitner boxes so it decays when reviews lapse.
+function senseByAxis() {
+  const v = Object.fromEntries(AXES.map((a) => [a, 0]));
+  for (const t of state.attempts) if (t.grade === 'best') { const a = AXIS_OF[t.domain] || t.domain; if (a in v) v[a] = Math.min(100, v[a] + 5); }
+  return v;
+}
+function hexSvg(vals) {
+  const R = 74, C = 132, size = 264;
+  const pt = (i, r) => { const a = -Math.PI / 2 + i * Math.PI / 3; return [C + r * Math.cos(a), C + r * Math.sin(a)]; };
+  const poly = (f) => AXES.map((_, i) => pt(i, f(i)).join(',')).join(' ');
+  const svg = el('svg', { viewBox: `0 0 ${size} ${size}`, class: 'hex', role: 'img', 'aria-label': AXES.map((a) => `${a} ${vals[a]}`).join(', ') });
+  for (const f of [1, 0.66, 0.33]) svg.append(el('polygon', { points: poly(() => R * f), fill: 'none', stroke: 'var(--line)', 'stroke-width': 1.5 }));
+  svg.append(el('polygon', { points: poly((i) => R * Math.max(vals[AXES[i]], 3) / 100), fill: 'var(--accent)', 'fill-opacity': .25, stroke: 'var(--accent)', 'stroke-width': 2.5, 'stroke-linejoin': 'round' }));
+  AXES.forEach((a, i) => { const [x, y] = pt(i, R + 22); svg.append(el('text', { x, y, 'text-anchor': 'middle', 'dominant-baseline': 'central', class: 'hex-label', text: `${a} ${vals[a]}` })); });
+  return svg;
+}
+function renderProfile() {
+  setNav('profile');
+  header('프로필', state.user ? state.user.name : '게스트', null);
+  const vals = senseByAxis();
+  const top = AXES.reduce((a, b) => (vals[b] > vals[a] ? b : a));
+  const title = vals[top] ? TITLES[top] : '매너 새싹';
+  const correctA = state.attempts.filter((t) => t.grade === 'best').length;
+  const lv = Math.floor(correctA / 5) + 1, within = correctA % 5;
+  const weak = [...new Set(state.attempts.filter((t) => t.grade !== 'best').map((t) => t.manner))];
+  let login;
+  if (state.user) {
+    login = el('div', { class: 'account' }, [
+      el('span', { class: 'avatar', text: state.user.name[0] }),
+      el('span', { class: 'acc-text' }, [el('b', { text: state.user.name }), el('small', { text: state.user.email })]),
+      el('span', { class: 'chip ok-chip', text: 'Google 연결됨' })]);
+  } else {
+    login = el('div', { class: 'guest-cta' }, [
+      el('p', { class: 'hint', text: '게스트 기록은 이 기기에만 있어요. 폰을 바꾸면 연속 학습일과 스탯이 사라져요.' }),
+      el('button', { class: 'btn ghost', type: 'button', text: 'Google로 기록 저장하기' })]);
+    login.querySelector('button').addEventListener('click', openLogin);
+  }
+  setCard(
+    el('div', { class: 'statline' }, [
+      el('span', { class: 'chip hot' }, [el('i', { class: 'tie' }), document.createTextNode(`${state.streak}일`)]),
+      el('span', { class: 'chip', text: `${state.xp} XP` }),
+      el('span', { class: 'chip', text: `옷장 ${Math.floor(state.daysDone / data.weekly.days)} / 8` })]),
+    el('div', { class: 'titlebox' }, [el('small', { text: '칭호' }), el('b', { text: title })]),
+    hexSvg(vals),
+    el('p', { class: 'hint', style: 'text-align:center', text: state.attempts.length ? '맞힌 상황이 쌓일수록 그 영역 센스가 올라가요.' : '하루를 마치면 영역별 센스가 채워져요.' }),
+    el('div', { class: 'skill' }, [
+      el('div', { class: 'row' }, [el('span', { text: `원칙 A · ${data.principles[0].motto}` }), el('b', { text: `Lv.${lv}` })]),
+      el('div', { class: 'progress' }, [el('div', { style: `width:${within / 5 * 100}%` })])]),
+    el('div', { class: 'weak' }, [el('b', { text: '약한 매너' }),
+      el('span', { text: weak.length ? weak.map((m) => `#${m} ${mannerName[m]}`).join(', ') : '아직 없어요' })]),
+    login
+  );
+}
+
+/* ---------- account (simulated): login, logout, withdraw ---------- */
+// ponytail: fake Google account and in-memory "server" copy. Real app: Supabase Auth + attempts table keyed by user id.
+const DEMO_USER = { name: '테스트 계정', email: 'manner.tester@example.com' };
+let serverCopy = null;
+const PROGRESS_KEYS = ['day', 'scene', 'xp', 'streak', 'daysDone', 'doneToday'];
+function sheet(title, body, actions) {
+  const wrap = el('div', { class: 'sheet-wrap', role: 'dialog', 'aria-modal': 'true', 'aria-label': title });
+  const close = () => wrap.remove();
+  const btns = actions.map(([label, cls, fn]) => { const b = el('button', { class: `btn ${cls}`, type: 'button', text: label }); b.addEventListener('click', () => { close(); fn && fn(); }); return b; });
+  wrap.append(el('div', { class: 'sheet' }, [el('b', { text: title }), ...[].concat(body), el('div', { class: 'row' }, btns)]));
+  wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
+  $('device').append(wrap);
+  btns[btns.length - 1].focus();
+}
+function toast(text) {
+  document.querySelector('.toast')?.remove();
+  const t = el('div', { class: 'toast', role: 'status', text });
+  $('device').append(t);
+  setTimeout(() => t.remove(), 2800);
+}
+function openLogin() {
+  const pick = el('button', { class: 'acc-pick', type: 'button' }, [
+    el('span', { class: 'avatar', text: DEMO_USER.name[0] }),
+    el('span', { class: 'acc-text' }, [el('b', { text: DEMO_USER.name }), el('small', { text: DEMO_USER.email })])]);
+  sheet('Google 계정 선택', [el('p', { class: 'hint', text: '프로토타입이라 실제 Google 로그인 대신 예시 계정을 써요.' }), pick], [['취소', 'ghost']]);
+  pick.addEventListener('click', () => { document.querySelector('.sheet-wrap')?.remove(); login(); });
+}
+function login() {
+  const guestCount = state.attempts.length;
+  if (serverCopy) {
+    // Returning user: server copy wins for progress, guest attempts are appended (attempt log merges by id in the real app).
+    const guestXp = state.xp;
+    Object.assign(state, serverCopy.progress);
+    state.xp += guestXp;
+    state.attempts = [...serverCopy.attempts, ...state.attempts];
+    state.seen = new Set([...serverCopy.seen, ...state.seen]);
+  }
+  state.user = DEMO_USER;
+  renderProfile();
+  toast(serverCopy ? `다시 오셨네요. 계정 기록을 불러왔어요.` : guestCount ? `로그인했어요. 게스트 기록 ${guestCount}개를 계정에 저장했어요.` : '로그인했어요. 이제 기록이 계정에 저장돼요.');
+}
+function freshGuest() {
+  Object.assign(state, { day: 0, scene: 0, xp: 0, streak: 0, daysDone: 0, doneToday: false, seen: new Set(), attempts: [], user: null });
+}
+function logout() {
+  sheet('로그아웃할까요?', el('p', { class: 'hint', text: '이 기기에서 기록이 지워져요. 다시 로그인하면 계정에서 불러와요.' }), [['취소', 'ghost'], ['로그아웃', '', () => {
+    serverCopy = { progress: Object.fromEntries(PROGRESS_KEYS.map((k) => [k, state[k]])), attempts: [...state.attempts], seen: [...state.seen] };
+    freshGuest();
+    renderProfile();
+    toast('로그아웃했어요.');
+  }]]);
+}
+function openWithdraw() {
+  sheet('정말 탈퇴할까요?', el('p', { class: 'hint', text: '계정, 풀이 기록, 스탯, 연속 학습일이 모두 삭제돼요. 되돌릴 수 없어요.' }), [['취소', 'ghost'], ['탈퇴하고 모두 삭제', 'danger', () => {
+    serverCopy = null;
+    freshGuest();
+    renderProfile();
+    toast('탈퇴했어요. 모든 기록을 삭제했어요.');
+  }]]);
+}
+
+/* ---------- question-format gallery: the 6 manipulation formats from the wireframe, playable inside the phone ---------- */
+const FX_SVG = new Set(['svg', 'g', 'rect', 'circle', 'path', 'line', 'text', 'ellipse', 'polygon']);
+function wel(tag, attrs = {}, kids = []) {
+  const n = FX_SVG.has(tag) ? document.createElementNS(NS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null) continue;
+    if (k === 'text') n.textContent = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+  }
+  for (const c of [].concat(kids)) if (c != null) n.append(c);
+  return n;
+}
+const fxShake = (n) => { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); };
+let fxIdx = 0, fxCleanup = null;
+
+function fxReply({ stage, say }) {
+  const chat = wel('div', { class: 'fx-chat' }, [
+    wel('span', { class: 'fx-who', text: '지민' }),
+    wel('div', { class: 'fx-b' }, ['나 도착했어! 어디쯤이야?', wel('small', { text: '오후 7:02' })]),
+    wel('div', { class: 'fx-b' }, ['약속 7시였지?', wel('small', { text: '오후 7:05' })])]);
+  const opts = [
+    { t: '미안, 15분쯤 늦어! 7시 20분 도착이야', g: 'best', why: '늦는 시간과 도착 시각을 같이 알려줬어요.' },
+    { t: '헐 미안ㅠㅠ 거의 다 왔어 금방 갈게', g: 'avoid', why: '"금방"으로는 얼마나 기다릴지 알 수 없어요.' },
+    { t: '차가 너무 막혀서ㅠ 나도 진짜 답답해', g: 'avoid', why: '사정보다 도착 시각이 먼저예요.' }];
+  const box = wel('div', { class: 'fx-opts' });
+  const btns = shuffle(opts).map((o) => {
+    const b = wel('button', { class: 'fx-opt', type: 'button', text: o.t, onclick: () => {
+      chat.append(wel('div', { class: 'fx-b me' }, [o.t, wel('small', { text: '오후 7:06' })]));
+      chat.scrollTop = chat.scrollHeight;
+      for (const x of btns) { x.b.disabled = true; if (x.o.g === 'best') x.b.classList.add('best'); }
+      say(o.g, o.why);
+      if (o.g !== 'best') fxShake(chat);
+    } });
+    box.append(b);
+    return { b, o };
+  });
+  stage.append(chat, box);
+}
+
+function fxFind({ stage, say }) {
+  const toks = [
+    { t: 'ㅇㅇ', wrong: true, why: '초성 답장은 윗사람에게 성의 없어 보여요.' },
+    { t: '알겠어요~' }, { t: '근데' },
+    { t: '왜 바뀐 거임?', wrong: true, why: '"~임?"은 반말이고 따지는 말투로 읽혀요.' }];
+  const need = toks.filter((t) => t.wrong).length;
+  let found = 0;
+  const counter = wel('span', { class: 'fx-counter', text: `찾은 곳 0 / ${need}` });
+  const chat = wel('div', { class: 'fx-chat' }, [
+    wel('span', { class: 'fx-who', text: '김 팀장님' }),
+    wel('div', { class: 'fx-b' }, ['내일 회의 10시로 바뀌었어요. 확인 부탁해요.', wel('small', { text: '오후 5:41' })])]);
+  const draft = wel('div', { class: 'fx-draft', 'aria-label': '보내기 전 답장' }, toks.map((t) => wel('button', { class: 'fx-tok', type: 'button', text: t.t, onclick: (e) => {
+    const b = e.currentTarget;
+    if (b.classList.contains('hit') || found === need) return;
+    if (t.wrong) { b.classList.add('hit'); found++; counter.textContent = `찾은 곳 ${found} / ${need}`; say(found === need ? 'best' : null, t.why); }
+    else { b.classList.add('fine'); fxShake(draft); say('avoid', '이 부분은 괜찮아요.'); }
+    if (found === need) chat.append(wel('div', { class: 'fx-b me' }, ['네, 확인했습니다. 내일 10시에 뵙겠습니다.', wel('small', { text: '고친 답장' })]));
+  } })));
+  stage.append(chat, wel('div', { class: 'row' }, [wel('span', { class: 'fx-counter', text: '보내기 전 답장' }), counter]), draft);
+}
+
+function fxTime({ stage, say }) {
+  const START = 23 * 60 + 30, at = (i) => (START + i * 30) % 1440;
+  const fmt = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  const when = wel('small', { text: '오늘 밤' });
+  const clock = wel('div', { class: 'fx-clock' }, [wel('span', { text: '23:30' }), when]);
+  const range = wel('input', { type: 'range', min: 0, max: 23, value: 0, id: 'fx-range', 'aria-label': '보낼 시각' });
+  const stamp = wel('small', { text: '보낼 시각 23:30' });
+  const preview = wel('div', { class: 'fx-b me' }, ['선배님, 내일 모임 장소가 어디인가요?', stamp]);
+  range.addEventListener('input', () => {
+    const m = at(+range.value);
+    clock.firstChild.textContent = fmt(m);
+    when.textContent = m >= START ? '오늘 밤' : '내일';
+    stamp.textContent = `보낼 시각 ${fmt(m)}`;
+  });
+  const send = wel('button', { class: 'btn', type: 'button', text: '이 시각에 보내기', onclick: () => {
+    const m = at(+range.value);
+    range.disabled = true; send.disabled = true;
+    if (m >= START || m < 8 * 60) { say('avoid', '늦은 밤·새벽 알림은 잠을 깨워요. 아침 9시 이후에 보내요.'); fxShake(clock); }
+    else if (m < 9 * 60) say('ok', '나쁘진 않지만 출근·등교 준비 시간이에요. 9시 이후가 무난해요.');
+    else say('best', '모임은 내일 오후라 아침에 물어봐도 충분해요.');
+  } });
+  stage.append(wel('div', { class: 'fx-chat' }, [wel('span', { class: 'fx-who', text: '동아리 선배' }), preview]),
+    clock, range, wel('div', { class: 'fx-scale' }, [wel('span', { text: '23:30' }), wel('span', { text: '05:00' }), wel('span', { text: '11:00' })]), send);
+}
+
+const FX_ICON = {
+  fork: '<path d="M8 2v8M5 2v6a3 3 0 0 0 6 0V2M8 10v10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+  knife: '<path d="M10 2c3 3 3 8 0 9v9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+  glass: '<path d="M6 3h10l-2 16H8z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/>',
+  bread: '<circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><ellipse cx="11" cy="11" rx="4" ry="3" fill="currentColor" opacity=".5"/>'
+};
+function fxTable({ stage, say }) {
+  const ITEMS = [{ k: 'fork', label: '포크' }, { k: 'knife', label: '나이프' }, { k: 'glass', label: '물잔' }, { k: 'bread', label: '빵접시' }];
+  const SLOTS = [{ k: 'bread', x: 18, y: 22 }, { k: 'glass', x: 82, y: 22 }, { k: 'fork', x: 14, y: 60 }, { k: 'knife', x: 86, y: 60 }];
+  const table = wel('div', { class: 'fx-table' }, [wel('div', { class: 'fx-plate', text: '메인 접시' })]);
+  const slots = SLOTS.map((s) => { const d = wel('div', { class: 'fx-slot', style: `left:${s.x}%;top:${s.y}%`, 'data-k': s.k, role: 'button', tabindex: 0, 'aria-label': '빈 자리' }); table.append(d); return d; });
+  const tray = wel('div', { class: 'fx-tray', 'aria-label': '놓을 물건' });
+  let selected = null;
+  const check = () => {
+    if (slots.some((s) => !s.firstChild)) return;
+    let ok = 0;
+    for (const s of slots) { const r = s.firstChild.dataset.k === s.dataset.k; s.classList.add(r ? 'right' : 'wrong'); ok += r; }
+    if (ok === 4) say('best', 'BMW로 기억해요. 빵(Bread)은 왼쪽, 메인(Main) 가운데, 물(Water)은 오른쪽.');
+    else { say('avoid', `${ok} / 4 맞음. 빵은 왼쪽, 물은 오른쪽이에요.`); fxShake(table); }
+  };
+  const place = (item, slot) => {
+    if (slot.classList.contains('right') || slot.classList.contains('wrong')) return;
+    if (slot.firstChild) tray.append(slot.firstChild);
+    slot.append(item);
+    item.classList.remove('sel', 'dim');
+    selected = null;
+    slots.forEach((s) => s.classList.remove('armed'));
+    check();
+  };
+  for (const s of slots) {
+    const go = () => { if (selected) place(selected, s); };
+    s.addEventListener('click', go);
+    s.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  }
+  for (const it of shuffle(ITEMS)) {
+    const ico = wel('svg', { viewBox: '0 0 22 22', 'aria-hidden': 'true' }); ico.innerHTML = FX_ICON[it.k];
+    const item = wel('div', { class: 'fx-item', 'data-k': it.k, role: 'button', tabindex: 0, 'aria-label': it.label }, [ico, wel('span', { text: it.label })]);
+    let start = null, ghost = null;
+    const toggle = () => {
+      if (item.parentElement !== tray) return;
+      selected = selected === item ? null : item;
+      tray.querySelectorAll('.fx-item').forEach((x) => x.classList.toggle('sel', x === selected));
+      slots.forEach((s) => s.classList.toggle('armed', !!selected && !s.firstChild));
+    };
+    item.addEventListener('pointerdown', (e) => { start = { x: e.clientX, y: e.clientY }; item.setPointerCapture(e.pointerId); });
+    item.addEventListener('pointermove', (e) => {
+      if (!start) return;
+      if (!ghost && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) { ghost = item.cloneNode(true); ghost.classList.add('fx-ghost'); document.body.append(ghost); item.classList.add('dim'); }
+      if (ghost) {
+        ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px';
+        const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.fx-slot');
+        slots.forEach((s) => s.classList.toggle('over', s === over));
+      }
+    });
+    item.addEventListener('pointerup', (e) => {
+      if (!start) return;
+      if (ghost) {
+        ghost.remove(); ghost = null; item.classList.remove('dim');
+        slots.forEach((s) => s.classList.remove('over'));
+        const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.fx-slot');
+        if (over && slots.includes(over)) place(item, over);
+      } else toggle();
+      start = null;
+    });
+    item.addEventListener('pointercancel', () => { if (ghost) { ghost.remove(); ghost = null; item.classList.remove('dim'); } start = null; });
+    item.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    tray.append(item);
+  }
+  stage.append(table, tray);
+}
+
+function fxPlate(kind) {
+  const s = wel('svg', { viewBox: '0 0 64 56', 'aria-hidden': 'true' });
+  if (kind === 'chair') s.innerHTML = '<rect x="18" y="6" width="28" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="28" width="36" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M18 36v16M46 36v16" stroke="currentColor" stroke-width="2"/><path d="M24 8l16 0-4 18-8 0z" fill="currentColor" opacity=".35"/>';
+  else s.innerHTML = `<circle cx="32" cy="30" r="24" fill="none" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round">${kind === 'pause' ? '<path d="M20 44L29 20M44 44L35 20"/>' : '<path d="M24 16L42 42M18 20L36 46"/>'}</g>`;
+  return s;
+}
+function fxMatch({ stage, say }) {
+  const PAIRS = [
+    { k: 'pause', left: '포크·나이프 八자', right: '잠깐 쉬는 중이에요' },
+    { k: 'done', left: '나란히 4시 방향', right: '다 먹었어요, 치워도 돼요' },
+    { k: 'chair', left: '냅킨을 의자 위에', right: '잠시 자리 비울게요' }];
+  const wrap = wel('div', { class: 'fx-match' });
+  const svg = wel('svg', { class: 'fx-lines' });
+  const links = new Map();
+  let pick = null, finished = false;
+  const lefts = PAIRS.map((p) => wel('button', { class: 'fx-m', type: 'button', 'data-k': p.k }, [fxPlate(p.k), wel('span', { text: p.left })]));
+  const rights = shuffle(PAIRS).map((p) => wel('button', { class: 'fx-m', type: 'button', 'data-k': p.k }, [wel('span', { text: p.right })]));
+  for (let i = 0; i < PAIRS.length; i++) wrap.append(lefts[i], rights[i]);
+  wrap.append(svg);
+  const draw = () => {
+    svg.replaceChildren();
+    const box = wrap.getBoundingClientRect();
+    for (const [l, r] of links) {
+      const a = l.getBoundingClientRect(), b = r.getBoundingClientRect();
+      const color = finished ? (l.dataset.k === r.dataset.k ? 'var(--good)' : 'var(--bad)') : 'var(--accent)';
+      svg.append(wel('line', { x1: a.right - box.left, y1: a.top + a.height / 2 - box.top, x2: b.left - box.left, y2: b.top + b.height / 2 - box.top, stroke: color, 'stroke-width': 2.5, 'stroke-linecap': 'round' }));
+    }
+  };
+  const choose = (b, side) => {
+    if (finished) return;
+    if (!pick || pick.side === side) { pick = { b, side }; [...lefts, ...rights].forEach((x) => x.classList.toggle('sel', x === b)); return; }
+    const [l, r] = side === 'r' ? [pick.b, b] : [b, pick.b];
+    for (const [k, v] of [...links]) if (k === l || v === r) links.delete(k);
+    links.set(l, r);
+    pick = null; [...lefts, ...rights].forEach((x) => x.classList.remove('sel'));
+    if (links.size === PAIRS.length) {
+      finished = true;
+      const ok = [...links].filter(([a, c]) => a.dataset.k === c.dataset.k).length;
+      if (ok === PAIRS.length) say('best', '八자는 아직 먹는 중, 나란히는 다 먹었다는 뜻이에요.');
+      else { say('avoid', `${ok} / 3 맞음. 빨간 선을 확인해 보세요.`); fxShake(wrap); }
+    }
+    draw();
+  };
+  lefts.forEach((b) => b.addEventListener('click', () => choose(b, 'l')));
+  rights.forEach((b) => b.addEventListener('click', () => choose(b, 'r')));
+  const ro = new ResizeObserver(draw); ro.observe(wrap);
+  fxCleanup = () => ro.disconnect();
+  stage.append(wrap);
+}
+
+function fxScene({ stage, say }) {
+  const PEOPLE = [
+    { x: 34, sit: true }, { x: 92, sit: true, book: true }, { x: 206, sit: true },
+    { x: 262, sit: true, loud: true, why: '영상 소리는 이어폰으로 들어요.' },
+    { x: 62, bag: true, why: '백팩은 앞으로 메거나 손에 들어요.' },
+    { x: 146, door: true, why: '문 앞에 서 있으면 타고 내리기 어려워요.' },
+    { x: 232, strap: true }];
+  const need = PEOPLE.filter((p) => p.why).length;
+  const svg = wel('svg', { viewBox: '0 0 300 250', role: 'group', 'aria-label': '지하철 칸 그림' }, [
+    wel('rect', { x: 0, y: 0, width: 300, height: 250, fill: 'var(--pave)' }),
+    wel('rect', { x: 8, y: 30, width: 104, height: 40, rx: 4, fill: 'var(--surface)', stroke: 'var(--line)' }),
+    wel('rect', { x: 188, y: 30, width: 104, height: 40, rx: 4, fill: 'var(--surface)', stroke: 'var(--line)' }),
+    wel('rect', { x: 122, y: 20, width: 56, height: 210, fill: 'none', stroke: 'var(--step-edge)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }),
+    wel('text', { x: 150, y: 244, 'text-anchor': 'middle', 'font-size': 10, fill: 'var(--muted)', text: '출입문' }),
+    wel('rect', { x: 6, y: 196, width: 110, height: 16, rx: 3, fill: 'var(--step-edge)' }),
+    wel('rect', { x: 184, y: 196, width: 110, height: 16, rx: 3, fill: 'var(--step-edge)' }),
+    wel('line', { x1: 0, y1: 14, x2: 300, y2: 14, stroke: 'var(--step-edge)', 'stroke-width': 2 })]);
+  let found = 0, left = 20, timer = null, over = false, started = false;
+  const bar = wel('div');
+  const status = wel('span', { class: 'fx-counter', text: `찾은 사람 0 / ${need} · 20초` });
+  const ring = (p, color, dash) => wel('circle', { cx: p.x, cy: p.sit ? 175 : 120, r: 34, fill: 'none', stroke: color, 'stroke-width': 3, 'stroke-dasharray': dash });
+  const finish = (win) => {
+    over = true; clearInterval(timer);
+    if (!win) for (const g of groups) if (g.p.why && !g.done) g.node.append(ring(g.p, 'var(--bad)', '5 4'));
+    win ? say('best', `${left}초 남기고 다 찾았어요!`) : say('avoid', '시간 끝. 놓친 사람을 표시했어요.');
+  };
+  const show = () => { bar.style.width = (left / 20 * 100) + '%'; status.textContent = `찾은 사람 ${found} / ${need} · ${left}초`; if (left === 0 && !over) finish(false); };
+  const groups = PEOPLE.map((p) => {
+    const g = wel('g', { class: 'fx-person', role: 'button', tabindex: 0, 'aria-label': '승객' });
+    const headY = p.sit ? 160 : 70, bodyY = p.sit ? 172 : 82, bodyH = p.sit ? 30 : 64;
+    if (p.strap) g.append(wel('line', { x1: p.x + 10, y1: 14, x2: p.x + 10, y2: 84, stroke: 'var(--muted)', 'stroke-width': 2 }));
+    if (p.bag) g.append(wel('rect', { x: p.x - 26, y: 86, width: 16, height: 34, rx: 4, fill: 'var(--them)' }));
+    g.append(wel('rect', { x: p.x - 12, y: bodyY, width: 24, height: bodyH, rx: 8, fill: 'var(--asphalt)' }), wel('circle', { cx: p.x, cy: headY, r: 10, fill: 'var(--asphalt)' }));
+    if (p.book) g.append(wel('rect', { x: p.x - 8, y: 176, width: 16, height: 11, fill: 'var(--surface)' }));
+    if (p.loud) g.append(wel('path', { d: `M${p.x + 16} 150 q8 10 0 20 M${p.x + 22} 145 q12 15 0 30`, stroke: 'var(--muted)', 'stroke-width': 2, fill: 'none' }));
+    if (p.door) g.append(wel('path', { d: `M${p.x - 14} 100 h28`, stroke: 'var(--surface)', 'stroke-width': 3 }));
+    g.append(wel('rect', { x: p.x - 26, y: p.sit ? 145 : 55, width: 52, height: p.sit ? 64 : 110, fill: 'transparent' }));
+    const item = { p, node: g, done: false };
+    const hit = () => {
+      if (over || !started || item.done) return;
+      if (p.why) { item.done = true; found++; g.append(ring(p, 'var(--good)')); say(null, p.why); if (found === need) finish(true); else show(); }
+      else { left = Math.max(0, left - 3); fxShake(svg); say('avoid', '이 승객은 괜찮아요. −3초'); show(); }
+    };
+    g.addEventListener('click', hit);
+    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); hit(); } });
+    svg.append(g);
+    return item;
+  });
+  const startBtn = wel('button', { class: 'fx-start', type: 'button', text: '탭해서 시작 · 20초', onclick: () => {
+    startBtn.remove(); started = true; timer = setInterval(() => { left = Math.max(0, left - 1); show(); }, 1000);
+  } });
+  fxCleanup = () => clearInterval(timer);
+  stage.append(wel('div', { class: 'fx-timer' }, [bar]), status, wel('div', { class: 'fx-scene' }, [svg, startBtn]));
+}
+
+const FORMATS = [
+  { short: '카톡 답장', title: '카톡 답장 고르기', chip: '메시지 · 친구', prompt: '약속에 늦었다. 지민이에게 보낼 답장은?', hint: '말풍선을 탭하면 대화방에 전송돼요.', build: fxReply },
+  { short: '틀린 곳', title: '카톡 틀린 곳 찾기', chip: '메시지 · 직장', prompt: '팀장님께 보낼 답장이에요. 고칠 곳 2군데를 탭하세요.', hint: '고칠 단어를 탭하세요.', build: fxFind },
+  { short: '보낼 시각', title: '보낼 시각 고르기', chip: '메시지 · 친구', prompt: '지금 밤 11시 30분. 내일 오후 모임 장소를 선배에게 물어보려 한다. 언제 보낼까?', hint: '슬라이더로 시각을 고르세요.', build: fxTime },
+  { short: '테이블', title: '테이블 배치', chip: '위치 · 연애', prompt: '레스토랑 코스 식사. 물건을 제자리에 놓으세요.', hint: '끌어다 놓거나, 탭한 뒤 자리를 탭하세요.', build: fxTable },
+  { short: '짝맞추기', title: '신호 짝맞추기', chip: '짝맞추기 · 연애', prompt: '식사 중 이 신호들은 무슨 뜻일까? 그림과 뜻을 이으세요.', hint: '왼쪽을 탭한 뒤 오른쪽을 탭하세요.', build: fxMatch },
+  { short: '장면 찾기', title: '장면 속 틀린 행동 찾기', chip: '찾기 · 공공장소', prompt: '지하철 칸에서 매너에 어긋난 승객 3명을 찾으세요.', hint: '20초 제한, 틀리면 −3초예요.', build: fxScene }
+];
+function renderFormats(i = fxIdx) {
+  fxCleanup?.(); fxCleanup = null;
+  fxIdx = i;
+  setNav(null);
+  setView('formats');
+  const f = FORMATS[i];
+  header(`문제 형식 ${i + 1} / ${FORMATS.length}`, f.title, null);
+  const back = wel('button', { class: 'back', type: 'button', text: '‹ 앱으로', onclick: leaveFormats });
+  const pills = wel('div', { class: 'fx-pills', role: 'tablist', 'aria-label': '문제 형식' }, FORMATS.map((x, j) =>
+    wel('button', { class: `fx-pill${j === i ? ' on' : ''}`, type: 'button', role: 'tab', 'aria-selected': String(j === i), text: x.short, onclick: () => renderFormats(j) })));
+  const stage = wel('div', { class: 'fx-stage' });
+  const fbText = wel('span');
+  const say = (grade, text) => fbText.replaceChildren(...[grade ? wel('b', { class: grade, text: { best: '정답 ', ok: '괜찮음 ', avoid: '아쉬움 ' }[grade] }) : null, text || ''].filter(Boolean));
+  const fb = wel('div', { class: 'fx-fb', 'aria-live': 'polite' }, [fbText, wel('button', { class: 'fx-reset', type: 'button', text: '다시', onclick: () => renderFormats(i) })]);
+  const prev = wel('button', { class: 'btn ghost', type: 'button', text: '‹ 이전', onclick: () => renderFormats((i + FORMATS.length - 1) % FORMATS.length) });
+  const next = wel('button', { class: 'btn ghost', type: 'button', text: '다음 ›', onclick: () => renderFormats((i + 1) % FORMATS.length) });
+  say(null, f.hint);
+  setCard(back, pills, wel('div', { class: 'chips' }, [wel('span', { class: 'chip fmt', text: f.chip })]), wel('p', { class: 'prompt', text: f.prompt }), stage, fb, wel('div', { class: 'fx-navrow' }, [prev, next]));
+  f.build({ stage, say });
+  pills.querySelector('.on')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function leaveFormats() { fxCleanup?.(); fxCleanup = null; setView('app'); renderHome(); }
+function setView(v) { for (const b of document.querySelectorAll('.viewer button')) b.setAttribute('aria-pressed', String(b.dataset.view === v)); }
+
+/* ---------- developer menu (prototype only): pool stats and day skipping, hidden behind the version row ---------- */
+function devRow() {
+  const b = el('button', { class: 'set-row link', type: 'button' }, [el('span', { text: '버전' }), el('span', { class: 'muted', text: '0.1 프로토타입' })]);
+  let timer = null, taps = 0, tapTimer = null;
+  b.addEventListener('pointerdown', () => { timer = setTimeout(openDev, 600); });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => clearTimeout(timer));
+  b.addEventListener('click', () => { taps++; clearTimeout(tapTimer); tapTimer = setTimeout(() => (taps = 0), 800); if (taps >= 3) { taps = 0; openDev(); } });
+  return b;
+}
+function openDev() {
+  if (document.querySelector('.sheet-wrap')) return;
+  const next = data.days[state.day + 1], playable = next && !next.locked;
+  const act = (label, fn) => { const b = el('button', { class: 'btn ghost', type: 'button', text: label }); b.addEventListener('click', () => { document.querySelector('.sheet-wrap')?.remove(); fn(); }); return b; };
+  sheet('개발자 메뉴', [
+    el('p', { class: 'hint', text: '프로토타입 확인용이에요. 출처는 요약이며 앱 출시 전 라이선스 확인이 필요해요.' }),
+    state.doneToday && playable ? act(`내일로 건너뛰기 · ${next.title}`, () => { Object.assign(state, { day: state.day + 1, scene: 0, doneToday: false }); renderHome(); }) : null,
+    act('문제 형식 6종 보기', () => renderFormats(0)),
+    act('처음부터 다시', () => { Object.assign(state, { day: 0, scene: 0, xp: 0, streak: 0, daysDone: 0, doneToday: false, seen: new Set(), attempts: [] }); renderHome(); }),
+    poolPanel()
+  ].filter(Boolean), [['닫기', 'ghost']]);
+}
+
+/* ---------- settings (sub-page of profile) ---------- */
+function renderSettings() {
+  setNav('profile');
+  $('appbar').hidden = true;
+  header('프로필', '설정', null);
+  const back = el('button', { class: 'back', type: 'button', text: '‹ 프로필' });
+  back.addEventListener('click', renderProfile);
+  const toggle = (id, on) => el('input', { type: 'checkbox', class: 'switch', id, ...(on ? { checked: '' } : {}) });
+  const row = (label, right, cls = '') => el('div', { class: `set-row ${cls}` }, [el('span', { text: label }), right]);
+  const muted = (t) => el('span', { class: 'muted', text: t });
+  const linkRow = (label, fn, cls = '', right = '›') => {
+    const b = el('button', { class: `set-row link ${cls}`, type: 'button' }, [el('span', { text: label }), muted(right)]);
+    b.addEventListener('click', fn);
+    return b;
+  };
+  setCard(back,
+    el('div', { class: 'set-group' }, [
+      el('small', { text: '학습' }),
+      row('학습 알림', el('label', { class: 'set-right', for: 'set-noti' }, [muted('오후 9시'), toggle('set-noti', true)])),
+      row('효과음', toggle('set-sound', true)),
+      row('진동', toggle('set-haptic', true))]),
+    el('div', { class: 'set-group' }, [
+      el('small', { text: '계정' }),
+      ...(state.user ? [
+        row('로그인', muted(`Google · ${state.user.email}`)),
+        linkRow('로그아웃', logout),
+        linkRow('회원 탈퇴', openWithdraw, 'danger')
+      ] : [
+        linkRow('로그인', openLogin, '', 'Google로 저장 ›'),
+        row('회원 탈퇴', muted('로그인 후 가능'), 'disabled')
+      ])]),
+    el('div', { class: 'set-group' }, [
+      el('small', { text: '정보' }),
+      row('해설 오류 신고', muted('›')),
+      row('개인정보처리방침', muted('›')),
+      row('오픈소스 라이선스', muted('›')),
+      devRow()]),
+    el('p', { class: 'hint', text: '알림은 밤 10시 이후로는 설정할 수 없어요.' })
+  );
+}
+
+/* No mid-day save (like Duolingo): leaving restarts the day. Answers already given stay in the attempt log. */
+function quit() {
+  let sheet = null;
+  const leave = () => { sheet?.remove(); state.scene = 0; run = null; renderHome(); };
+  if (!run || run.total === 0) return leave();
+  const stay = el('button', { class: 'btn', type: 'button', text: '계속하기' });
+  const out = el('button', { class: 'btn ghost', type: 'button', text: '나가기' });
+  sheet = el('div', { class: 'sheet-wrap', role: 'dialog', 'aria-modal': 'true', 'aria-label': '하루 그만하기' }, [
+    el('div', { class: 'sheet' }, [
+      el('b', { text: '지금 나가면 오늘 하루를 처음부터 다시 해요' }),
+      el('p', { class: 'hint', text: `XP ${run.xp}은 하루를 마쳐야 받아요. 이미 푼 문제는 복습 기록에 남아요.` }),
+      el('div', { class: 'row' }, [out, stay])
+    ])
+  ]);
+  stay.addEventListener('click', () => sheet.remove());
+  out.addEventListener('click', leave);
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.remove(); });
+  $('device').append(sheet);
+  stay.focus();
+}
+
+fetch('content.json')
+  .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then((d) => {
+    data = d;
+    pool = d.scenarios.flatMap(expand);
+    byManner = new Map(d.manners.map((m) => [m.id, pool.filter((s) => s.manner === m.id)]));
+    mannerName = Object.fromEntries(d.manners.map((m) => [m.id, m.name]));
+    renderHome();
+  })
+  .catch(() => { setCard(el('p', { class: 'loading', text: '문제 파일을 불러오지 못했어요. 새로고침해 보세요.' })); });
+</script>

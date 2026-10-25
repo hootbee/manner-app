@@ -1,0 +1,449 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>매너 문제 와이어프레임</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
+<style>
+/* Layout: wireframe board — phone frames in a wrapping grid, each with redline-style notes under it. Greys only; one annotation blue. */
+:root {
+  --bg: #e9ebee; --screen: #ffffff; --frame: #3b3f46; --ink: #1f2328; --muted: #6a717c;
+  --box: #e3e6ea; --box-2: #cfd4da; --line: #c4c9d0; --me: #d7dbe1;
+  --note: #2f6fd6; --good: #1f8a4c; --ok: #a86d12; --bad: #c2412d;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15171b; --screen: #1f2228; --frame: #8b929c; --ink: #e6e9ee; --muted: #9aa2ad;
+  --box: #2b2f36; --box-2: #3a3f47; --line: #444a53; --me: #353b44;
+  --note: #7aa8f5; --good: #5ccc8a; --ok: #e2b04c; --bad: #f07a62; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #15171b; --screen: #1f2228; --frame: #8b929c; --ink: #e6e9ee; --muted: #9aa2ad;
+  --box: #2b2f36; --box-2: #3a3f47; --line: #444a53; --me: #353b44;
+  --note: #7aa8f5; --good: #5ccc8a; --ok: #e2b04c; --bad: #f07a62; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
+.page { max-width: 1120px; margin: 0 auto; padding-block: 28px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.page > header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 24px; }
+h1 { margin: 0; font-size: 24px; text-wrap: balance; }
+.sub { margin: 0; color: var(--muted); }
+.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 32px 24px; justify-items: center; }
+.cell { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
+.tag { font-family: var(--font-mono); font-size: 12px; color: var(--note); letter-spacing: .04em; }
+.cell h2 { margin: 0; font-size: 16px; }
+
+.phone { width: 100%; max-width: 320px; height: 600px; border: 2px solid var(--frame); border-radius: 30px; background: var(--screen);
+  padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; position: relative; }
+.status { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); padding: 0 6px; }
+.q { display: flex; flex-direction: column; gap: 4px; }
+.q .chip { align-self: flex-start; font-size: 11px; font-weight: 600; padding: 1px 8px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); }
+.q p { margin: 0; font-weight: 600; font-size: 14px; }
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.fb { min-height: 46px; border-radius: 10px; background: var(--box); padding: 8px 10px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fb b.best { color: var(--good); } .fb b.ok { color: var(--ok); } .fb b.avoid { color: var(--bad); }
+.reset { font: inherit; font-size: 12px; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 8px; padding: 4px 8px; cursor: pointer; flex: none; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--note); outline-offset: 2px; }
+.notes { margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 11.5px; color: var(--note); display: flex; flex-direction: column; gap: 3px; }
+.notes li::before { content: "↳ "; }
+.shake { animation: shake .3s; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } * { transition: none !important; } }
+
+/* chat */
+.chat { flex: 1; min-height: 0; background: var(--box); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+.chat .who { font-size: 11px; color: var(--muted); }
+.b { max-width: 80%; padding: 7px 10px; border-radius: 12px; font-size: 13px; background: var(--screen); align-self: flex-start; }
+.b.me { background: var(--me); align-self: flex-end; }
+.b small { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.opts { display: flex; flex-direction: column; gap: 6px; }
+.opt { font: inherit; font-size: 13px; text-align: left; padding: 8px 10px; border: 1.5px dashed var(--box-2); border-radius: 12px; background: var(--screen); color: var(--ink); cursor: pointer; }
+.opt:disabled { cursor: default; opacity: .5; }
+.opt.best { border: 1.5px solid var(--good); opacity: 1; }
+/* find the wrong part */
+.draft { background: var(--me); border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 14px; }
+.tok { border: 1.5px dashed var(--box-2); border-radius: 6px; padding: 2px 6px; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.tok.hit { border: 1.5px solid var(--bad); text-decoration: line-through; color: var(--bad); }
+.tok.fine { border-style: solid; border-color: var(--good); }
+.counter { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+/* time */
+.clock { font-family: var(--font-mono); font-size: 34px; text-align: center; }
+.clock small { display: block; font-size: 12px; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--frame); }
+.scale { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.send { font: inherit; font-weight: 600; padding: 9px; border-radius: 10px; border: none; background: var(--frame); color: var(--screen); cursor: pointer; }
+.send:disabled { opacity: .5; cursor: default; }
+/* table */
+.table { position: relative; width: 100%; aspect-ratio: 1 / 0.86; max-width: 100%; background: var(--box); border-radius: 14px; }
+.plate { position: absolute; left: 50%; top: 56%; width: 34%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--box-2); background: var(--screen); transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
+.slot { position: absolute; width: 58px; height: 58px; border-radius: 12px; border: 2px dashed var(--box-2); transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
+.slot.over, .slot.armed { border-color: var(--note); }
+.slot.right { border: 2px solid var(--good); } .slot.wrong { border: 2px solid var(--bad); }
+.tray { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 58px; padding: 6px; border: 1.5px dashed var(--line); border-radius: 12px; }
+.item { width: 54px; height: 54px; border-radius: 10px; background: var(--screen); border: 1.5px solid var(--frame); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: 11px; cursor: grab; touch-action: none; user-select: none; color: var(--ink); }
+.item svg { width: 26px; height: 22px; }
+.item.sel { outline: 2px solid var(--note); }
+.item.dim { opacity: .35; }
+.ghost { position: fixed; pointer-events: none; z-index: 10; transform: translate(-50%, -50%); }
+/* match */
+.match { position: relative; flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 40px; align-content: center; }
+.m { font: inherit; font-size: 12px; border: 1.5px solid var(--box-2); border-radius: 12px; background: var(--screen); color: var(--ink); cursor: pointer; padding: 6px; min-height: 84px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative; z-index: 1; }
+.m.sel { border-color: var(--note); }
+.m svg { width: 64px; height: 56px; }
+.lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+/* scene */
+.scene { position: relative; }
+.scene svg { width: 100%; height: auto; display: block; border-radius: 12px; }
+.person { cursor: pointer; }
+.timer { height: 6px; border-radius: 99px; background: var(--box); overflow: hidden; }
+.timer > div { height: 100%; width: 100%; background: var(--frame); transition: width .25s linear; }
+.start { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--screen) 70%, transparent); border: none; font: inherit; font-weight: 600; color: var(--ink); cursor: pointer; border-radius: 12px; }
+</style>
+
+<div class="page">
+  <header>
+    <span class="tag">WIREFRAME · 문제 형식 6종</span>
+    <h1>조작형 매너 문제</h1>
+    <p class="sub">글을 읽고 고르는 대신, 화면을 직접 탭하고 끌어서 푸는 문제들이에요. 각 화면은 실제로 해 볼 수 있어요.</p>
+  </header>
+  <main class="board" id="board"></main>
+</div>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const SVG_TAGS = new Set(['svg', 'g', 'rect', 'circle', 'path', 'line', 'text', 'ellipse', 'polygon']);
+function el(tag, attrs = {}, kids = []) {
+  const n = SVG_TAGS.has(tag) ? document.createElementNS(NS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null) continue;
+    if (k === 'text') n.textContent = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+  }
+  for (const c of [].concat(kids)) if (c != null) n.append(c);
+  return n;
+}
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const shake = (n) => { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); };
+
+/* Shared frame: phone with question header, stage, feedback bar + reset. */
+function frame({ n, title, chip, prompt, notes, build, time = '19:07' }) {
+  const cell = el('section', { class: 'cell', 'aria-label': title });
+  const run = () => {
+    const status = el('div', { class: 'status' }, [el('span', { text: time }), el('span', { text: '▮▮▮ ▭' })]);
+    const stage = el('div', { class: 'stage' });
+    const fbText = el('span', { text: '' });
+    const fb = el('div', { class: 'fb', 'aria-live': 'polite' }, [fbText, el('button', { class: 'reset', type: 'button', text: '다시', onclick: run })]);
+    const phone = el('div', { class: 'phone' }, [status, el('div', { class: 'q' }, [el('span', { class: 'chip', text: chip }), el('p', { text: prompt })]), stage, fb]);
+    const say = (grade, text) => { fbText.replaceChildren(grade ? el('b', { class: grade, text: { best: '정답 ', ok: '괜찮음 ', avoid: '아쉬움 ' }[grade] }) : '', text); };
+    say(null, '');
+    cell.replaceChildren(el('span', { class: 'tag', text: `#${n}` }), el('h2', { text: title }), phone,
+      el('ul', { class: 'notes' }, notes.map((t) => el('li', { text: t }))));
+    build({ stage, say, status, phone });
+  };
+  run();
+  return cell;
+}
+
+/* #1 KakaoTalk-style reply */
+function buildReply({ stage, say }) {
+  const chat = el('div', { class: 'chat' }, [
+    el('span', { class: 'who', text: '지민' }),
+    el('div', { class: 'b' }, ['나 도착했어! 어디쯤이야?', el('small', { text: '오후 7:02' })]),
+    el('div', { class: 'b' }, ['약속 7시였지?', el('small', { text: '오후 7:05' })])
+  ]);
+  const opts = [
+    { t: '미안, 15분쯤 늦어! 7시 20분 도착이야', g: 'best', why: '늦는 시간과 도착 시각을 같이 알려줬어요.' },
+    { t: '헐 미안ㅠㅠ 거의 다 왔어 금방 갈게', g: 'avoid', why: '"금방"으로는 얼마나 기다릴지 알 수 없어요.' },
+    { t: '차가 너무 막혀서ㅠ 나도 진짜 답답해', g: 'avoid', why: '사정보다 도착 시각이 먼저예요.' }
+  ];
+  const box = el('div', { class: 'opts' });
+  const btns = shuffle(opts).map((o) => {
+    const b = el('button', { class: 'opt', type: 'button', text: o.t, onclick: () => {
+      chat.append(el('div', { class: 'b me' }, [o.t, el('small', { text: '오후 7:06' })]));
+      chat.scrollTop = chat.scrollHeight;
+      for (const x of btns) { x.b.disabled = true; if (x.o.g === 'best') x.b.classList.add('best'); }
+      say(o.g, o.why);
+      if (o.g !== 'best') shake(chat);
+    } });
+    box.append(b);
+    return { b, o };
+  });
+  stage.append(chat, box);
+}
+
+/* #2 Find the wrong part in my draft */
+function buildFind({ stage, say }) {
+  const toks = [
+    { t: 'ㅇㅇ', wrong: true, why: '초성 답장은 윗사람에게 성의 없어 보여요.' },
+    { t: '알겠어요~', wrong: false },
+    { t: '근데', wrong: false },
+    { t: '왜 바뀐 거임?', wrong: true, why: '"~임?"은 반말이고 따지는 말투로 읽혀요.' }
+  ];
+  const need = toks.filter((t) => t.wrong).length;
+  let found = 0;
+  const counter = el('span', { class: 'counter', text: `찾은 곳 0 / ${need}` });
+  const chat = el('div', { class: 'chat' }, [
+    el('span', { class: 'who', text: '김 팀장님' }),
+    el('div', { class: 'b' }, ['내일 회의 10시로 바뀌었어요. 확인 부탁해요.', el('small', { text: '오후 5:41' })])
+  ]);
+  const draft = el('div', { class: 'draft', 'aria-label': '보내기 전 답장' }, toks.map((t) => el('button', { class: 'tok', type: 'button', text: t.t, onclick: (e) => {
+    const b = e.currentTarget;
+    if (b.classList.contains('hit') || found === need) return;
+    if (t.wrong) { b.classList.add('hit'); found++; counter.textContent = `찾은 곳 ${found} / ${need}`; say(found === need ? 'best' : null, t.why); }
+    else { b.classList.add('fine'); shake(draft); say('avoid', '이 부분은 괜찮아요.'); }
+    if (found === need) chat.append(el('div', { class: 'b me' }, ['네, 확인했습니다. 내일 10시에 뵙겠습니다.', el('small', { text: '고친 답장' })]));
+  } })));
+  stage.append(chat, el('div', {}, [el('span', { class: 'who counter', text: '보내기 전 답장 ' }), counter]), draft);
+}
+
+/* #3 When to send */
+function buildTime({ stage, say, status }) {
+  const START = 23 * 60 + 30;
+  const at = (i) => (START + i * 30) % 1440;
+  const fmt = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  const clock = el('div', { class: 'clock', text: '23:30' });
+  const when = el('small', { text: '오늘 밤' });
+  clock.append(when);
+  const range = el('input', { type: 'range', min: 0, max: 23, value: 0, id: 'time-range', 'aria-label': '보낼 시각' });
+  const preview = el('div', { class: 'b me' }, ['선배님, 내일 모임 장소가 어디인가요?', el('small', { text: '보낼 시각 23:30' })]);
+  const update = () => {
+    const m = at(+range.value);
+    clock.firstChild.textContent = fmt(m);
+    when.textContent = m >= START ? '오늘 밤' : '내일';
+    preview.lastChild.textContent = `보낼 시각 ${fmt(m)}`;
+    status.firstChild.textContent = fmt(m);
+  };
+  range.addEventListener('input', update);
+  const send = el('button', { class: 'send', type: 'button', text: '이 시각에 보내기', onclick: () => {
+    const m = at(+range.value);
+    range.disabled = true; send.disabled = true;
+    if (m >= START || m < 8 * 60) { say('avoid', '늦은 밤·새벽 알림은 잠을 깨워요. 아침 9시 이후에 보내요.'); shake(clock); }
+    else if (m < 9 * 60) say('ok', '나쁘진 않지만 출근·등교 준비 시간이에요. 9시 이후가 무난해요.');
+    else say('best', '모임은 내일 오후라 아침에 물어봐도 충분해요.');
+  } });
+  stage.append(
+    el('div', { class: 'chat' }, [el('span', { class: 'who', text: '동아리 선배 · 지금 오늘 밤 23:30' }), preview]),
+    clock, range, el('div', { class: 'scale' }, [el('span', { text: '23:30' }), el('span', { text: '05:00' }), el('span', { text: '11:00' })]), send);
+}
+
+/* #4 Table setting: drag (or tap) items into slots */
+const ICON = {
+  fork: '<path d="M8 2v8M5 2v6a3 3 0 0 0 6 0V2M8 10v10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+  knife: '<path d="M10 2c3 3 3 8 0 9v9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+  glass: '<path d="M6 3h10l-2 16H8z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/>',
+  bread: '<circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><ellipse cx="11" cy="11" rx="4" ry="3" fill="currentColor" opacity=".5"/>'
+};
+function icon(k) { const s = el('svg', { viewBox: '0 0 22 22', 'aria-hidden': 'true' }); s.innerHTML = ICON[k]; return s; }
+function buildTable({ stage, say }) {
+  const ITEMS = [{ k: 'fork', label: '포크' }, { k: 'knife', label: '나이프' }, { k: 'glass', label: '물잔' }, { k: 'bread', label: '빵접시' }];
+  const SLOTS = [{ k: 'bread', x: 18, y: 22 }, { k: 'glass', x: 82, y: 22 }, { k: 'fork', x: 14, y: 60 }, { k: 'knife', x: 86, y: 60 }];
+  const table = el('div', { class: 'table' }, [el('div', { class: 'plate', text: '메인 접시' })]);
+  const slots = SLOTS.map((s) => {
+    const d = el('div', { class: 'slot', style: `left:${s.x}%;top:${s.y}%`, 'data-k': s.k, role: 'button', tabindex: 0, 'aria-label': '빈 자리' });
+    table.append(d);
+    return d;
+  });
+  const tray = el('div', { class: 'tray', 'aria-label': '놓을 물건' });
+  let selected = null;
+  const check = () => {
+    if (slots.some((s) => !s.firstChild)) return;
+    let ok = 0;
+    for (const s of slots) { const r = s.firstChild.dataset.k === s.dataset.k; s.classList.add(r ? 'right' : 'wrong'); ok += r; }
+    if (ok === 4) say('best', 'BMW로 기억해요. 빵(Bread)은 왼쪽, 메인(Main) 가운데, 물(Water)은 오른쪽.');
+    else { say('avoid', `${ok} / 4 맞음. 빵은 왼쪽, 물은 오른쪽이에요.`); shake(table); }
+  };
+  const place = (item, slot) => {
+    if (slot.classList.contains('right') || slot.classList.contains('wrong')) return;
+    if (slot.firstChild) tray.append(slot.firstChild);
+    slot.append(item);
+    item.classList.remove('sel', 'dim');
+    selected = null;
+    slots.forEach((s) => s.classList.remove('armed'));
+    check();
+  };
+  for (const s of slots) {
+    const go = () => { if (selected) place(selected, s); };
+    s.addEventListener('click', go);
+    s.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  }
+  for (const it of shuffle(ITEMS)) {
+    const item = el('div', { class: 'item', 'data-k': it.k, role: 'button', tabindex: 0, 'aria-label': it.label }, [icon(it.k), el('span', { text: it.label })]);
+    let start = null, ghost = null;
+    const toggle = () => {
+      if (item.parentElement !== tray) return;
+      selected = selected === item ? null : item;
+      tray.querySelectorAll('.item').forEach((x) => x.classList.toggle('sel', x === selected));
+      slots.forEach((s) => s.classList.toggle('armed', !!selected && !s.firstChild));
+    };
+    item.addEventListener('pointerdown', (e) => { start = { x: e.clientX, y: e.clientY }; item.setPointerCapture(e.pointerId); });
+    item.addEventListener('pointermove', (e) => {
+      if (!start) return;
+      if (!ghost && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) {
+        ghost = item.cloneNode(true); ghost.classList.add('ghost'); document.body.append(ghost); item.classList.add('dim');
+      }
+      if (ghost) {
+        ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px';
+        const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
+        slots.forEach((s) => s.classList.toggle('over', s === over));
+      }
+    });
+    const end = (e) => {
+      if (!start) return;
+      if (ghost) {
+        ghost.remove(); ghost = null; item.classList.remove('dim');
+        slots.forEach((s) => s.classList.remove('over'));
+        const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
+        if (over && slots.includes(over)) place(item, over);
+      } else {
+        toggle();
+      }
+      start = null;
+    };
+    item.addEventListener('pointerup', end);
+    item.addEventListener('pointercancel', () => { if (ghost) { ghost.remove(); ghost = null; item.classList.remove('dim'); } start = null; });
+    item.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    tray.append(item);
+  }
+  stage.append(table, tray);
+}
+
+/* #5 Match signals to meanings */
+function plateSvg(kind) {
+  const s = el('svg', { viewBox: '0 0 64 56', 'aria-hidden': 'true' });
+  if (kind === 'chair') {
+    s.innerHTML = '<rect x="18" y="6" width="28" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="28" width="36" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M18 36v16M46 36v16" stroke="currentColor" stroke-width="2"/><path d="M24 8l16 0-4 18-8 0z" fill="currentColor" opacity=".35"/>';
+  } else {
+    const lines = kind === 'pause' ? '<path d="M20 44L29 20M44 44L35 20" />' : '<path d="M24 16L42 42M18 20L36 46" />';
+    s.innerHTML = `<circle cx="32" cy="30" r="24" fill="none" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round">${lines}</g>`;
+  }
+  return s;
+}
+function buildMatch({ stage, say }) {
+  const PAIRS = [
+    { k: 'pause', left: '포크·나이프 八자', right: '잠깐 쉬는 중이에요' },
+    { k: 'done', left: '나란히 4시 방향', right: '다 먹었어요, 치워도 돼요' },
+    { k: 'chair', left: '냅킨을 의자 위에', right: '잠시 자리 비울게요' }
+  ];
+  const wrap = el('div', { class: 'match' });
+  const svg = el('svg', { class: 'lines' });
+  const links = new Map();
+  let pick = null;
+  const lefts = PAIRS.map((p) => el('button', { class: 'm', type: 'button', 'data-k': p.k }, [plateSvg(p.k), el('span', { text: p.left })]));
+  const rights = shuffle(PAIRS).map((p) => el('button', { class: 'm', type: 'button', 'data-k': p.k }, [el('span', { text: p.right })]));
+  for (let i = 0; i < PAIRS.length; i++) wrap.append(lefts[i], rights[i]);
+  wrap.append(svg);
+  const draw = (done) => {
+    svg.replaceChildren();
+    const box = wrap.getBoundingClientRect();
+    for (const [l, r] of links) {
+      const a = l.getBoundingClientRect(), b = r.getBoundingClientRect();
+      const color = done ? (l.dataset.k === r.dataset.k ? 'var(--good)' : 'var(--bad)') : 'var(--note)';
+      svg.append(el('line', { x1: a.right - box.left, y1: a.top + a.height / 2 - box.top, x2: b.left - box.left, y2: b.top + b.height / 2 - box.top, stroke: color, 'stroke-width': 2.5, 'stroke-linecap': 'round' }));
+    }
+  };
+  let finished = false;
+  const choose = (b, side) => {
+    if (finished) return;
+    if (!pick || pick.side === side) { pick = { b, side }; [...lefts, ...rights].forEach((x) => x.classList.toggle('sel', x === b)); return; }
+    const [l, r] = side === 'r' ? [pick.b, b] : [b, pick.b];
+    for (const [k, v] of [...links]) if (k === l || v === r) links.delete(k);
+    links.set(l, r);
+    pick = null; [...lefts, ...rights].forEach((x) => x.classList.remove('sel'));
+    if (links.size === PAIRS.length) {
+      finished = true;
+      const ok = [...links].filter(([a, c]) => a.dataset.k === c.dataset.k).length;
+      ok === PAIRS.length ? say('best', '셋 다 맞았어요. 八자는 아직 먹는 중, 나란히는 다 먹었다는 뜻이에요.') : (say('avoid', `${ok} / 3 맞음. 빨간 선을 확인해 보세요.`), shake(wrap));
+    }
+    draw(finished);
+  };
+  lefts.forEach((b) => b.addEventListener('click', () => choose(b, 'l')));
+  rights.forEach((b) => b.addEventListener('click', () => choose(b, 'r')));
+  new ResizeObserver(() => draw(finished)).observe(wrap);
+  stage.append(wrap);
+}
+
+/* #6 Spot the wrong behaviour in a subway scene, against the clock */
+function buildScene({ stage, say }) {
+  const PEOPLE = [
+    { x: 34, sit: true }, { x: 92, sit: true, book: true }, { x: 206, sit: true },
+    { x: 262, sit: true, loud: true, why: '영상 소리는 이어폰으로 들어요.' },
+    { x: 62, bag: true, why: '백팩은 앞으로 메거나 손에 들어요.' },
+    { x: 146, door: true, why: '문 앞에 서 있으면 타고 내리기 어려워요.' },
+    { x: 232, strap: true }
+  ];
+  const need = PEOPLE.filter((p) => p.why).length;
+  const svg = el('svg', { viewBox: '0 0 300 250', role: 'group', 'aria-label': '지하철 칸 그림' });
+  svg.append(
+    el('rect', { x: 0, y: 0, width: 300, height: 250, fill: 'var(--box)' }),
+    el('rect', { x: 8, y: 30, width: 104, height: 40, rx: 4, fill: 'var(--screen)', stroke: 'var(--box-2)' }),
+    el('rect', { x: 188, y: 30, width: 104, height: 40, rx: 4, fill: 'var(--screen)', stroke: 'var(--box-2)' }),
+    el('rect', { x: 122, y: 20, width: 56, height: 210, fill: 'none', stroke: 'var(--box-2)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }),
+    el('text', { x: 150, y: 244, 'text-anchor': 'middle', 'font-size': 10, fill: 'var(--muted)', text: '출입문' }),
+    el('rect', { x: 6, y: 196, width: 110, height: 16, rx: 3, fill: 'var(--box-2)' }),
+    el('rect', { x: 184, y: 196, width: 110, height: 16, rx: 3, fill: 'var(--box-2)' }),
+    el('line', { x1: 0, y1: 14, x2: 300, y2: 14, stroke: 'var(--box-2)', 'stroke-width': 2 })
+  );
+  let found = 0, left = 20, timer = null, over = false, started = false;
+  const bar = el('div');
+  const status = el('span', { class: 'counter', text: `찾은 사람 0 / ${need} · 20초` });
+  const finish = (win) => {
+    over = true; clearInterval(timer);
+    if (!win) for (const g of groups) if (g.p.why && !g.done) g.node.append(el('circle', { cx: g.p.x, cy: g.p.sit ? 175 : 120, r: 34, fill: 'none', stroke: 'var(--bad)', 'stroke-width': 2.5, 'stroke-dasharray': '5 4' }));
+    win ? say('best', `${left}초 남기고 다 찾았어요!`) : say('avoid', '시간 끝. 놓친 사람을 표시했어요.');
+  };
+  const show = () => { bar.style.width = (left / 20 * 100) + '%'; status.textContent = `찾은 사람 ${found} / ${need} · ${left}초`; if (left === 0 && !over) finish(false); };
+  const tick = () => { left = Math.max(0, left - 1); show(); };
+  const groups = PEOPLE.map((p) => {
+    const g = el('g', { class: 'person', role: 'button', tabindex: 0, 'aria-label': '승객' });
+    const headY = p.sit ? 160 : 70, bodyY = p.sit ? 172 : 82, bodyH = p.sit ? 30 : 64;
+    if (p.strap) g.append(el('line', { x1: p.x + 10, y1: 14, x2: p.x + 10, y2: 84, stroke: 'var(--muted)', 'stroke-width': 2 }));
+    if (p.bag) g.append(el('rect', { x: p.x - 26, y: 86, width: 16, height: 34, rx: 4, fill: 'var(--muted)' }));
+    g.append(el('rect', { x: p.x - 12, y: bodyY, width: 24, height: bodyH, rx: 8, fill: 'var(--frame)' }), el('circle', { cx: p.x, cy: headY, r: 10, fill: 'var(--frame)' }));
+    if (p.book) g.append(el('rect', { x: p.x - 8, y: 176, width: 16, height: 11, fill: 'var(--screen)' }));
+    if (p.loud) g.append(el('path', { d: `M${p.x + 16} 150 q8 10 0 20 M${p.x + 22} 145 q12 15 0 30`, stroke: 'var(--muted)', 'stroke-width': 2, fill: 'none' }));
+    if (p.door) g.append(el('path', { d: `M${p.x - 14} 100 h28`, stroke: 'var(--screen)', 'stroke-width': 3 }));
+    g.append(el('rect', { x: p.x - 26, y: p.sit ? 145 : 55, width: 52, height: p.sit ? 64 : 110, fill: 'transparent' }));
+    const item = { p, node: g, done: false };
+    const hit = () => {
+      if (over || !started || item.done) return;
+      if (p.why) {
+        item.done = true; found++;
+        g.append(el('circle', { cx: p.x, cy: p.sit ? 175 : 120, r: 34, fill: 'none', stroke: 'var(--good)', 'stroke-width': 3 }));
+        say(null, p.why);
+        if (found === need) finish(true); else show();
+      } else {
+        left = Math.max(0, left - 3); shake(svg); say('avoid', '이 승객은 괜찮아요. −3초'); show();
+      }
+    };
+    g.addEventListener('click', hit);
+    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); hit(); } });
+    svg.append(g);
+    return item;
+  });
+  const startBtn = el('button', { class: 'start', type: 'button', text: '탭해서 시작 · 20초', onclick: () => {
+    startBtn.remove(); started = true; timer = setInterval(tick, 1000);
+  } });
+  stage.append(el('div', { class: 'timer' }, [bar]), status, el('div', { class: 'scene' }, [svg, startBtn]));
+}
+
+const board = document.getElementById('board');
+board.append(
+  frame({ n: 1, title: '카톡 답장 고르기', chip: '메시지 · 친구', prompt: '약속에 늦었다. 지민이에게 보낼 답장은?', build: buildReply,
+    notes: ['조작: 말풍선 탭 → 대화방에 전송되는 연출', '매너 #26 늦을 땐 도착 예상 시간까지', '보기 길이를 맞춰 정답이 튀지 않게'] }),
+  frame({ n: 2, title: '카톡 틀린 곳 찾기', chip: '메시지 · 직장', prompt: '팀장님께 보낼 답장이에요. 고칠 곳 2군데를 탭하세요.', build: buildFind, time: '17:42',
+    notes: ['조작: 단어 탭. 고칠 곳 개수를 미리 알려줌', '다 찾으면 고친 답장이 전송됨', '오답 탭은 흔들림 + "괜찮은 부분"'] }),
+  frame({ n: 3, title: '보낼 시각 고르기', chip: '메시지 · 친구', prompt: '내일 오후 모임 장소를 선배에게 물어보려 한다. 언제 보낼까?', build: buildTime, time: '23:30',
+    notes: ['조작: 슬라이더로 시각 조절 → 상단 시계도 같이 바뀜', '매너 #24 늦은 밤 연락 자제', '"늦은 밤" 기준(예: 22시~8시)을 콘텐츠에 명시 필요'] }),
+  frame({ n: 4, title: '테이블 배치', chip: '위치 · 연애', prompt: '레스토랑 코스 식사. 물건을 제자리에 놓으세요.', build: buildTable,
+    notes: ['조작: 끌어다 놓기. 탭 → 자리 탭으로도 가능', '4개 다 놓으면 자동 채점', '정답 후 외우기 팁(BMW)으로 마무리'] }),
+  frame({ n: 5, title: '신호 짝맞추기', chip: '짝맞추기 · 연애', prompt: '식사 중 이 신호들은 무슨 뜻일까? 그림과 뜻을 이으세요.', build: buildMatch,
+    notes: ['조작: 왼쪽 탭 → 오른쪽 탭으로 선 연결', '근거가 확실한 신호만 출제', '3개 다 이으면 맞은 선은 초록, 틀린 선은 빨강'] }),
+  frame({ n: 6, title: '장면 속 틀린 행동 찾기', chip: '찾기 · 공공장소', prompt: '지하철 칸에서 매너에 어긋난 승객 3명을 찾으세요.', build: buildScene, time: '08:12',
+    notes: ['조작: 사람 탭. 20초 제한, 오답은 −3초', '매너 #20 백팩, #21 통로, #22 소리', '게임 느낌 가장 강함. 콤보·XP 붙이기 좋음'] })
+);
+</script>
+
+</body></html>
