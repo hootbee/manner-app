@@ -7,6 +7,28 @@ class Content {
   Content(this.schema, this.version, this.principles, this.manners, this.scenarios, this.days);
   final int schema, version;
   final List<Json> principles, manners, scenarios, days;
+
+  /// 펼친 문제 id → 문제. 은퇴한 것도 들어 있다(조회용).
+  late final Map<String, Json> questions = {
+    for (final s in scenarios)
+      for (final q in expand(s)) q['id'] as String: q,
+  };
+  late final Map<Object?, Json> _manners = {for (final m in manners) m['id']: m};
+
+  /// 출제에 쓸 수 있는 펼친 문제. 은퇴한 매너·시나리오·보기에 걸린 것은 뺀다 (ADR 0003 §2).
+  late final List<Json> selectable = [
+    for (final q in questions.values)
+      if (q['retired'] != true && _manners[q['manner']]?['retired'] != true) q,
+  ];
+
+  /// 기록의 id로 매너와 문제를 찾는다. 은퇴한 것도 찾는다.
+  /// 펼친 문제가 콘텐츠에 없으면 `~` 앞의 기본 id로 매너만 찾는다(question null). 그래도 없으면 null.
+  ({Json manner, Json? question})? lookup(String id) {
+    final q = questions[id];
+    final base = id.split('~').first;
+    final m = _manners[q?['manner'] ?? scenarios.where((s) => s['id'] == base).firstOrNull?['manner']];
+    return m == null ? null : (manner: m, question: q);
+  }
 }
 
 Content parseContent(String source) {
@@ -18,6 +40,7 @@ Content parseContent(String source) {
 
 /// 기본 시나리오 하나를 축 조합마다 펼친다. id는 `<기본 id>~<key>.<key>`(축 순서), vary가 없으면 기본 id.
 /// 보기의 `area`, `feedback`이 기본값을 덮어쓰고, 보기들의 `vars`를 합쳐 `{변수}` 자리를 채운다.
+/// 은퇴한 시나리오나 은퇴한 보기를 포함한 문제는 `retired: true`다.
 List<Json> expand(Json base) {
   final vary = base['vary'] as List?;
   final rest = {...base}..remove('vary');
@@ -33,6 +56,7 @@ List<Json> expand(Json base) {
         final s = {...rest, 'id': '${base['id']}~${opts.map((o) => o['key']).join('.')}'};
         final vars = <String, Object?>{};
         for (final o in opts) {
+          if (o['retired'] == true) s['retired'] = true;
           for (final k in const ['area', 'feedback']) {
             if (o.containsKey(k)) s[k] = o[k];
           }
