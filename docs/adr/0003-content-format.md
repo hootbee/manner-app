@@ -30,7 +30,7 @@
 - 은퇴를 되돌리는 것은 허용한다. 뜻이 같기 때문이다.
 
 ### 3. 형식 (schema 1)
-전체 형식은 `docs/adr/0003-content.schema.json`(draft-07)이다. 구현할 때 `app/assets/content.schema.json`으로 옮긴다. 견본에서 바뀌는 것:
+전체 형식은 `app/assets/content.schema.json`(draft-07)이다. 견본에서 바뀌는 것:
 - 최상위에 `schema: 1`을 더하고 `weekly`를 뺀다. 매너의 `candidate`, 데일리의 `locked`·`focus`, 시나리오의 `subjectLabel`(늘 "나", 앱 상수), `evidence.level`(화면에 안 쓰이고, 출처가 없는지는 `sources`가 비었는지로 안다)을 뺀다.
 - `domain`은 `area`로 이름을 바꾼다(ADR 0002 `Question.area`). 값은 `연애, 친구, 어른·가족, 직장, 공공장소, 메시지`(가운뎃점 U+00B7)이고, 이 순서가 스테이터스 표시 순서다. A-sidewalk의 조카 보기는 `어른·가족`으로 옮긴다.
 - 축 보기는 `{key, retired?, area?, feedback?, vars?}`이다. 문장 변수는 `vars`에 넣는다(`{"key": "partner", "area": "연애", "vars": {"other": "연인"}}`). 펼칠 때 보기의 `area`, `feedback`이 기본값을 덮어쓴다(얕은 병합). 그 밖의 필드(`answer`, `spots` 등)는 보기에서 바꿀 수 없다.
