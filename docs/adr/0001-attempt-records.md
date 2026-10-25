@@ -161,7 +161,7 @@ begin;
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"<A uuid>","role":"authenticated"}';
 insert into public.attempts (id, scenario_id, grade, solved_on)
-  values ('00000000-0000-4000-8000-000000000001', 'A-sidewalk~연인.오른쪽', 'best', '2026-10-25')
+  values ('00000000-0000-4000-8000-000000000001', 'A-sidewalk~partner.right', 'best', '2026-10-25')
   on conflict (id) do nothing;                 -- 두 번 실행해도 오류 없음
 select count(*) from public.attempts;          -- 1
 rollback;
