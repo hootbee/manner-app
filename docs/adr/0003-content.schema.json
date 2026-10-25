@@ -1,0 +1,206 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "매너핏 콘텐츠 schema 1 (ADR 0003 초안)",
+  "description": "형식만 검사한다. 참조, vary 펼치기, 지운 id 같은 파일 간 규칙은 app/tool/validate_content.dart가 검사한다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "principles", "manners", "scenarios", "days"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema": { "const": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "principles": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/principle" } },
+    "manners": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/manner" } },
+    "scenarios": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/scenario" } },
+    "days": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/day" } }
+  },
+  "definitions": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "baseId": { "type": "string", "pattern": "^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$", "maxLength": 40 },
+    "key": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 16 },
+    "principleId": { "type": "string", "pattern": "^[A-Z]$" },
+    "mannerId": { "type": "integer", "minimum": 1 },
+    "retired": { "const": true },
+    "area": { "enum": ["연애", "친구", "어른·가족", "직장", "공공장소", "메시지"] },
+    "grade": { "enum": ["best", "ok", "avoid"] },
+
+    "principle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "motto"],
+      "properties": {
+        "id": { "$ref": "#/definitions/principleId" },
+        "name": { "$ref": "#/definitions/text" },
+        "motto": { "$ref": "#/definitions/text" }
+      }
+    },
+
+    "manner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "principle", "places"],
+      "properties": {
+        "id": { "$ref": "#/definitions/mannerId" },
+        "name": { "$ref": "#/definitions/text" },
+        "principle": { "$ref": "#/definitions/principleId" },
+        "places": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/definitions/text" } },
+        "retired": { "$ref": "#/definitions/retired" }
+      }
+    },
+
+    "feedback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "why"],
+      "properties": {
+        "title": { "$ref": "#/definitions/text" },
+        "why": { "$ref": "#/definitions/text" }
+      }
+    },
+
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "sources"],
+      "properties": {
+        "summary": { "$ref": "#/definitions/text" },
+        "sources": { "type": "array", "items": { "$ref": "#/definitions/source" } }
+      }
+    },
+
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "publisher", "date", "locator", "url"],
+      "properties": {
+        "title": { "$ref": "#/definitions/text" },
+        "publisher": { "$ref": "#/definitions/text" },
+        "date": { "type": "string", "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$" },
+        "locator": { "$ref": "#/definitions/text" },
+        "url": { "type": "string", "pattern": "^https://[^\\s]+$", "maxLength": 500 }
+      }
+    },
+
+    "varyOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key"],
+      "properties": {
+        "key": { "$ref": "#/definitions/key" },
+        "retired": { "$ref": "#/definitions/retired" },
+        "area": { "$ref": "#/definitions/area" },
+        "feedback": { "$ref": "#/definitions/feedback" },
+        "vars": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "pattern": "^[a-z][A-Za-z]*$" },
+          "additionalProperties": { "anyOf": [{ "type": "string" }, { "type": "boolean" }] }
+        }
+      }
+    },
+
+    "spot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "$ref": "#/definitions/key" },
+        "label": { "$ref": "#/definitions/text" }
+      }
+    },
+
+    "choiceOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "grade"],
+      "properties": {
+        "text": { "$ref": "#/definitions/text" },
+        "grade": { "$ref": "#/definitions/grade" },
+        "note": { "$ref": "#/definitions/text" }
+      }
+    },
+
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "manner", "format", "prompt"],
+      "properties": {
+        "id": { "$ref": "#/definitions/baseId" },
+        "manner": { "$ref": "#/definitions/mannerId" },
+        "format": { "enum": ["position", "choice", "ox", "order"] },
+        "area": { "$ref": "#/definitions/area" },
+        "tags": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/definitions/key" } },
+        "prompt": { "$ref": "#/definitions/text" },
+        "feedback": { "$ref": "#/definitions/feedback" },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "vary": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/varyOption" } }
+        },
+        "retired": { "$ref": "#/definitions/retired" },
+        "template": { "enum": ["sidewalk", "alley", "stairs"] },
+        "spots": { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/spot" } },
+        "answer": { "description": "position: spot id, ox: true(O)/false(X)" },
+        "options": { "type": "array", "minItems": 2, "maxItems": 5, "items": { "$ref": "#/definitions/choiceOption" } },
+        "cards": { "type": "array", "minItems": 3, "maxItems": 6, "uniqueItems": true, "items": { "$ref": "#/definitions/text" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "format": { "const": "position" } } },
+          "then": {
+            "required": ["template", "spots", "answer"],
+            "properties": { "answer": { "$ref": "#/definitions/key" }, "options": false, "cards": false }
+          }
+        },
+        {
+          "if": { "properties": { "format": { "const": "choice" } } },
+          "then": {
+            "required": ["options"],
+            "properties": { "template": false, "spots": false, "answer": false, "cards": false }
+          }
+        },
+        {
+          "if": { "properties": { "format": { "const": "ox" } } },
+          "then": {
+            "required": ["answer"],
+            "properties": { "answer": { "type": "boolean" }, "template": false, "spots": false, "options": false, "cards": false }
+          }
+        },
+        {
+          "if": { "properties": { "format": { "const": "order" } } },
+          "then": {
+            "required": ["cards"],
+            "properties": { "template": false, "spots": false, "answer": false, "options": false }
+          }
+        }
+      ]
+    },
+
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["time", "title", "short", "intro", "manner"],
+      "properties": {
+        "time": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+        "title": { "$ref": "#/definitions/text" },
+        "short": { "type": "string", "minLength": 1, "maxLength": 8 },
+        "intro": { "$ref": "#/definitions/text" },
+        "manner": { "$ref": "#/definitions/mannerId" }
+      }
+    },
+
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "scenes"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 },
+        "title": { "$ref": "#/definitions/text" },
+        "scenes": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/definitions/scene" } },
+        "retired": { "$ref": "#/definitions/retired" }
+      }
+    }
+  }
+}
