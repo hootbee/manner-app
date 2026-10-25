@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "매너핏 콘텐츠 schema 1 (ADR 0003 초안)",
+  "title": "매너핏 콘텐츠 schema 1 (ADR 0003)",
   "description": "형식만 검사한다. 참조, vary 펼치기, 지운 id 같은 파일 간 규칙은 app/tool/validate_content.dart가 검사한다.",
   "type": "object",
   "additionalProperties": false,
