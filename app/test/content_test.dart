@@ -19,7 +19,9 @@ void main() {
   });
 
   test('A-stairs~grandma.up은 보기의 feedback과 area를 받고 자리 표시가 채워진다', () {
-    final s = expanded('A-stairs').firstWhere((s) => s['id'] == 'A-stairs~grandma.up');
+    final s = expanded(
+      'A-stairs',
+    ).firstWhere((s) => s['id'] == 'A-stairs~grandma.up');
     final feedback = s['feedback'] as Map;
     expect(feedback['title'], '오를 땐 한 칸 아래, 뒤에서');
     expect(feedback['why'], '할머니가 뒤로 넘어지면 아래에서 받쳐 줄 수 있어요.');
@@ -28,9 +30,13 @@ void main() {
   });
 
   test('받침 있는 낱말 뒤에는 받침용 조사가 붙는다', () {
-    final sidewalk = expanded('A-sidewalk').firstWhere((s) => s['id'] == 'A-sidewalk~partner.right');
+    final sidewalk = expanded(
+      'A-sidewalk',
+    ).firstWhere((s) => s['id'] == 'A-sidewalk~partner.right');
     expect(sidewalk['prompt'], startsWith('연인과 인도를 걷는다.'));
-    final stairs = expanded('A-stairs').firstWhere((s) => s['id'] == 'A-stairs~boss.up');
+    final stairs = expanded(
+      'A-stairs',
+    ).firstWhere((s) => s['id'] == 'A-stairs~boss.up');
     expect((stairs['feedback'] as Map)['why'], contains('팀장님이'));
   });
 
@@ -55,5 +61,83 @@ void main() {
 
   test('vary가 없으면 기본 id 하나다', () {
     expect(expanded('A-crosswalk-01').map((s) => s['id']), ['A-crosswalk-01']);
+  });
+
+  group('은퇴와 조회', retiredTests);
+}
+
+void retiredTests() {
+  Content make({
+    bool mannerRetired = false,
+    bool scenarioRetired = false,
+    bool plainRetired = false,
+  }) => Content(
+    1,
+    1,
+    [],
+    [
+      {'id': 1, if (mannerRetired) 'retired': true},
+      {'id': 2},
+    ],
+    [
+      {
+        'id': 'A-sidewalk',
+        'manner': 1,
+        if (scenarioRetired) 'retired': true,
+        'vary': [
+          [
+            {'key': 'partner'},
+            {'key': 'boss', 'retired': true},
+          ],
+          [
+            {'key': 'right'},
+          ],
+        ],
+      },
+      {'id': 'B-plain', 'manner': 2, if (plainRetired) 'retired': true},
+    ],
+    [],
+  );
+  List<Object?> selectableIds(Content c) =>
+      c.selectable.map((q) => q['id']).toList();
+
+  test('은퇴한 보기를 포함한 펼친 문제는 출제 목록에 없지만 lookup으로 찾힌다', () {
+    final c = make();
+    expect(selectableIds(c), ['A-sidewalk~partner.right', 'B-plain']);
+    final hit = c.lookup('A-sidewalk~boss.right')!;
+    expect(hit.question?['id'], 'A-sidewalk~boss.right');
+    expect(hit.manner['id'], 1);
+  });
+
+  test('콘텐츠에 없는 펼친 문제는 ~ 앞의 기본 id로 매너를 찾는다', () {
+    final hit = make().lookup('A-sidewalk~new.right')!;
+    expect(hit.question, isNull);
+    expect(hit.manner['id'], 1);
+    expect(make().lookup('Z-unknown~a'), isNull);
+  });
+
+  test('은퇴한 시나리오의 펼친 문제는 모두 출제에서 빠지고 조회는 된다', () {
+    final c = make(scenarioRetired: true);
+    expect(selectableIds(c), ['B-plain']);
+    expect(
+      c.lookup('A-sidewalk~partner.right')?.question?['id'],
+      'A-sidewalk~partner.right',
+    );
+  });
+
+  test('은퇴한 매너의 시나리오는 모두 출제에서 빠지고 조회는 된다', () {
+    final c = make(mannerRetired: true);
+    expect(selectableIds(c), ['B-plain']);
+    final hit = c.lookup('A-sidewalk~partner.right')!;
+    expect(hit.question?['id'], 'A-sidewalk~partner.right');
+    expect(hit.manner['retired'], true);
+  });
+
+  test('vary 없는 시나리오도 은퇴하면 출제에서 빠지고, ~ 없는 id로 조회된다', () {
+    final c = make(plainRetired: true);
+    expect(selectableIds(c), ['A-sidewalk~partner.right']);
+    final hit = c.lookup('B-plain')!;
+    expect(hit.question?['id'], 'B-plain');
+    expect(hit.manner['id'], 2);
   });
 }
