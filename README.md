@@ -14,7 +14,7 @@ supabase/
   migrations/             DB 스키마와 RLS (ADR 0001)
   functions/delete-account/  탈퇴 Edge Function (ADR 0001)
 pipeline/                 Claude 문제 생성·검토 스크립트 (아직 없음)
-.github/workflows/        콘텐츠 파이프라인 (아직 없음)
+.github/workflows/        PR 검사: content(콘텐츠 JSON 검증), db(pgTAP), app(analyze, 로컬 Supabase 붙인 flutter test)
 docs/                     기획서, ADR, 견본, 디자인. GitHub Pages 소스
   privacy/                개인정보처리방침 (아직 없음)
   delete-account/         앱 밖 삭제 요청 안내 (아직 없음)
