@@ -29,8 +29,9 @@ select throws_ok($$ update public.attempts set grade = 'ok' $$, '42501', null, '
 select throws_ok($$ delete from public.attempts $$, '42501', null, 'attempts: no delete');
 select throws_ok($$ insert into public.attempts (id, scenario_id, grade, solved_on)
   values (gen_random_uuid(), 's~k', 'great', '2026-10-25') $$, '23514', null, 'attempts: bad grade');
-select throws_ok($$ insert into public.attempts (id, scenario_id, grade, solved_on)
-  values (gen_random_uuid(), 's~k', 'best', '2025-12-31') $$, '23514', null, 'attempts: date before 2026');
+-- ADR 0001 §1: no date range check. A wrong device clock must not block sync.
+select lives_ok($$ insert into public.attempts (id, scenario_id, grade, solved_on)
+  values (gen_random_uuid(), 's~k', 'best', '1970-01-01') $$, 'attempts: any device date is accepted');
 select throws_ok($$ insert into public.attempts (id, scenario_id, grade, solved_on)
   values (gen_random_uuid(), '', 'best', '2026-10-25') $$, '23514', null, 'attempts: empty scenario_id');
 
@@ -48,8 +49,8 @@ select throws_ok($$ insert into public.day_completions (id, day_id, completed_on
   values (gen_random_uuid(), 'day-01', '2026-10-25', now()) $$, '42501', null, 'day_completions: cannot set created_at');
 select throws_ok($$ update public.day_completions set day_id = 'day-02' $$, '42501', null, 'day_completions: no update');
 select throws_ok($$ delete from public.day_completions $$, '42501', null, 'day_completions: no delete');
-select throws_ok($$ insert into public.day_completions (id, day_id, completed_on)
-  values (gen_random_uuid(), 'day-01', '2025-12-31') $$, '23514', null, 'day_completions: date before 2026');
+select lives_ok($$ insert into public.day_completions (id, day_id, completed_on)
+  values (gen_random_uuid(), 'day-01', '1970-01-01') $$, 'day_completions: any device date is accepted');
 select throws_ok($$ insert into public.day_completions (id, day_id, completed_on)
   values (gen_random_uuid(), '', '2026-10-25') $$, '23514', null, 'day_completions: empty day_id');
 
