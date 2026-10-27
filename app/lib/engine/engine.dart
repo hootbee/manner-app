@@ -27,6 +27,9 @@ class DayCompletion {
   final DateTime completedOn;
 }
 
+/// 연월일만 남긴 날짜. 엔진은 모든 날짜를 이것으로 비교한다.
+DateTime day(DateTime t) => DateTime.utc(t.year, t.month, t.day);
+
 int xp(Iterable<Attempt> attempts) => attempts.fold(0, (sum, a) => sum + a.grade.xp);
 
 int level(int xp) => xp ~/ 100 + 1;
@@ -35,7 +38,6 @@ double levelProgress(int xp) => (xp % 100) / 100;
 
 /// T가 완료 날짜에 있으면 T에서, 아니고 T-1이 있으면 T-1에서 끝나는 연속 일수. 둘 다 아니면 0.
 int streak(Iterable<DayCompletion> completions, DateTime today) {
-  DateTime day(DateTime t) => DateTime.utc(t.year, t.month, t.day);
   final days = {for (final c in completions) day(c.completedOn)};
   var t = day(today);
   if (!days.contains(t)) t = DateTime.utc(t.year, t.month, t.day - 1);
