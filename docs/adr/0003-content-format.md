@@ -26,7 +26,7 @@
 ### 2. 은퇴 `retired: true`
 매너, 시나리오, 축 보기, 데일리에 붙인다. 값은 `true`만 허용하고, 은퇴하지 않았으면 필드를 쓰지 않는다. 은퇴한 매너의 시나리오와 은퇴한 보기를 포함한 펼친 문제는 은퇴한 것으로 본다.
 - 출제(데일리 장면, 카테고리 연습, 다시 풀기, 복습)에서 뺀다. 오늘의 복습 수에도 넣지 않는다. 은퇴한 데일리는 경로에서 건너뛴다.
-- 조회는 그대로 된다. 지난 기록의 매너와 영역, 스테이터스의 영역 값, 오류 신고의 대상 문제는 은퇴한 항목으로도 찾는다.
+- 조회는 그대로 된다. 지난 기록의 매너와 영역, 오류 신고의 대상 문제는 은퇴한 항목으로도 찾는다. 영역 스탯에서는 은퇴한 매너를 뺀다(ADR 0004).
 - 은퇴를 되돌리는 것은 허용한다. 뜻이 같기 때문이다.
 
 ### 3. 형식 (schema 1)
@@ -61,7 +61,7 @@
   2. 시작할 때 한 번 `manifest.json`을 받는다(제한 시간 5초). `version`이 지금 것보다 크면 본문을 받는다.
   3. 본문을 끝까지 파싱해서 검증한다: `schema`가 맞는지, `version`이 manifest와 같은지, 6절의 파일 하나 검사(참조, 펼치기, 자리 표시)를 통과하는지. 통과하면 임시 파일에 쓰고 `rename`으로 바꾼다. 실패하면 아무것도 바꾸지 않고 다음 시작 때 다시 한다.
   4. 새 콘텐츠는 다음 시작부터 쓴다. 세트 중간에 문제 풀이 바뀌지 않게 하기 위해서다.
-- 올리기: `main`에 `content/`가 바뀌어 들어오면 GitHub Actions가 service role 키(저장소 secret, environment `content-publish`)로 Storage REST에 올린다. 순서는 본문(`x-upsert: false`) 다음 manifest(`x-upsert: true`)다. manifest가 없는 파일을 가리키는 일이 없다. 다시 실행해도 안전하다. manifest의 `version`이 같으면 아무것도 하지 않고, 크면 실패시키고, 본문이 이미 있다는 400이 오면 manifest만 올린다.
+- 올리기: `main`에 `app/assets/content.json`이 바뀌어 들어오면 GitHub Actions가 service role 키(저장소 secret, environment `content-publish`)로 Storage REST에 올린다. 순서는 본문(`x-upsert: false`) 다음 manifest(`x-upsert: true`)다. manifest가 없는 파일을 가리키는 일이 없다. 다시 실행해도 안전하다. manifest의 `version`이 같으면 아무것도 하지 않고, 크면 실패시키고, 본문이 이미 있다는 400이 오면 manifest만 올린다.
 - 번들: 원본은 `app/assets/content.json` 하나다. Flutter는 패키지 밖 경로를 `flutter_assets`에 넣지 않으므로(2026-10-25 `flutter build bundle`로 확인) 처음부터 앱 안에 둔다. 사본을 두지 않는다. 스키마는 옆에 `app/assets/content.schema.json`으로 두고, `pubspec.yaml`에는 `assets/content.json`만 올린다.
 
 ### 6. 자동 검사 (`app/tool/validate_content.dart`)
@@ -82,9 +82,9 @@ cd app && flutter pub get && dart run tool/validate_content.dart assets/content.
 | choice의 `best`가 정확히 하나 | 오류 |
 | `--previous`에 있던 매너·기본 시나리오·펼친 문제·데일리 id가 사라짐 | 오류 |
 | `--previous`와 같은 id인 시나리오의 `manner`가 바뀜(지난 기록의 복습 일정이 바뀐다) | 오류 |
-| `--previous`와 내용이 다른데 `version`이 크지 않음 | 오류 |
-| 은퇴하지 않은 매너의 출제 가능한 펼친 문제가 3개 미만(장면 2문제와 다시 풀기 1문제가 안 됨) | 오류 |
-| 은퇴하지 않은 매너의 출제 가능한 기본 시나리오가 3개 미만(기획서: 다시 풀기·복습은 다른 상황으로) | 경고 |
+| `--previous`보다 `version`이 작음, 또는 내용이 다른데 `version`이 같음 | 오류 |
+| 은퇴하지 않은 매너의 출제 가능한 펼친 문제가 2개 미만(장면 2문제가 안 됨. 다시 풀기는 같은 문제를 쓴다, ADR 0004) | 오류 |
+| 은퇴하지 않은 매너의 출제 가능한 기본 시나리오가 3개 미만(한 상황의 변형만 나오면 지루하다) | 경고 |
 | choice의 `best` 보기가 가장 김(기획서 콘텐츠 원칙) | 경고 |
 
 경고는 출력만 하고 종료 코드는 0이다. 2026-10-25 현재 콘텐츠로 돌리면 경고 두 개가 나온다(매너 3의 기본 시나리오 1개, `A-umbrella-01`의 best 보기가 가장 김). 경고는 콘텐츠가 바뀌면 달라지므로 현재 파일 테스트는 오류가 없는지만 확인하고, 경고 검사는 작은 예시 데이터로 테스트한다. `--previous`는 PR 기준 브랜치의 파일이다(`git show origin/$BASE:app/assets/content.json`). 처음 만드는 PR이라 없으면 비교 검사를 건너뛴다.
@@ -100,7 +100,7 @@ cd app && flutter pub get && dart run tool/validate_content.dart assets/content.
 - **확인할 점**
   - 네트워크 없음: 번들이나 저장된 파일로 시작한다. manifest를 못 받아도 학습은 그대로다. 무료 프로젝트가 1주 비활성으로 멈춰도 같다.
   - 같은 요청 두 번: 다운로드는 진행 중인 Future 하나로 묶는다. 임시 파일을 `rename`하므로 반쯤 쓴 파일이 남지 않는다. 올리기 재실행은 5절 규칙대로 같은 결과가 된다.
-  - 기기 두 대: 두 기기의 콘텐츠 버전이 다를 수 있다. pull로 받은 기록의 `scenario_id`가 없으면 `~` 앞의 기본 id로 매너를 찾는다. 그래도 없으면 기록은 지우지 않고 XP에만 넣으며, 복습과 영역 값에서는 콘텐츠를 받을 때까지 뺀다. 모르는 `day_id`도 연속 학습일(날짜만 씀)에는 들어가고, 경로 위치에서는 뺀다. 확정은 엔진 ADR에서 한다.
+  - 기기 두 대: 두 기기의 콘텐츠 버전이 다를 수 있다. pull로 받은 기록의 `scenario_id`가 없으면 `~` 앞의 기본 id로 매너를 찾는다. 그래도 없으면 기록은 지우지 않고 XP에만 넣으며, 복습과 영역 스탯에서는 콘텐츠를 받을 때까지 뺀다. 모르는 `day_id`도 연속 학습일(날짜만 씀)에는 들어가고, 경로 위치에서는 뺀다. ADR 0004 §5에서 확정했다.
   - 탈퇴: 콘텐츠는 사용자 데이터가 아니므로 영향이 없다.
 - **넣지 않은 것과 넣을 시점**: 금지 표현 검사(파이프라인 ADR에서 목록을 정할 때), 콘텐츠 분할·gzip(본문 크기 × 월 활성 사용자 × 월 업데이트 횟수가 2.5GB를 넘을 때. 무료 플랜 egress는 비캐시 5GB와 캐시 5GB다. 견본은 최소화하면 시나리오당 약 0.6KB여서 3,000개면 약 1.9MB다), 실행 중 콘텐츠 교체(다음 시작까지 기다리는 것이 불편하다는 의견이 나올 때).
 - **다시 볼 조건**: `schema` 2가 필요할 때, 위치 템플릿을 더할 때(schema가 오른다).
@@ -113,7 +113,7 @@ cd app && flutter pub get && dart run tool/validate_content.dart assets/content.
 | 3 | 은퇴와 조회 | 은퇴한 보기를 포함한 펼친 문제는 출제 목록에 없지만 `lookup(id)`로는 찾힌다. 콘텐츠에 없는 `A-sidewalk~new.right`는 `~` 앞으로 매너 1을 찾는다 |
 | 4 | 파일 하나 검사(참조, 자리 표시, choice `best` 하나, 매너당 3문제) | 장면이 콘텐츠에 없는 매너 99를 가리키면 오류다. 현재 `app/assets/content.json`은 오류가 없고 종료 코드 0이다 |
 | 5 | 비교 검사(`--previous`) | 이전 파일에 있던 `A-alley~child`를 지우면 오류 이름과 id를 출력하고 종료 코드 1. 내용만 바꾸고 `version`을 그대로 두면 오류 |
-| 6 | CI `.github/workflows/content.yml`: `dev`로 가는 PR에서 `content/**`, `app/lib/content/**`, `app/tool/**`가 바뀌면 6절 두 명령 실행 | `day-01`의 `id`를 바꾼 PR에서 워크플로가 실패한다(초안 PR로 확인) |
+| 6 | CI `.github/workflows/content.yml`: `dev`로 가는 PR에서 `app/assets/content*.json`, `app/lib/content/**`, `app/tool/**`가 바뀌면 6절 두 명령 실행 | `day-01`의 `id`를 바꾼 PR에서 워크플로가 실패한다(초안 PR로 확인) |
 | 7 | Storage 버킷 마이그레이션 | pgTAP: `authenticated` 역할로 `storage.objects`에 `bucket_id='content'` insert가 거부된다 |
 | 8 | `live/`의 받기와 바꾸기(5절 1~4) | 가짜 HTTP가 깨진 JSON을 주면 저장된 파일이 그대로다. 같은 `version`이면 본문을 요청하지 않는다. 저장된 파일의 `schema`가 2면 번들을 쓴다 |
 | 9 | 올리기 워크플로(`main`, environment `content-publish`) | 셸 함수를 가짜 응답으로 돌려 manifest `version`이 같으면 업로드 요청이 0번이다 |

@@ -59,10 +59,10 @@ abstract interface class Session {           // 세트 하나. Finished 뒤에�
   void next();           // Intro → Asking, Answered → 다음 문제·장면·Finished. Finished로 갈 때 하루 완료를 기록한다
   void quit();           // 중간 저장 없음. 이미 답한 기록과 XP는 남는다
 }
-sealed class Phase { final double progress; }  // 0~1, 진행 바
+sealed class Phase { final double progress; }  // 0~1, 진행 바. 다시 풀기가 붙으면 줄 수 있다
 class Intro extends Phase { final String dayTitle, intro; final SceneCard scene; }
 class Asking extends Phase { final Question q; final bool retry; }       // retry: "다시 풀기" 칩
-class Answered extends Phase { final Question q; final Explanation e; final SceneCard? nextScene; final bool last; }
+class Answered extends Phase { final Question q; final Explanation e; final SceneCard? nextScene; final bool last; } // 다시 풀기 문제의 nextScene은 null. last는 남은 문제가 없을 때만 참
 class Finished extends Phase { final int xpGained, firstTry, total, bestCombo; final int? streak; final List<String> retryTomorrow; } // streak: 데일리만
 
 sealed class Question { final String area, prompt, motto; }              // area: 영역 칩, motto: 원칙 문구
@@ -91,7 +91,7 @@ class Evidence { final String summary; final List<Source> sources; }  class Sour
 - MVP에서 빼는 것: 원칙 스킬, 칭호, 옷장·옷차림 아이템, 약한 매너(2026-10-25 사용자 결정). 인터페이스에 자리도 만들지 않는다.
 
 ### 3. 가짜 구현 (`app/lib/fake/`)
-- `fake_backend.dart`: `FakeBackend implements Backend`. 메모리에만 상태를 둔다. 채점은 `correct`와 비교, XP는 10·5·0, 오답이면 같은 세트에 `retry: true` 문제를 한 번 더 내고, 마지막 `next()`에서 `streak + 1`, `doneToday = true`가 된다. 비동기 메서드는 `delay`(기본 300ms)만큼 기다려 로딩 표시를 볼 수 있게 한다.
+- `fake_backend.dart`: `FakeBackend implements Backend`. 메모리에만 상태를 둔다. 채점은 `correct`와 비교, XP는 10·5·0, 오답이면 같은 문제를 세트 맨 뒤에 `retry: true`로 다시 내고(맞힐 때까지, ADR 0004 §4), 마지막 `next()`에서 `streak + 1`, `doneToday = true`가 된다. 비동기 메서드는 `delay`(기본 300ms)만큼 기다려 로딩 표시를 볼 수 있게 한다.
 - `samples.dart`: `docs/prototype/content.json`에서 옮긴 고정 데이터. 하루는 `day-01`(3장면), 문제는 `A-sidewalk`(연인·오른쪽), `A-alley`(다시 풀기용), `A-stairs`(할머니·올라감), `A-umbrella-01`, `A-crosswalk-01`. 순서 형식은 견본에 예가 없으므로 가짜 문제 하나를 쓰고 `// 가짜` 주석을 단다.
 - 경계 상태는 생성자 인자로 만든다: `FakeBackend({bool online = true, Account? account, bool doneToday = false, bool noDay = false, SignInResult signIn = ok, int unsynced = 0, DeleteResult delete = ok, Duration delay})`. 테스트에서는 `fake.setOnline(false)`로 바꿀 수 있다.
 - 실행할 때는 이름 붙은 묶음을 고른다: `flutter run --dart-define=FAKE=<이름>`. 이름은 `guest`(기본, 첫 실행), `signedIn`, `doneToday`, `noDay`, `offline`, `signInFails`, `wouldLose`, `deleteFails`. 팀원이 버튼으로 고를 수 있게 `.vscode/launch.json`에 묶음마다 실행 설정을 둔다.
@@ -126,14 +126,14 @@ Future<void> main() async {
 ## 작업 목록 (1이 끝나면 2~6과 7~10을 동시에 한다. 11은 7~10 뒤)
 | # | 담당 | 작업 | 먼저 쓸 실패하는 테스트 |
 | --- | --- | --- | --- |
-| 1 | 사용자 | `backend.dart`, `fake/`, 경계 검사, `main.dart` 가짜 연결, `launch.json` | `boundaries_test`: `screens/` 파일이 `backend.dart` 밖의 앱 파일이나 `supabase`를 import하면 실패한다. `fake_backend_test`: 첫 문제에 오답을 내면 같은 세트에 `retry: true`인 `Asking`이 한 번 더 온다. 마지막 `next()` 뒤 `home.value.streak`가 1 늘고 `doneToday`가 참이다 |
+| 1 | 사용자 | `backend.dart`, `fake/`, 경계 검사, `main.dart` 가짜 연결, `launch.json` | `boundaries_test`: `screens/` 파일이 `backend.dart` 밖의 앱 파일이나 `supabase`를 import하면 실패한다. `fake_backend_test`: 첫 문제에 오답을 내면 같은 문제가 세트 맨 뒤에 `retry: true`인 `Asking`으로 다시 오고, 그것도 틀리면 또 온다. 마지막 `next()` 뒤 `home.value.streak`가 1 늘고 `doneToday`가 참이다 |
 | 2 | 팀원 | 홈 | `FakeBackend(doneToday: true)`에서 "하루 시작하기" 버튼이 눌리지 않는다 |
 | 3 | 팀원 | 장면 소개, 풀이 4형식, 해설 | `guest`로 세트를 끝까지 탭하면 완료 화면이 나온다(핵심 흐름 위젯 테스트) |
 | 4 | 팀원 | 세트 완료, 로그인(설정의 "기록 백업하기") | `FakeBackend(signIn: failed)`에서 로그인을 누르면 실패 안내가 보이고 게스트로 남는다 |
 | 5 | 팀원 | 스테이터스(영역 육각형) | 레이아웃이므로 테스트를 먼저 쓰지 않는다(`CLAUDE.md`) |
 | 6 | 팀원 | 설정: 로그아웃, 탈퇴, 개인정보처리방침 링크 | `offline`에서 탈퇴 버튼이 막혀 있다. `FakeBackend(unsynced: 3)`에서 로그아웃하면 "3개" 확인 시트가 뜬다 |
 | 7 | 사용자 | `content/`: 번들 JSON → `Question` (ADR 0003 뒤) | `A-sidewalk`가 8문제로 펼쳐지고 `PositionQuestion.vars['mirror']`가 축 값과 같다 |
-| 8 | 사용자 | `engine/`: XP, 레벨, 연속 학습일, Leitner, 영역 값, 출제 순서 | ADR 0001 §4 규칙 그대로: `best, ok, avoid` 세 기록의 XP는 15다 |
+| 8 | 사용자 | `engine/`: XP, 레벨, 연속 학습일, Leitner, 영역 스탯, 출제 순서 | ADR 0001 §4 규칙 그대로: `best, ok, avoid` 세 기록의 XP는 15다 |
 | 9 | 사용자 | `sync/`: 로컬 기록 테이블과 `sync(table)` | 네트워크 없음, 같은 행 두 번 push, 기기 두 대 pull 뒤 같은 집합(ADR 0001 §3) |
 | 10 | 사용자 | `auth/`: Google 로그인, 탈퇴 순서 | `delete-account`가 401을 주고 세션 갱신도 실패하면 로컬 기록이 지워진다(ADR 0001 §5-4) |
 | 11 | 사용자 | `live/`, `main.dart` 전환 | `answer()` 한 번에 로컬 `attempts`에 `synced=false` 행이 하나 생기고 `home.value.xp`가 10 는다 |
