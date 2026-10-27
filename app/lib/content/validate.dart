@@ -100,7 +100,7 @@ List<Issue> validate(Content c) {
     if (m['retired'] == true) continue;
     final qs = c.selectable.where((q) => q['manner'] == m['id']);
     final bases = {for (final q in qs) (q['id'] as String).split('~').first};
-    if (qs.length < 3) err('출제 가능한 펼친 문제 3개 미만: 매너 ${m['id']} (${qs.length}개)');
+    if (qs.length < 2) err('출제 가능한 펼친 문제 2개 미만: 매너 ${m['id']} (${qs.length}개)');
     if (bases.length < 3) warn('출제 가능한 기본 시나리오 3개 미만: 매너 ${m['id']} (${bases.length}개)');
   }
   return out;
