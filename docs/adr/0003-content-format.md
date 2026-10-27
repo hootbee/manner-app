@@ -61,7 +61,7 @@
   2. 시작할 때 한 번 `manifest.json`을 받는다(제한 시간 5초). `version`이 지금 것보다 크면 본문을 받는다.
   3. 본문을 끝까지 파싱해서 검증한다: `schema`가 맞는지, `version`이 manifest와 같은지, 6절의 파일 하나 검사(참조, 펼치기, 자리 표시)를 통과하는지. 통과하면 임시 파일에 쓰고 `rename`으로 바꾼다. 실패하면 아무것도 바꾸지 않고 다음 시작 때 다시 한다.
   4. 새 콘텐츠는 다음 시작부터 쓴다. 세트 중간에 문제 풀이 바뀌지 않게 하기 위해서다.
-- 올리기: `main`에 `app/assets/content.json`이 바뀌어 들어오면 GitHub Actions가 service role 키(저장소 secret, environment `content-publish`)로 Storage REST에 올린다. 순서는 본문(`x-upsert: false`) 다음 manifest(`x-upsert: true`)다. manifest가 없는 파일을 가리키는 일이 없다. 다시 실행해도 안전하다. manifest의 `version`이 같으면 아무것도 하지 않고, 크면 실패시키고, 본문이 이미 있다는 400이 오면 manifest만 올린다.
+- 올리기: `main`에 `app/assets/content.json`이 바뀌어 들어오면 GitHub Actions가 service role 키(environment `content-publish`의 secret `SUPABASE_SERVICE_ROLE_KEY`, 배포 브랜치는 `main`만. 저장소 secret에 두면 아무 브랜치의 워크플로가 읽을 수 있다)로 Storage REST에 올린다. 순서는 본문(`x-upsert: false`) 다음 manifest(`x-upsert: true`)다. manifest가 없는 파일을 가리키는 일이 없다. 다시 실행해도 안전하다. manifest의 `version`이 같으면 아무것도 하지 않고, 크면 실패시키고, 본문이 이미 있다는 400이 오면 manifest만 올린다.
 - 번들: 원본은 `app/assets/content.json` 하나다. Flutter는 패키지 밖 경로를 `flutter_assets`에 넣지 않으므로(2026-10-25 `flutter build bundle`로 확인) 처음부터 앱 안에 둔다. 사본을 두지 않는다. 스키마는 옆에 `app/assets/content.schema.json`으로 두고, `pubspec.yaml`에는 `assets/content.json`만 올린다.
 
 ### 6. 자동 검사 (`app/tool/validate_content.dart`)
