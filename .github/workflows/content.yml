@@ -1,0 +1,46 @@
+# 콘텐츠 자동 검사 (ADR 0003 §6)
+name: content
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - app/assets/content*.json
+      - app/lib/content/**
+      - app/tool/**
+      - .github/workflows/content.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # 기준 브랜치 파일을 --previous로 쓴다
+
+      - name: JSON Schema
+        run: npx --yes ajv-cli@5.0.0 validate --spec=draft7 -s app/assets/content.schema.json -d app/assets/content.json
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.2 # pubspec sdk ^3.11.0
+
+      - run: cd app && flutter pub get
+
+      - name: validate_content
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          git rev-parse --verify "origin/$BASE" # 기준 ref가 없으면 실패
+          args=()
+          if git cat-file -e "origin/$BASE:app/assets/content.json" 2>/dev/null; then
+            git show "origin/$BASE:app/assets/content.json" > "$RUNNER_TEMP/prev.json"
+            args+=("--previous=$RUNNER_TEMP/prev.json")
+          else
+            echo "기준 브랜치에 콘텐츠 파일이 없어 비교 검사를 건너뛴다"
+          fi
+          cd app && dart run tool/validate_content.dart assets/content.json "${args[@]}"
