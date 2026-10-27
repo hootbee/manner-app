@@ -10,6 +10,8 @@ const rules = <String, (List<String>, List<String>)>{
   'sync': (['engine'], ['package:flutter', 'dart:ui']), // ADR 0005 §3: supabase_flutter는 허용
   'fake': (['backend.dart'], _screenBanned),
   'screens': (['backend.dart'], _screenBanned),
+  // Backend 구현이라 ValueNotifier, rootBundle에 package:flutter가 필요하다. firebase_analytics는 허용(ADR 0006).
+  'live': (['backend.dart', 'content', 'engine', 'sync', 'auth'], ['package:firebase_core']),
   // backend.dart는 표에 없지만 3절 코드가 main.dart에서 전역 backend에 넣는다.
   'main.dart': (['backend.dart', 'screens', 'fake', 'live', 'firebase_options.dart'], ['package:supabase', 'package:google_sign_in', 'package:firebase_analytics']),
 };
