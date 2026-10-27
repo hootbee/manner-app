@@ -125,9 +125,10 @@ jobs:
       - run: |
           env=$(supabase status -o env --override-name api.url=SUPABASE_URL --override-name auth.anon_key=SUPABASE_ANON_KEY --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY)
           eval "$env"; export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
+          : "${SUPABASE_URL:?}" "${SUPABASE_ANON_KEY:?}" "${SUPABASE_SERVICE_ROLE_KEY:?}"
           cd app && flutter pub get && flutter analyze && flutter test
 ```
-`env=$(…)`는 `supabase status`가 실패하면 그 줄에서 멈춘다(Actions의 bash는 `-e`). 그래서 환경 변수 없이 테스트가 skip된 채 통과하는 일이 없다.
+`env=$(…)`는 `supabase status`가 실패하면 그 줄에서 멈춘다(Actions의 bash는 `-e`). status가 성공해도 변수 이름이 빠지면 `:?` 줄에서 멈춘다. 그래서 환경 변수 없이 테스트가 skip된 채 통과하는 일이 없다.
 
 ## 고려한 대안
 버전은 2026-10-27 pub.dev API 기준이다. 우리 Flutter는 3.41.2다.
