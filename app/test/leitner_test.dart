@@ -76,4 +76,11 @@ void main() {
     });
     test('은퇴한 매너는 복습일이 지나도 0', () => expect(reviewsDue(retired, b, d(11, 30)), 0));
   });
+
+  group('dueManners', () {
+    test('복습일이 오래된 순, 같으면 매너 id 순', () {
+      final b = {3: Box(1, d(10, 25)), 2: Box(1, d(10, 20)), 1: Box(1, d(10, 25))};
+      expect(dueManners(content, b, d(10, 27)), [2, 1, 3]);
+    });
+  });
 }

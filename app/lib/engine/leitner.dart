@@ -38,9 +38,15 @@ Map<int, Box> boxes(Content c, Iterable<Attempt> attempts) {
   });
 }
 
-/// 복습 대상(은퇴하지 않았고 due <= today)인 매너 수.
-int reviewsDue(Content c, Map<int, Box> boxes, DateTime today) => boxes.entries
-    .where((e) =>
-        !e.value.due.isAfter(day(today)) &&
-        c.manners.any((m) => m['id'] == e.key && m['retired'] != true))
-    .length;
+/// 복습 대상(은퇴하지 않았고 due <= today)인 매너 id. 복습일이 오래된 순, 같으면 매너 id 순.
+List<int> dueManners(Content c, Map<int, Box> boxes, DateTime today) => [
+      for (final e in boxes.entries)
+        if (!e.value.due.isAfter(day(today)) && c.manners.any((m) => m['id'] == e.key && m['retired'] != true))
+          e.key,
+    ]..sort((x, y) {
+        final by = boxes[x]!.due.compareTo(boxes[y]!.due);
+        return by != 0 ? by : x.compareTo(y);
+      });
+
+/// 복습 대상인 매너 수.
+int reviewsDue(Content c, Map<int, Box> boxes, DateTime today) => dueManners(c, boxes, today).length;
