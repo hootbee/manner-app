@@ -82,7 +82,7 @@ class Store {
 `live/`가 부르는 순서(ADR 0001 §3·§5를 이 API로 옮긴 것)
 - 답할 때 `addAttempt`, 데일리 마지막 `next()`에서 `addDayCompletion`. 앱 시작, 세트 끝, 연결이 돌아왔을 때 `for (t in tables) sync(t)`.
 - 로그아웃: `sync` → `unsynced > 0`이고 `discardUnsynced`가 아니면 `WouldLose(unsynced)` → 아니면 `clear()` → Google 로그아웃.
-- 탈퇴: `delete-account`가 204 → `clear()` → Google `disconnect()` → 게스트 첫 화면.
+- 탈퇴: `delete-account`가 204 → `clear()` → Google `disconnect()` → 게스트 첫 화면. 세션이 거절되면 ADR 0001 §5-4.
 
 ### 5. 테스트: 로컬 Supabase에 직접 붙는다 (가짜 원격 없음)
 가짜 원격을 만들려면 Supabase 앞에 인터페이스를 하나 더 둬야 하고, 그 가짜는 RLS, grant, `ignoreDuplicates`가 실제로 어떻게 도는지 알려 주지 못한다. 로컬 Supabase는 이미 있고(ADR 0001 테스트, `delete-account` 테스트) 무료다.
