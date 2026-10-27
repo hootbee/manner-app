@@ -20,10 +20,10 @@
 
 ## 검증 명령
 
-- 앱: `cd app && flutter analyze && flutter test`
+- 앱: `cd app && flutter analyze && flutter test`. `sync/`의 Supabase 테스트는 아래 환경 변수가 없으면 건너뛴다. 동기화를 바꿨으면 `supabase start` 뒤 환경 변수를 넣고 돌린다.
 - DB: `supabase start` 뒤 `supabase test db` (pgTAP, `supabase/tests/*.sql`)
 - Edge Function: `supabase start`(edge-runtime을 빼지 않는다)와 `supabase functions serve` 뒤, 환경 변수를 넣고 `deno test --allow-net --allow-env supabase/functions/`
-  - 환경 변수: `eval "$(supabase status -o env --override-name api.url=SUPABASE_URL --override-name auth.anon_key=SUPABASE_ANON_KEY --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY | grep '^SUPABASE_' | sed 's/^/export /')"`. 로컬 키라도 파일에 적지 않는다.
+- 환경 변수(앱 `sync/`와 Edge Function 테스트): `eval "$(supabase status -o env --override-name api.url=SUPABASE_URL --override-name auth.anon_key=SUPABASE_ANON_KEY --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY | grep '^SUPABASE_' | sed 's/^/export /')"`. 로컬 키라도 파일에 적지 않는다.
 
 작업을 끝냈다고 말하기 전에 해당 층의 명령을 돌리고 결과를 그대로 보고한다.
 
