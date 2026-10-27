@@ -78,6 +78,7 @@ cd app && flutter pub get && dart run tool/validate_content.dart assets/content.
 | 매너·기본 시나리오·데일리·원칙 id 중복, 축 안 `key` 중복, 펼친 문제 id 중복 | 오류 |
 | 시나리오의 `manner`, 매너의 `principle`, 장면의 `manner`가 있는 id를 가리킴 | 오류 |
 | 은퇴하지 않은 데일리의 장면이 은퇴한 매너를 가리킴 | 오류 |
+| 한 데일리 안에서 같은 매너가 두 장면에 나옴(장면마다 그 매너 문제 2개를 고르므로 모자란다, ADR 0004, 2026-10-27 결정) | 오류 |
 | 펼친 뒤 `area`, `feedback`이 있고 `{…}` 자리 표시가 남지 않음. position은 `vars.other`가 있고 `answer`가 `spots` 안에 있으며, spot id가 템플릿이 아는 자리(`lib/content/templates.dart` 상수)임 | 오류 |
 | choice의 `best`가 정확히 하나 | 오류 |
 | `--previous`에 있던 매너·기본 시나리오·펼친 문제·데일리 id가 사라짐 | 오류 |

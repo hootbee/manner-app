@@ -7,8 +7,15 @@ import 'package:mannerfit/content/validate.dart';
 
 const _fb = {'title': 't', 'why': 'w'};
 
+/// 장면용 매너 [m]의 ox 문제 3개(기본 시나리오 3개 경고를 피한다).
+List<Map<String, Object>> _ox(int m) => [
+      for (var i = 1; i <= 3; i++)
+        {'id': 'ox-$m-$i', 'manner': m, 'format': 'ox', 'area': '친구', 'prompt': 'p', 'answer': true, 'feedback': _fb},
+    ];
+
 /// 오류도 경고도 없는 가장 작은 콘텐츠. 매너 1에 기본 시나리오 3개, 펼친 문제 3개.
-const _fixture = {
+/// 하루의 장면 매너는 서로 달라야 하므로 매너 11·12에 ox 문제 3개씩을 둔다.
+final _fixture = {
   'schema': 1,
   'version': 1,
   'principles': [
@@ -16,6 +23,8 @@ const _fixture = {
   ],
   'manners': [
     {'id': 1, 'principle': 'A'},
+    {'id': 11, 'principle': 'A'},
+    {'id': 12, 'principle': 'A'},
   ],
   'scenarios': [
     {
@@ -61,6 +70,8 @@ const _fixture = {
         ],
       ],
     },
+    ..._ox(11),
+    ..._ox(12),
   ],
   'days': [
     {
@@ -68,8 +79,8 @@ const _fixture = {
       'title': 't',
       'scenes': [
         {'time': '08:00', 'title': 't', 'short': 's', 'intro': 'i', 'manner': 1},
-        {'time': '12:00', 'title': 't', 'short': 's', 'intro': 'i', 'manner': 1},
-        {'time': '18:00', 'title': 't', 'short': 's', 'intro': 'i', 'manner': 1},
+        {'time': '12:00', 'title': 't', 'short': 's', 'intro': 'i', 'manner': 11},
+        {'time': '18:00', 'title': 't', 'short': 's', 'intro': 'i', 'manner': 12},
       ],
     },
   ],
@@ -286,6 +297,9 @@ void main() {
         }),
         isEmpty,
       );
+    });
+    test('하루 안에서 같은 매너가 두 장면에 나오면 오류다 (planDay가 문제를 못 고른다)', () {
+      expect(run((c) => c['days'][0]['scenes'][2]['manner'] = 1), has('오류: 장면 매너 중복: day-01 → 1'));
     });
   });
 

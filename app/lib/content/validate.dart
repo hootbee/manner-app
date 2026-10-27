@@ -55,6 +55,10 @@ List<Issue> validate(Content c) {
   }
   for (final d in c.days) {
     final scenes = (d['scenes'] as List).cast<Json>();
+    final seen = <Object?>{};
+    for (final s in scenes) {
+      if (!seen.add(s['manner'])) err('장면 매너 중복: ${d['id']} → ${s['manner']}');
+    }
     for (var i = 0; i < scenes.length; i++) {
       final m = scenes[i]['manner'];
       if (!manners.containsKey(m)) {
