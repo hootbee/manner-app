@@ -1,0 +1,29 @@
+# DB 테스트 (pgTAP, supabase/tests/*.sql)
+name: db
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - supabase/migrations/**
+      - supabase/tests/**
+      - supabase/config.toml
+      - .github/workflows/db.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.122.0 # 로컬과 같은 버전
+
+      # 테스트에 필요한 db, auth, rest, storage, kong만 띄운다
+      - run: supabase start -x studio,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor,realtime,postgres-meta
+
+      - run: supabase test db
