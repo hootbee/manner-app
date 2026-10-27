@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
   const jwt = req.headers.get('Authorization')?.replace(/^Bearer /, '') ?? ''
   const { data, error } = await admin.auth.getClaims(jwt)
   const uid = data?.claims?.sub
-  if (error || !uid || data.claims.role !== 'authenticated') return new Response(null, { status: 401 })
+  if (error || !uid) return new Response(null, { status: 401 })
   const { error: delErr } = await admin.auth.admin.deleteUser(uid)   // only the token's sub, hard delete
   if (delErr && delErr.status !== 404) return new Response(null, { status: 500 })
   return new Response(null, { status: 204 })                         // already gone is success (idempotent)

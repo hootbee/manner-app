@@ -107,13 +107,14 @@ Deno.serve(async (req) => {
   const jwt = req.headers.get('Authorization')?.replace(/^Bearer /, '') ?? ''
   const { data, error } = await admin.auth.getClaims(jwt)
   const uid = data?.claims?.sub
-  if (error || !uid || data.claims.role !== 'authenticated') return new Response(null, { status: 401 })
+  if (error || !uid) return new Response(null, { status: 401 })
   const { error: delErr } = await admin.auth.admin.deleteUser(uid)   // 토큰의 sub만 지운다. 하드 삭제
   if (delErr && delErr.status !== 404) return new Response(null, { status: 500 })
   return new Response(null, { status: 204 })                         // 이미 없어도 성공(멱등)
 })
 ```
 
+- 토큰의 `sub` 한 명만 지우므로 role은 보지 않는다. `sub`가 없는 anon·service role 키는 `!uid`에서 401이다(2026-10-27, 쓸모없는 role 검사를 뺐다).
 - `verify_jwt`는 기본값(켜짐) 그대로 둔다. 키는 함수 환경 변수에만 둔다. 새 키 체계를 쓰면 `SUPABASE_SECRET_KEYS`를 쓴다. 기록은 cascade로 함께 지워진다. 사용자가 소유한 Storage 객체가 생기면 `deleteUser`가 실패하므로, 그때는 이 함수에서 객체를 먼저 지운다. 앱에서의 순서는 아래와 같다.
 1. 오프라인이면 탈퇴 버튼을 막는다. 탈퇴 요청은 큐에 넣지 않는다.
 2. 사용자 확인을 받으면 `sync`를 멈추고 함수를 호출한다. 로컬 데이터는 서버가 성공한 뒤에만 지운다.
