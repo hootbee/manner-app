@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
 
 ### 6. 웹 페이지 (GitHub Pages, 정적 안내만)
 - Pages 소스는 메인 리포 `main` 브랜치의 `/docs` 폴더다. 페이지는 `docs/privacy/index.html`과 `docs/delete-account/index.html` 두 개다.
-- `/privacy/`에 적을 것: 수집 항목(Google 이름과 이메일, 풀이 기록, 완료 기록), 제3자(Supabase 서울 리전, Firebase Crashlytics), 탈퇴 방법(앱 설정, 운영 이메일), 백업 보관("탈퇴 후 최대 30일 동안 백업에 남은 뒤 자동 파기").
+- `/privacy/`에 적을 것: 수집 항목(Google 이름과 이메일, 풀이 기록, 완료 기록, 계정과 연결하지 않는 앱 이용 통계), 제3자(Supabase 서울 리전, Firebase Crashlytics, Firebase Analytics), 앱 이용 통계와 국외 이전 문구(ADR 0006 §3), 탈퇴 방법(앱 설정, 운영 이메일), 백업 보관("탈퇴 후 최대 30일 동안 백업에 남은 뒤 자동 파기").
 - `/delete-account/`: "탈퇴는 앱 설정 > 회원 탈퇴에서 한다"와 "앱 밖에서 요청하려면 hootbee0327@gmail.com으로 Google 계정 이메일을 보낸다. 받은 날부터 7일 안에 삭제하고 회신한다"만 적는다. 로그인이나 스크립트는 넣지 않는다.
 - 운영자는 요청 메일을 받으면 Supabase 대시보드 Authentication에서 해당 이메일의 사용자를 삭제한다. 기록은 cascade로 함께 지워진다. 처리 기한은 받은 날부터 7일이다. 개인정보 보호법 시행령 제43조의 법정 기한 10일 안에서 주말·시험 기간을 버틸 여유를 둔 값이다. 삭제했으면 "삭제 완료"로 회신한다.
 - 운영 이메일은 공개 페이지와 공개 리포에 그대로 드러난다.

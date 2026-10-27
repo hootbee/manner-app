@@ -35,5 +35,5 @@
   - Claude는 문제 생성·검토 파이프라인에서만 쓴다.
   - 파이프라인은 GitHub Actions에서 돈다. 사람이 PR로 승인하면 결과를 Supabase Storage에 올린다.
   - 비용은 Claude Max 플랜의 월간 API 크레딧으로 감당한다. 급하지 않은 일은 Batch API로 돌린다.
-- 운영: 크래시는 Firebase Crashlytics로 받는다. 백업은 별도 비공개 리포의 GitHub Actions에서 정기 `pg_dump`로 하고 30일 보관한다.
+- 운영: 크래시는 Firebase Crashlytics로 받는다. 사용자 행동 분석은 Firebase Analytics로 하고, 이벤트는 최소한으로 둔다(`docs/adr/0006-analytics.md`). 백업은 별도 비공개 리포의 GitHub Actions에서 정기 `pg_dump`로 하고 30일 보관한다.
 - 예산: 스토어 등록비 외에는 무료 플랜 안에서 버틴다. Supabase Pro는 DB가 400MB를 넘을 때만 올린다.
