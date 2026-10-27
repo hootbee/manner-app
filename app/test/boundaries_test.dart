@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// 폴더 → (import해도 되는 다른 앱 폴더, 금지 패키지 접두). ADR 0002 표의 줄을 여기에 더한다.
 const rules = <String, (List<String>, List<String>)>{
   'content': ([], ['package:flutter', 'package:supabase', 'dart:ui']),
+  'engine': (['content'], ['package:flutter', 'package:supabase', 'dart:ui']),
 };
 
 final _import = RegExp(r'''^\s*(?:import|export)\s+['"]([^'"]+)['"]''', multiLine: true);
