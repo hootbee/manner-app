@@ -8,6 +8,7 @@ const rules = <String, (List<String>, List<String>)>{
   'content': ([], ['package:flutter', 'package:supabase', 'dart:ui']),
   'engine': (['content'], ['package:flutter', 'package:supabase', 'dart:ui']),
   'sync': (['engine'], ['package:flutter', 'dart:ui']), // ADR 0005 §3: supabase_flutter는 허용
+  'auth': ([], ['package:flutter', 'dart:ui']), // ADR 0002 §1: google_sign_in, supabase_flutter는 허용
   'fake': (['backend.dart'], _screenBanned),
   'screens': (['backend.dart'], _screenBanned),
   // Backend 구현이라 ValueNotifier, rootBundle에 package:flutter가 필요하다. firebase_analytics는 허용(ADR 0006).

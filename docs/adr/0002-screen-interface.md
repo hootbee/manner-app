@@ -137,7 +137,7 @@ Future<void> main() async {
 | 7 | 사용자 | `content/`: 번들 JSON → `Question` (ADR 0003 뒤) | `A-sidewalk`가 8문제로 펼쳐지고 `PositionQuestion.vars['mirror']`가 축 값과 같다 |
 | 8 | 사용자 | `engine/`: XP, 레벨, 연속 학습일, Leitner, 영역 스탯, 출제 순서 | ADR 0001 §4 규칙 그대로: `best, ok, avoid` 세 기록의 XP는 15다 |
 | 9 | 사용자 | `sync/`: 로컬 기록 파일과 `sync(table)`(ADR 0005) | 네트워크 없음, 같은 행 두 번 push, 기기 두 대 pull 뒤 같은 집합(ADR 0001 §3) |
-| 10 | 사용자 | `auth/`: Google 로그인, 탈퇴 순서 | `delete-account`가 401을 주고 세션 갱신도 실패하면 로컬 기록이 지워진다(ADR 0001 §5-4) |
+| 10 | 사용자 | `auth/`: Google 로그인, 탈퇴 순서. Android는 nonce 없이 ID 토큰을 보낸다(iOS 출시 때 다시 본다) | `delete-account`가 401을 주고 세션 갱신도 거절되면 로컬 기록이 지워지고 결과는 실패다(ADR 0001 §5-4) |
 | 11 | 사용자 | `live/`, `main.dart` 전환 | `answer()` 한 번에 로컬 `attempts`에 `synced=false` 행이 하나 생기고 `home.value.xp`가 10 는다 |
 
 ## 열린 질문 (사용자 결정 필요)
