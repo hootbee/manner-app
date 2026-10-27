@@ -16,7 +16,7 @@ create table public.attempts (
   user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
   scenario_id text not null check (char_length(scenario_id) between 1 and 100),
   grade       text not null check (grade in ('best', 'ok', 'avoid')),
-  solved_on   date not null check (solved_on >= date '2026-01-01'), -- 답한 순간의 기기 날짜
+  solved_on   date not null,                                      -- 답한 순간의 기기 날짜
   created_at  timestamptz not null default now()                    -- pull 커서로만 쓴다
 );
 create index attempts_user_created_idx on public.attempts (user_id, created_at, id);
@@ -25,7 +25,7 @@ create table public.day_completions (
   id           uuid primary key,
   user_id      uuid not null default auth.uid() references auth.users (id) on delete cascade,
   day_id       text not null check (char_length(day_id) between 1 and 100),  -- content.json days[].id
-  completed_on date not null check (completed_on >= date '2026-01-01'),     -- 마친 순간의 기기 날짜
+  completed_on date not null,                                               -- 마친 순간의 기기 날짜
   created_at   timestamptz not null default now()
 );
 create index day_completions_user_created_idx on public.day_completions (user_id, created_at, id);
@@ -35,6 +35,7 @@ create index day_completions_user_created_idx on public.day_completions (user_id
 - `scenario_id`는 `<기본 시나리오 id>~<변형 키>` 형식이다. 매너는 콘텐츠에서 찾는다.
 - 콘텐츠 ADR이 보장해야 할 것이 두 가지다. 기본 시나리오 id와 `day_id`는 지우거나 다른 데 다시 쓰지 않는다(빼야 할 때는 `retired`로 표시한다). 변형 키는 순번이 아니라 축 값으로 만든다.
 - 시간대는 저장하지 않는다. CHECK 제약에는 상수만 쓴다. `current_date` 같은 값을 넣으면 dump를 복원할 때 깨진다.
+- 날짜에는 범위 검사를 두지 않는다. 기기 시계가 틀려 서버가 거절하는 행이 생기면 그 테이블의 동기화가 계속 멈추기 때문이다(2026-10-27 사용자, 마이그레이션 `20261028000000_drop_record_date_checks.sql`).
 - `day_completions`에는 `(user_id, completed_on)` 고유 제약을 두지 않는다. 기기 두 대가 같은 날 마치면 행이 둘 생기지만, 계산은 날짜 집합으로 하므로 하루로 센다.
 - 이름과 이메일은 세션의 user 객체에서 읽으므로 `profiles` 테이블은 두지 않는다.
 - 익명 로그인도 쓰지 않는다. 게스트 기록은 기기에만 둔다.
