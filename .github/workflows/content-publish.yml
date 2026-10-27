@@ -1,0 +1,28 @@
+# 콘텐츠 올리기 (ADR 0003 §5): main에 content.json이 바뀌어 들어오면 Storage content 버킷에 올린다
+# 키는 environment content-publish의 secret(배포 브랜치 main만)
+name: content-publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - app/assets/content.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 두 실행이 겹치면 늦게 확인한 쪽이 manifest를 낮은 version으로 덮을 수 있어 하나씩 돈다
+concurrency: content-publish
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: content-publish
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: bash .github/scripts/publish_content.sh app/assets/content.json
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

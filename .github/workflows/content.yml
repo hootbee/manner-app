@@ -8,6 +8,7 @@ on:
       - app/assets/content*.json
       - app/lib/content/**
       - app/tool/**
+      - .github/scripts/**
       - .github/workflows/content.yml
 
 permissions:
@@ -20,6 +21,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # 기준 브랜치 파일을 --previous로 쓴다
+
+      - name: 올리기 스크립트 테스트
+        run: bash .github/scripts/publish_content_test.sh
 
       - name: JSON Schema
         run: npx --yes ajv-cli@5.0.0 validate --spec=draft7 -s app/assets/content.schema.json -d app/assets/content.json
