@@ -38,7 +38,10 @@ class Box {
 /// 매너 id → 칸. 매너를 찾지 못한 기록은 뺀다(5절).
 Map<int, Box> boxes(Content c, Iterable<Attempt> attempts);
 
-/// 복습 대상(은퇴하지 않았고 due <= today)인 매너 수.
+/// 복습 대상(은퇴하지 않았고 due <= today)인 매너 id. 복습일 오래된 순, 같으면 id 순. planDay가 쓴다.
+List<int> dueManners(Content c, Map<int, Box> boxes, DateTime today);
+
+/// dueManners의 개수(홈의 "복습 N개").
 int reviewsDue(Content c, Map<int, Box> boxes, DateTime today);
 ```
 
@@ -65,7 +68,7 @@ List<(String area, int value)> areaStats(Content c, Iterable<Attempt> attempts,
 - 경로는 은퇴하지 않은 `days`를 배열 순서대로 늘어놓은 것이다.
 - `next`는 경로에서 완료 기록이 없는 첫 하루다.
 - `doneToday`는 오늘 날짜의 완료 기록이 하나라도 있으면 참이다. 모르는 `day_id`도 센다.
-- 보여 줄 하루는 오늘 마친 하루(콘텐츠에 있는 것 중 배열에서 마지막)이고, 그런 하루가 없으면 `next`다. 둘 다 없으면 `null`이다(`Home.today == null`).
+- 보여 줄 하루는 오늘 마친 하루(경로에 있는 것 중 마지막)이고, 그런 하루가 없으면 `next`다. 둘 다 없으면 `null`이다(`Home.today == null`).
 - `number`는 경로에서 몇 번째인지(1부터)이고, `nextTitle`은 `doneToday`일 때만 `next`의 제목이다.
 
 **세트 구성** (`planDay`)
@@ -103,8 +106,8 @@ List<String> retryTomorrow(Content c, Iterable<Attempt> session);
 | 펼친 문제가 있음(은퇴 포함) | 매너, 문제 | 넣음 | 넣음 | 넣음 | — | — |
 | 펼친 문제는 없고 기본 시나리오는 있음 | 매너만 | 넣음 | 넣음 | 뺌(문제의 영역을 모름) | — | — |
 | 둘 다 없음 | 없음 | 넣음 | 뺌 | 뺌 | — | — |
-| `day_id`가 콘텐츠에 있음 | — | — | — | — | 넣음 | 넣음 |
-| `day_id`가 콘텐츠에 없음 | — | — | — | — | 넣음 | 뺌(`doneToday`에는 넣음) |
+| `day_id`가 경로에 있음 | — | — | — | — | 넣음 | 넣음 |
+| `day_id`가 콘텐츠에 없거나 은퇴함 | — | — | — | — | 넣음 | 뺌(`doneToday`에는 넣음) |
 
 은퇴한 매너는 Leitner 계산은 하되 복습 대상과 영역 스탯에서는 뺀다(2절·3절).
 
