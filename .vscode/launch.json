@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "가짜: guest", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=guest"] },
+    { "name": "가짜: signedIn", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=signedIn"] },
+    { "name": "가짜: doneToday", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=doneToday"] },
+    { "name": "가짜: noDay", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=noDay"] },
+    { "name": "가짜: offline", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=offline"] },
+    { "name": "가짜: signInFails", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=signInFails"] },
+    { "name": "가짜: wouldLose", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=wouldLose"] },
+    { "name": "가짜: deleteFails", "request": "launch", "type": "dart", "cwd": "app", "toolArgs": ["--dart-define=FAKE=deleteFails"] }
+  ]
+}
