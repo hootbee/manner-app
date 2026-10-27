@@ -17,10 +17,12 @@
 | `sync/` | `engine/`의 기록 타입 | 로컬 기록 테이블과 `sync(table)`(ADR 0001 §3) |
 | `auth/` | 없음 | Google 로그인, `delete-account` 호출 |
 | `backend.dart` | 없음 (`package:flutter/foundation.dart`만) | 화면이 보는 인터페이스와 값 타입(2절) |
-| `live/` | `backend.dart`, `content/`, `engine/`, `sync/`, `auth/` | 인터페이스의 실제 구현. 계산 없이 모듈을 이어 붙이기만 한다 |
+| `live/` | `backend.dart`, `content/`, `engine/`, `sync/`, `auth/` | 인터페이스의 실제 구현. 계산 없이 모듈을 이어 붙이기만 한다. 분석 이벤트를 보낸다(ADR 0006) |
 | `fake/` | `backend.dart` | 가짜 구현(3절) |
 | `screens/` | `backend.dart` | Supabase, `google_sign_in`, 다른 앱 폴더 전부 금지 |
-| `main.dart` | `screens/`, `fake/`, `live/` | 구현 하나를 골라 넣는다 |
+| `main.dart` | `screens/`, `fake/`, `live/`, `firebase_options.dart` | 구현 하나를 골라 넣는다 |
+
+패키지는 `firebase_analytics`를 `live/`만, `firebase_core`를 `main.dart`만 import한다. 나머지 폴더는 `package:firebase_`를 import하지 않는다(ADR 0006).
 
 Dart에는 폴더 단위 공개 범위가 없으므로 `app/test/boundaries_test.dart`가 `lib/` 아래 import 줄을 읽어 위 표를 검사한다. 패키지(`import_lint` 등)는 쓰지 않는다.
 
