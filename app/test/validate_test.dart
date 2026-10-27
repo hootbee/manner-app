@@ -117,6 +117,116 @@ void main() {
     expect(await cli(bad.path), 1);
   }, timeout: const Timeout(Duration(minutes: 2)));
 
+  group('--previous 비교', () {
+    /// [prev]와 [next]로 고친 두 견본을 비교한 결과.
+    List<String> diff(void Function(dynamic c) prev, void Function(dynamic c) next) {
+      Content load(void Function(dynamic c) edit) {
+        final c = jsonDecode(jsonEncode(_fixture));
+        edit(c);
+        return parseContent(jsonEncode(c));
+      }
+
+      return compare(load(prev), load(next)).map((i) => '$i').toList();
+    }
+
+    void same(dynamic c) {}
+    void bump(dynamic c) => c['version'] = 2;
+
+    test('내용과 version이 같으면 통과한다', () {
+      expect(diff(same, same), isEmpty);
+    });
+    test('매너·기본 시나리오·펼친 문제·데일리 id가 사라지면 오류다', () {
+      final out = diff((c) {
+        c['manners'].add({'id': 2, 'principle': 'A'});
+        c['scenarios'].add({...scenario(c, 'ox-1'), 'id': 'ox-2'});
+        scenario(c, 'pos-1')['vary'][0].add({
+          'key': 'mom',
+          'vars': {'other': '어머니'},
+        });
+        c['days'].add({...c['days'][0], 'id': 'day-02'});
+      }, bump);
+      expect(out, has('오류: 사라진 id: 매너 2'));
+      expect(out, has('오류: 사라진 id: 시나리오 ox-2'));
+      expect(out, has('오류: 사라진 id: 펼친 문제 pos-1~mom'));
+      expect(out, has('오류: 사라진 id: 데일리 day-02'));
+    });
+    test('은퇴는 사라진 것이 아니다', () {
+      expect(
+        diff(same, (c) {
+          bump(c);
+          c['manners'][0]['retired'] = true;
+          scenario(c, 'ox-1')['retired'] = true;
+          scenario(c, 'pos-1')['vary'][0][0]['retired'] = true;
+          c['days'][0]['retired'] = true;
+        }),
+        isEmpty,
+      );
+    });
+    test('같은 id인 시나리오의 manner가 바뀌면 오류다', () {
+      expect(
+        diff(same, (c) {
+          bump(c);
+          c['manners'].add({'id': 2, 'principle': 'A'});
+          scenario(c, 'ox-1')['manner'] = 2;
+        }),
+        has('오류: 매너 바뀜: 시나리오 ox-1 1 → 2'),
+      );
+    });
+    test('매너·시나리오·보기·데일리를 더하고 version을 올리면 통과한다', () {
+      expect(
+        diff(same, (c) {
+          bump(c);
+          c['manners'].add({'id': 2, 'principle': 'A'});
+          c['scenarios'].add({...scenario(c, 'ox-1'), 'id': 'ox-2', 'manner': 2});
+          scenario(c, 'pos-1')['vary'][0].add({
+            'key': 'mom',
+            'vars': {'other': '어머니'},
+          });
+          c['days'].add({...c['days'][0], 'id': 'day-02'});
+        }),
+        isEmpty,
+      );
+    });
+    test('내용이 다른데 version이 크지 않으면 오류다', () {
+      final edits = <String, void Function(dynamic c)>{
+        '시나리오 문구': (c) => scenario(c, 'ox-1')['prompt'] = 'q',
+        '데일리 문구': (c) => c['days'][0]['title'] = 'u',
+        '매너 필드': (c) => c['manners'][0]['name'] = 'n',
+        '원칙 필드': (c) => c['principles'][0]['name'] = 'n',
+        'schema': (c) => c['schema'] = 2,
+      };
+      for (final MapEntry(key: what, value: edit) in edits.entries) {
+        expect(diff(same, edit), ['오류: version이 크지 않음: 1 → 1'], reason: what);
+        expect(diff(bump, edit), ['오류: version이 크지 않음: 2 → 1'], reason: what);
+        expect(
+            diff(same, (c) {
+              edit(c);
+              bump(c);
+            }),
+            isEmpty,
+            reason: what);
+      }
+    });
+    test('version이 줄면 내용이 같아도 오류다', () {
+      expect(diff(bump, same), ['오류: version이 크지 않음: 2 → 1']);
+    });
+  });
+
+  test('CLI --previous: A-alley~child를 지우면 오류 이름과 id를 출력하고 1로 끝난다', () async {
+    final dir = Directory.systemTemp.createTempSync('validate_content');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final c = jsonDecode(File('assets/content.json').readAsStringSync());
+    (scenario(c, 'A-alley')['vary'][0] as List).removeWhere((o) => o['key'] == 'child');
+    final next = File('${dir.path}/next.json')..writeAsStringSync(jsonEncode(c));
+
+    Future<ProcessResult> cli(String file) => Process.run(
+        'dart', ['run', 'tool/validate_content.dart', file, '--previous=assets/content.json']);
+    final r = await cli(next.path);
+    expect(r.stdout, contains('오류: 사라진 id: 펼친 문제 A-alley~child'));
+    expect(r.exitCode, 1);
+    expect((await cli('assets/content.json')).exitCode, 0);
+  }, timeout: const Timeout(Duration(minutes: 2)));
+
   group('id 중복', () {
     test('매너', () {
       expect(run((c) => c['manners'].add({'id': 1, 'principle': 'A'})), has('오류: 중복 id: 매너 1'));

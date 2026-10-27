@@ -1,4 +1,6 @@
-// 콘텐츠 파일 하나 검사 (ADR 0003 §6). 순수 Dart. JSON Schema 검사는 ajv가 따로 한다.
+// 콘텐츠 검사 (ADR 0003 §6): 파일 하나 검사와 --previous 비교. 순수 Dart. JSON Schema 검사는 ajv가 따로 한다.
+import 'dart:convert';
+
 import 'content.dart';
 import 'templates.dart';
 
@@ -110,3 +112,35 @@ Iterable<String> _strings(Object? v) => switch (v) {
       Map m => m.values.expand(_strings),
       _ => const [],
     };
+
+/// `--previous`와 비교한다. 은퇴한 것도 파일에 남으므로 사라진 것이 아니다.
+List<Issue> compare(Content prev, Content next) {
+  final out = <Issue>[];
+  void gone(String what, Iterable<Object?> before, Iterable<Object?> after) {
+    final now = after.toSet();
+    for (final id in before) {
+      if (!now.contains(id)) out.add(Issue(true, '사라진 id: $what $id'));
+    }
+  }
+
+  gone('매너', prev.manners.map((m) => m['id']), next.manners.map((m) => m['id']));
+  gone('시나리오', prev.scenarios.map((s) => s['id']), next.scenarios.map((s) => s['id']));
+  gone('펼친 문제', prev.questions.keys, next.questions.keys);
+  gone('데일리', prev.days.map((d) => d['id']), next.days.map((d) => d['id']));
+
+  final before = {for (final s in prev.scenarios) s['id']: s['manner']};
+  for (final s in next.scenarios) {
+    final m = before[s['id']];
+    if (m != null && m != s['manner']) {
+      out.add(Issue(true, '매너 바뀜: 시나리오 ${s['id']} $m → ${s['manner']}'));
+    }
+  }
+
+  // ponytail: version을 뺀 필드를 jsonEncode로 비교한다. 키 순서만 바뀌어도 다르다고 보고,
+  // 최상위 `$schema`(Content에 없음)는 보지 않는다.
+  String body(Content c) => jsonEncode([c.schema, c.principles, c.manners, c.scenarios, c.days]);
+  if (next.version < prev.version || (next.version == prev.version && body(prev) != body(next))) {
+    out.add(Issue(true, 'version이 크지 않음: ${prev.version} → ${next.version}'));
+  }
+  return out;
+}
