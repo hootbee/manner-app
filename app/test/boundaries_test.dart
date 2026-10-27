@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 const rules = <String, (List<String>, List<String>)>{
   'content': ([], ['package:flutter', 'package:supabase', 'dart:ui']),
   'engine': (['content'], ['package:flutter', 'package:supabase', 'dart:ui']),
+  'sync': (['engine'], ['package:flutter', 'dart:ui']), // ADR 0005 §3: supabase_flutter는 허용
 };
 
 final _import = RegExp(r'''^\s*(?:import|export)\s+['"]([^'"]+)['"]''', multiLine: true);
