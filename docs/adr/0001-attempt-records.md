@@ -151,12 +151,14 @@ name: db-backup
 on:
   schedule: [{ cron: '17 18 * * *' }]   # 매일 03:17 KST. 정시는 지연·누락이 잦다
   workflow_dispatch:
+permissions: {}
 jobs:
   dump:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
+        with: { version: 2.122.0 } # 메인 리포 db.yml과 같은 버전. 이 CLI의 pg_dump는 17
       - env: { DB_URL: '${{ secrets.SUPABASE_DB_URL }}' }
         run: |
           supabase db dump --db-url "$DB_URL" -f roles.sql --role-only
@@ -169,6 +171,8 @@ jobs:
 
 - 개인정보처리방침 문구: "탈퇴 후 최대 30일 동안 백업에 남은 뒤 자동 파기"
 - GitHub Free의 비공개 리포 한도는 Actions 월 2,000분, 아티팩트 저장 500MB다. 덤프를 30개 보관하므로 `backup.tgz`가 15MB를 넘으면 다시 본다.
+- CLI 버전은 고정한다. CLI가 올라가면 `pg_dump` 버전도 같이 바뀌기 때문이다. `pg_dump`는 자기보다 새 메이저 버전 서버를 덤프하지 못하므로, Supabase 프로젝트의 Postgres가 18 이상이 되면 `version`을 함께 올린다.
+- 워크플로에 `--debug`나 `--dry-run`을 붙이지 않는다. 디코딩된 DB 비밀번호가 로그에 평문으로 나온다(로컬에서 확인).
 
 ### 검증 (로컬 `supabase start`)
 ```sql
