@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'backend.dart';
+import 'fake/fake_backend.dart';
+
+// ADR 0002 §3. live/가 생기기 전에는 가짜만 넣는다. 묶음 이름은 FakeBackend.preset.
+const fake = String.fromEnvironment('FAKE');
+
 void main() {
+  backend = FakeBackend.preset(fake.isEmpty ? 'guest' : fake);
   runApp(const MyApp());
 }
 

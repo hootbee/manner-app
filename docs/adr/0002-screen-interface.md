@@ -20,7 +20,7 @@
 | `live/` | `backend.dart`, `content/`, `engine/`, `sync/`, `auth/` | 인터페이스의 실제 구현. 계산 없이 모듈을 이어 붙이기만 한다. 분석 이벤트를 보낸다(ADR 0006) |
 | `fake/` | `backend.dart` | 가짜 구현(3절) |
 | `screens/` | `backend.dart` | Supabase, `google_sign_in`, 다른 앱 폴더 전부 금지 |
-| `main.dart` | `screens/`, `fake/`, `live/`, `firebase_options.dart` | 구현 하나를 골라 넣는다 |
+| `main.dart` | `backend.dart`, `screens/`, `fake/`, `live/`, `firebase_options.dart` | 구현 하나를 골라 넣는다 |
 
 패키지는 `firebase_analytics`를 `live/`만, `firebase_core`를 `main.dart`만 import한다. 나머지 폴더는 `package:firebase_`를 import하지 않는다(ADR 0006).
 
@@ -93,7 +93,7 @@ class Evidence { final String summary; final List<Source> sources; }  class Sour
 - MVP에서 빼는 것: 원칙 스킬, 칭호, 옷장·옷차림 아이템, 약한 매너(2026-10-25 사용자 결정). 인터페이스에 자리도 만들지 않는다.
 
 ### 3. 가짜 구현 (`app/lib/fake/`)
-- `fake_backend.dart`: `FakeBackend implements Backend`. 메모리에만 상태를 둔다. 채점은 `correct`와 비교, XP는 10·5·0, 오답이면 같은 문제를 세트 맨 뒤에 `retry: true`로 다시 내고(맞힐 때까지, ADR 0004 §4), 마지막 `next()`에서 `streak + 1`, `doneToday = true`가 된다. 비동기 메서드는 `delay`(기본 300ms)만큼 기다려 로딩 표시를 볼 수 있게 한다.
+- `fake_backend.dart`: `FakeBackend implements Backend`. 메모리에만 상태를 둔다. 채점은 `correct`와 비교, XP는 10·5·0, `best`가 아니면(`ok` 포함) 같은 문제를 세트 맨 뒤에 `retry: true`로 다시 내고(맞힐 때까지, ADR 0004 §4), 마지막 `next()`에서 `streak + 1`, `doneToday = true`가 된다. 비동기 메서드는 `delay`(기본 300ms)만큼 기다려 로딩 표시를 볼 수 있게 한다.
 - `samples.dart`: `docs/prototype/content.json`에서 옮긴 고정 데이터. 하루는 `day-01`(3장면), 문제는 `A-sidewalk`(연인·오른쪽), `A-alley`(다시 풀기용), `A-stairs`(할머니·올라감), `A-umbrella-01`, `A-crosswalk-01`. 순서 형식은 견본에 예가 없으므로 가짜 문제 하나를 쓰고 `// 가짜` 주석을 단다.
 - 경계 상태는 생성자 인자로 만든다: `FakeBackend({bool online = true, Account? account, bool doneToday = false, bool noDay = false, SignInResult signIn = ok, int unsynced = 0, DeleteResult delete = ok, Duration delay})`. 테스트에서는 `fake.setOnline(false)`로 바꿀 수 있다.
 - 실행할 때는 이름 붙은 묶음을 고른다: `flutter run --dart-define=FAKE=<이름>`. 이름은 `guest`(기본, 첫 실행), `signedIn`, `doneToday`, `noDay`, `offline`, `signInFails`, `wouldLose`, `deleteFails`. 팀원이 버튼으로 고를 수 있게 `.vscode/launch.json`에 묶음마다 실행 설정을 둔다.
