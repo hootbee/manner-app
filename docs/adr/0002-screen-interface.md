@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | `content/` | 없음 | 번들 JSON 로드, `vary` 펼치기. 형식은 ADR 0003 |
 | `engine/` | `content/` | 순수 Dart. Flutter, Supabase 금지. 기록 타입(`Attempt`, `DayCompletion`)을 여기 둔다 |
-| `sync/` | `engine/`의 기록 타입 | 로컬 기록 테이블과 `sync(table)`(ADR 0001 §3) |
+| `sync/` | `engine/`의 기록 타입 | 로컬 기록 파일과 `sync(table)`(ADR 0001 §3, ADR 0005) |
 | `auth/` | 없음 | Google 로그인, `delete-account` 호출 |
 | `backend.dart` | 없음 (`package:flutter/foundation.dart`만) | 화면이 보는 인터페이스와 값 타입(2절) |
 | `live/` | `backend.dart`, `content/`, `engine/`, `sync/`, `auth/` | 인터페이스의 실제 구현. 계산 없이 모듈을 이어 붙이기만 한다 |
@@ -134,7 +134,7 @@ Future<void> main() async {
 | 6 | 팀원 | 설정: 로그아웃, 탈퇴, 개인정보처리방침 링크 | `offline`에서 탈퇴 버튼이 막혀 있다. `FakeBackend(unsynced: 3)`에서 로그아웃하면 "3개" 확인 시트가 뜬다 |
 | 7 | 사용자 | `content/`: 번들 JSON → `Question` (ADR 0003 뒤) | `A-sidewalk`가 8문제로 펼쳐지고 `PositionQuestion.vars['mirror']`가 축 값과 같다 |
 | 8 | 사용자 | `engine/`: XP, 레벨, 연속 학습일, Leitner, 영역 스탯, 출제 순서 | ADR 0001 §4 규칙 그대로: `best, ok, avoid` 세 기록의 XP는 15다 |
-| 9 | 사용자 | `sync/`: 로컬 기록 테이블과 `sync(table)` | 네트워크 없음, 같은 행 두 번 push, 기기 두 대 pull 뒤 같은 집합(ADR 0001 §3) |
+| 9 | 사용자 | `sync/`: 로컬 기록 파일과 `sync(table)`(ADR 0005) | 네트워크 없음, 같은 행 두 번 push, 기기 두 대 pull 뒤 같은 집합(ADR 0001 §3) |
 | 10 | 사용자 | `auth/`: Google 로그인, 탈퇴 순서 | `delete-account`가 401을 주고 세션 갱신도 실패하면 로컬 기록이 지워진다(ADR 0001 §5-4) |
 | 11 | 사용자 | `live/`, `main.dart` 전환 | `answer()` 한 번에 로컬 `attempts`에 `synced=false` 행이 하나 생기고 `home.value.xp`가 10 는다 |
 

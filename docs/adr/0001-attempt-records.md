@@ -74,12 +74,12 @@ Future<void> sync(String table) async {
   await _pull(table); // (created_at, id) 키셋으로 1000행씩 받아 id 합집합으로 로컬에 추가
 }
 // _pull의 한 페이지: supabase.from(table).select().eq('user_id', uid)
-//   .or('created_at.gt.$c,and(created_at.eq.$c,id.gt.$i)').order('created_at').order('id').limit(1000);
+//   .or('created_at.gt.$c,and(created_at.eq.$c,id.gt.$i)').order('created_at', ascending: true).order('id', ascending: true).limit(1000); // 기본값은 내림차순
 ```
 
-- **로컬 원본**: 서버와 같은 컬럼에 `synced bool`을 더한 로컬 테이블을 둔다. 답할 때 `attempts`에 쓰고(`id`는 uuid v4, `solved_on`은 기기의 오늘 날짜), 데일리 마지막 장면을 마칠 때 `day_completions`에 쓴다. 둘 다 네트워크가 필요 없다.
+- **로컬 원본**: 서버 insert 권한이 있는 컬럼에 `synced`를 더한 행을 기기 안 저장소에 둔다(형식은 ADR 0005). 답할 때 `attempts`에 쓰고(`id`는 uuid v4, `solved_on`은 기기의 오늘 날짜), 데일리 마지막 장면을 마칠 때 `day_completions`에 쓴다. 둘 다 네트워크가 필요 없다.
 - **호출 시점**: 앱 시작, 세트 종료, 연결이 돌아왔을 때. 실패하면 다음 호출에서 다시 한다. 같은 행을 다시 보내도 결과는 같다.
-- **pull 커서**: 테이블과 사용자마다 `(created_at, id)` 하나를 저장하고, 페이지를 받을 때마다 마지막 행 값으로 갱신한다. 시각은 마이크로초까지 UTC `Z` 형식으로 보낸다.
+- **pull 커서**: 테이블마다 `(created_at, id)` 하나를 저장하고(로그아웃·탈퇴 때 기록과 함께 지우므로 한 기기에는 한 사용자의 커서만 있다), 페이지를 받을 때마다 마지막 행 값으로 갱신한다. 시각은 마이크로초까지 UTC `Z` 형식으로 보낸다.
   - 첫 페이지: 커서가 없으면 처음부터 받는다. 커서 `(c, i)`가 있으면 시작 키는 `(c - 5분, '00000000-0000-0000-0000-000000000000')`이고, 이는 `created_at >= c - 5분`과 같다. 5분을 겹치는 이유는 `now()`가 트랜잭션 시작 시각이라 커밋 순서와 어긋날 수 있기 때문이다.
   - 다음 페이지는 직전 페이지 마지막 행부터 받는다. 받은 행이 1000개보다 적으면 멈춘다.
 - **게스트와 로그아웃**: 게스트 기록도 `synced=false`로 쌓아 두었다가 로그인하면 그대로 올린다. `user_id`는 서버가 채운다. 로그아웃할 때는 먼저 `sync`를 해 본다. 그래도 못 올린 행이 있으면 "N개가 사라진다"는 확인을 받고, 로컬 기록과 커서를 지운다.
@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
 - `verify_jwt`는 기본값(켜짐) 그대로 둔다. 키는 함수 환경 변수에만 둔다. 새 키 체계를 쓰면 `SUPABASE_SECRET_KEYS`를 쓴다. 기록은 cascade로 함께 지워진다. 사용자가 소유한 Storage 객체가 생기면 `deleteUser`가 실패하므로, 그때는 이 함수에서 객체를 먼저 지운다. 앱에서의 순서는 아래와 같다.
 1. 오프라인이면 탈퇴 버튼을 막는다. 탈퇴 요청은 큐에 넣지 않는다.
 2. 사용자 확인을 받으면 `sync`를 멈추고 함수를 호출한다. 로컬 데이터는 서버가 성공한 뒤에만 지운다.
-3. 204를 받으면 차례로 한다: 로컬 기록 테이블 전부와 커서 삭제 → `auth.signOut(scope: local)` → Google Sign-In `disconnect()` → 게스트 첫 화면.
+3. 204를 받으면 차례로 한다: 로컬 기록과 커서 삭제 → `auth.signOut(scope: local)` → Google Sign-In `disconnect()` → 게스트 첫 화면.
 4. 응답이 없으면 다시 호출한다. 401이 오면 `refreshSession()`을 시도하고, 실패하면 3을 진행한다.
 5. 다른 기기는 기존 토큰이 만료될 때까지 남아 있다. 그 기기에서 올리면 FK 위반(`23503`)으로 거절된다. 앱은 `23503`을 받거나 세션 갱신에 실패하면 로컬을 지우고 로그아웃한다.
 
