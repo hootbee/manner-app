@@ -100,10 +100,12 @@ void main() {
   late Directory dir;
   late File file;
   late List<String> log; // 서버 요청과 Google 콜백을 부른 순서
+  late List<Object> reported; // ADR 0007 §3: non-fatal로 보낸 오류
   setUp(() {
     dir = Directory.systemTemp.createTempSync('live_backend_test');
     file = File('${dir.path}/records.json');
     log = [];
+    reported = [];
     today = DateTime(2026, 10, 27, 9);
   });
   tearDown(() => dir.deleteSync(recursive: true));
@@ -118,8 +120,10 @@ void main() {
           clearLocal: store.clear,
           googleIdToken: () async => 'gid',
           googleSignOut: () async => log.add('google.signOut'),
-          googleDisconnect: () async => log.add('google.disconnect')),
+          googleDisconnect: () async => log.add('google.disconnect'),
+          report: (e, _) => reported.add(e)),
       now: () => today,
+      report: (e, _) => reported.add(e),
     );
   }
 
@@ -479,7 +483,7 @@ void main() {
       expect(b.online.value, isTrue);
     });
 
-    test('연결 오류가 아닌 예외(코드 버그)는 Zone으로 넘기고 오프라인으로 보지 않는다', () async {
+    test('연결 오류가 아닌 예외(코드 버그)는 Zone으로 넘기지 않고 report로 보낸다. 오프라인으로 보지 않는다(ADR 0007 §3)', () async {
       final b = await signedIn((r) async => r.method == 'POST' ? throw StateError('bug') : accepting(r));
       final s = b.startDaily();
       askNext(s);
@@ -487,7 +491,8 @@ void main() {
 
       final errors = <Object>[];
       await runZonedGuarded(b.sync, (e, _) => errors.add(e));
-      expect(errors, [isA<StateError>()]);
+      expect(errors, isEmpty);
+      expect(reported, [isA<StateError>()]);
       expect(b.online.value, isTrue);
       expect(rows('attempts').single['synced'], isFalse);
     });
@@ -659,6 +664,7 @@ void main() {
       expect(file.existsSync(), isFalse);
       expect(b.account.value, isNull);
       expect(log, isNot(contains('POST /rest/v1/attempts'))); // 요청 전에 갱신이 실패했다
+      expect(reported, [isA<AuthException>(), isA<StateError>()]); // ADR 0007 §3: 서버가 응답한 오류 + 세션 없음과 synced 행
     });
 
     test('한 번도 올리지 못한 사용자의 세션 갱신이 거절되면 기록은 남기고 게스트가 된다(account null, online true)', () async {
@@ -683,6 +689,59 @@ void main() {
       expect(rows('attempts'), hasLength(1));
       expect(b.account.value, isNull);
       expect(b.online.value, isTrue);
+      expect(reported, [isA<AuthException>()]); // ADR 0007 §3: 서버가 응답한 오류. synced 행이 없어 StateError는 없다
+    });
+  });
+
+  group('sync의 non-fatal 보고 (ADR 0007 §3)', () {
+    Future<LiveBackend> answered(Future<http.Response> Function(http.Request r) server) async {
+      final b = await signedIn(server);
+      final s = b.startDaily();
+      askNext(s);
+      s.answer(right);
+      return b;
+    }
+
+    test('서버가 42501(RLS 거절)이면 하나를 보내고 online은 참이다', () async {
+      final b = await answered((r) async => r.method == 'POST' ? json({'code': '42501', 'message': 'rls'}, 403) : accepting(r));
+      await b.sync();
+      expect(reported, [isA<PostgrestException>().having((e) => e.code, 'code', '42501')]);
+      expect(b.online.value, isTrue);
+    });
+
+    test('ClientException(전송 오류)이면 보내지 않고 online은 거짓이다', () async {
+      final b = await answered(down);
+      await b.sync();
+      expect(reported, isEmpty);
+      expect(b.online.value, isFalse);
+    });
+
+    test('23503이면 하나를 보내고 로컬이 지워진다', () async {
+      final b = await answered((r) async => r.url.path == '/rest/v1/attempts'
+          ? json({'code': '23503', 'message': 'insert or update violates foreign key constraint'}, 409)
+          : status(204));
+      await b.sync();
+      expect(reported, [isA<PostgrestException>().having((e) => e.code, 'code', '23503')]);
+      expect(file.existsSync(), isFalse);
+    });
+
+    test('저장소가 TypeError를 던지면 하나를 보내고 online은 참이다', () async {
+      final b = await answered((r) async => r.method == 'POST' ? throw TypeError() : accepting(r));
+      await b.sync();
+      expect(reported, [isA<TypeError>()]);
+      expect(b.online.value, isTrue);
+    });
+
+    test('세션이 없는데 synced=true 행이 있으면 StateError 하나를 보낸다', () async {
+      file.writeAsStringSync(jsonEncode({
+        'attempts': [
+          {'id': '00000000-0000-4000-8000-000000000001', 'scenario_id': 'X-1a', 'grade': 'best', 'solved_on': '2026-10-27', 'synced': true},
+        ],
+      }));
+      final b = guest();
+      await b.sync();
+      expect(reported, [isA<StateError>()]);
+      expect(file.existsSync(), isFalse);
     });
   });
 }

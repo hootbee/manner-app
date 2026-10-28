@@ -2,6 +2,8 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'offline.dart';
+
 /// Google Cloud 웹 클라이언트 ID. 공개 식별자다. ID 토큰의 aud가 되고 Supabase Google 공급자가 이 값으로 검사한다.
 const webClientId = '111140034242-d0d4s5hmqmjr1r1kqttsbes3hqtpt6hi.apps.googleusercontent.com';
 
@@ -20,11 +22,13 @@ class Auth {
     required this.googleIdToken,
     required this.googleSignOut,
     required this.googleDisconnect,
+    required this.report,
   });
 
   /// 기기용. `GoogleSignIn.initialize`는 앱에서 한 번만 불러야 한다.
   /// nonce는 넘기지 않는다: Android 구현은 nonce를 받았을 때만 ID 토큰에 넣으므로 Supabase에도 넘길 것이 없다.
-  static Future<Auth> google(SupabaseClient client, {required Future<void> Function() clearLocal}) async {
+  static Future<Auth> google(SupabaseClient client,
+      {required Future<void> Function() clearLocal, required void Function(Object, StackTrace) report}) async {
     final g = GoogleSignIn.instance;
     await g.initialize(serverClientId: webClientId);
     return Auth(
@@ -33,6 +37,7 @@ class Auth {
       googleIdToken: () async => (await g.authenticate()).authentication.idToken,
       googleSignOut: g.signOut,
       googleDisconnect: g.disconnect,
+      report: report,
     );
   }
 
@@ -41,20 +46,28 @@ class Auth {
   final Future<String?> Function() googleIdToken; // 취소·실패는 GoogleSignInException
   final Future<void> Function() googleSignOut;
   final Future<void> Function() googleDisconnect;
+  final void Function(Object, StackTrace) report; // 잡은 실패를 non-fatal로 보낸다(ADR 0007 §3)
 
   Future<SignInStatus> signIn() async {
     final String? idToken;
     try {
       idToken = await googleIdToken();
-    } on GoogleSignInException catch (e) {
-      return e.code == GoogleSignInExceptionCode.canceled ? SignInStatus.cancelled : SignInStatus.failed;
+    } on GoogleSignInException catch (e, s) {
+      if (e.code == GoogleSignInExceptionCode.canceled) return SignInStatus.cancelled;
+      report(e, s);
+      return SignInStatus.failed;
     }
-    if (idToken == null) return SignInStatus.failed;
+    if (idToken == null) {
+      report(StateError('idToken null'), StackTrace.current);
+      return SignInStatus.failed;
+    }
     try {
       await _client.auth.signInWithIdToken(provider: OAuthProvider.google, idToken: idToken);
       return SignInStatus.ok;
-    } catch (e) {
-      return _unreachable(e) ? SignInStatus.offline : SignInStatus.failed;
+    } catch (e, s) {
+      if (isOffline(e)) return SignInStatus.offline;
+      report(e, s);
+      return SignInStatus.failed;
     }
   }
 
@@ -68,10 +81,13 @@ class Auth {
     try {
       deleted = await _callDelete();
       await clearLocal();
-    } catch (e) {
-      return _unreachable(e) ? DeleteStatus.offline : DeleteStatus.failed;
+    } catch (e, s) {
+      if (isOffline(e)) return DeleteStatus.offline;
+      report(e, s);
+      return DeleteStatus.failed;
     }
     await _quietly(googleDisconnect);
+    if (!deleted) report(StateError('delete: session rejected'), StackTrace.current);
     return deleted ? DeleteStatus.ok : DeleteStatus.failed;
   }
 
@@ -101,11 +117,3 @@ Future<void> _quietly(Future<void> Function() f) async {
     await f();
   } catch (_) {}
 }
-
-/// 요청이 서버에 닿지 않았다. 요청 전 갱신 오류는 FunctionsFetchException.details 안에 있다.
-bool _unreachable(Object? e) => switch (e) {
-      FunctionsFetchException(:final AuthException details) => _unreachable(details),
-      FunctionsFetchException() => true,
-      AuthRetryableFetchException(:final statusCode) => statusCode == null,
-      _ => false,
-    };

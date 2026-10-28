@@ -1,4 +1,5 @@
 // ADR 0003 §5 앱 시작 순서 1~4: 저장된 콘텐츠 고르기와 새 콘텐츠 받아 두기. 네트워크는 가짜 함수다.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,9 +26,12 @@ void main() {
 
   late Directory dir;
   late File saved;
+  late List<Object> reported; // ADR 0007 §3: non-fatal로 보낸 오류
+  void report(Object e, StackTrace _) => reported.add(e);
   setUp(() {
     dir = Directory.systemTemp.createTempSync('content_update_test');
     saved = File('${dir.path}/content.json');
+    reported = [];
   });
   tearDown(() => dir.deleteSync(recursive: true));
 
@@ -45,30 +49,32 @@ void main() {
 
   group('pickContent (§5-1)', () {
     test('저장된 파일이 없으면 번들을 쓴다', () {
-      expect(pickContent(dir, bundle), same(bundle));
+      expect(pickContent(dir, bundle, report: report), same(bundle));
+      expect(reported, isEmpty); // 파일 없음은 실패가 아니다
     });
 
     test('저장된 파일의 schema가 2면 번들을 쓰고 저장 파일을 지운다', () {
       saved.writeAsStringSync(variant(schema: 2, version: 5));
-      expect(pickContent(dir, bundle), same(bundle));
+      expect(pickContent(dir, bundle, report: report), same(bundle));
       expect(saved.existsSync(), isFalse);
     });
 
     test('저장된 파일의 version이 번들 이하이면 번들을 쓰고 저장 파일을 지운다', () {
       saved.writeAsStringSync(variant(version: 1));
-      expect(pickContent(dir, bundle), same(bundle));
+      expect(pickContent(dir, bundle, report: report), same(bundle));
       expect(saved.existsSync(), isFalse);
     });
 
     test('저장된 파일이 깨졌으면 번들을 쓰고 저장 파일을 지운다', () {
       saved.writeAsStringSync('{"schema": 1, "vers');
-      expect(pickContent(dir, bundle), same(bundle));
+      expect(pickContent(dir, bundle, report: report), same(bundle));
       expect(saved.existsSync(), isFalse);
+      expect(reported, hasLength(1));
     });
 
     test('schema가 같고 version이 번들보다 크면 저장된 파일을 쓴다', () {
       saved.writeAsStringSync(variant(version: 2));
-      expect(pickContent(dir, bundle).version, 2);
+      expect(pickContent(dir, bundle, report: report).version, 2);
       expect(saved.existsSync(), isTrue);
     });
   });
@@ -97,47 +103,60 @@ void main() {
     for (final MapEntry(key: why, value: body) in rejected.entries) {
       test('본문이 $why이면 저장된 파일이 그대로다', () async {
         final get = fake({manifestUri: '{"version": 3}', bodyUri(3): body});
-        await fetchContent(url, dir, parseContent(current), get: get);
+        await fetchContent(url, dir, parseContent(current), get: get, report: report);
         expect(requested, [manifestUri, bodyUri(3)]);
         expectUnchanged();
+        expect(reported, hasLength(1));
       });
     }
 
     test('manifest version이 지금 것과 같으면 본문을 요청하지 않는다', () async {
       final get = fake({manifestUri: '{"version": 2}', bodyUri(2): current});
-      await fetchContent(url, dir, parseContent(current), get: get);
+      await fetchContent(url, dir, parseContent(current), get: get, report: report);
       expect(requested, [manifestUri]);
       expectUnchanged();
     });
 
     test('manifest version이 지금 것보다 작으면 본문을 요청하지 않는다', () async {
       final get = fake({manifestUri: '{"version": 1}', bodyUri(1): bundleJson});
-      await fetchContent(url, dir, parseContent(current), get: get);
+      await fetchContent(url, dir, parseContent(current), get: get, report: report);
       expect(requested, [manifestUri]);
       expectUnchanged();
     });
 
     test('네트워크가 없으면 예외 없이 끝나고 아무것도 바뀌지 않는다', () async {
       final get = fake({});
-      await fetchContent(url, dir, parseContent(current), get: get);
+      await fetchContent(url, dir, parseContent(current), get: get, report: report);
       expect(requested, [manifestUri]);
       expectUnchanged();
+      expect(reported, isEmpty); // SocketException
     });
+
+    for (final (name, e) in [
+      ('TimeoutException', TimeoutException('5s')),
+      ('HttpException(응답 도중 끊김)', const HttpException('connection closed')),
+    ]) {
+      test('get이 $name이면 보내지 않는다', () async {
+        await fetchContent(url, dir, parseContent(current), get: (_) async => throw e, report: report);
+        expectUnchanged();
+        expect(reported, isEmpty);
+      });
+    }
 
     test('새 version이 검사를 통과하면 저장 파일을 바꾸고 다음 pickContent가 그것을 고른다', () async {
       final next = variant(version: 3);
       final get = fake({manifestUri: '{"version": 3}', bodyUri(3): next});
-      await fetchContent(url, dir, parseContent(current), get: get);
+      await fetchContent(url, dir, parseContent(current), get: get, report: report);
       expect(saved.readAsStringSync(), next);
       expect(dir.listSync().map((e) => e.path), [saved.path]); // 임시 파일은 rename되어 남지 않는다
-      expect(pickContent(dir, bundle).version, 3);
+      expect(pickContent(dir, bundle, report: report).version, 3);
     });
 
     test('동시에 두 번 불러도 요청은 한 번이다', () async {
       final get = fake({manifestUri: '{"version": 3}', bodyUri(3): variant(version: 3)});
       await Future.wait([
-        fetchContent(url, dir, parseContent(current), get: get),
-        fetchContent(url, dir, parseContent(current), get: get),
+        fetchContent(url, dir, parseContent(current), get: get, report: report),
+        fetchContent(url, dir, parseContent(current), get: get, report: report),
       ]);
       expect(requested, [manifestUri, bodyUri(3)]);
     });
@@ -150,7 +169,7 @@ void main() {
       server.listen((req) {
         final ok = req.uri.path == '/ok';
         req.response
-          ..statusCode = ok ? 200 : 400
+          ..statusCode = ok ? 200 : 404
           ..headers.contentType = ContentType.json
           ..write(ok ? '{"title": "인도 안쪽"}' : '{"error": "not_found"}')
           ..close();
@@ -163,8 +182,18 @@ void main() {
       expect(await httpGet(at('/ok')), '{"title": "인도 안쪽"}');
     });
 
-    test('200이 아니면 예외를 던진다', () async {
-      await expectLater(httpGet(at('/missing')), throwsA(isA<HttpException>()));
+    // ADR 0007 §2: HttpException은 전송 오류라 비-200에는 쓰지 않는다.
+    test('200이 아니면 HttpException이 아닌 Exception(HTTP 404 …)을 던진다', () async {
+      await expectLater(
+          httpGet(at('/missing')),
+          throwsA(isA<Exception>()
+              .having((e) => e is HttpException, 'is HttpException', isFalse)
+              .having((e) => '$e', 'message', contains('HTTP 404'))));
+    });
+
+    test('fetchContent가 404를 받으면 하나를 보낸다', () async {
+      await fetchContent('http://127.0.0.1:${server.port}', dir, bundle, report: report);
+      expect(reported, [isA<Exception>().having((e) => '$e', 'message', contains('HTTP 404'))]);
     });
   });
 }

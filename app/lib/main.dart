@@ -21,7 +21,9 @@ Future<void> main() async {
     crashlytics.recordError(error, stack, fatal: true);
     return true;
   };
-  backend = (kReleaseMode || fake.isEmpty) ? await LiveBackend.start() : FakeBackend.preset(fake);
+  backend = (kReleaseMode || fake.isEmpty)
+      ? await LiveBackend.start(report: crashlytics.recordError) // ADR 0007 §3: 잡은 실패는 non-fatal(fatal 기본값 false)
+      : FakeBackend.preset(fake);
   runApp(const MyApp());
 }
 
