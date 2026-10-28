@@ -11,6 +11,9 @@ Deno.serve(async (req) => {
   const uid = data?.claims?.sub
   if (error || !uid) return new Response(null, { status: 401 })
   const { error: delErr } = await admin.auth.admin.deleteUser(uid)   // only the token's sub, hard delete
-  if (delErr && delErr.status !== 404) return new Response(null, { status: 500 })
+  if (delErr && delErr.status !== 404) {
+    console.error('deleteUser failed', delErr.status, delErr.code)   // ADR 0007 §5: no uid or email
+    return new Response(null, { status: 500 })
+  }
   return new Response(null, { status: 204 })                         // already gone is success (idempotent)
 })
