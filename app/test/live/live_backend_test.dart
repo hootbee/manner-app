@@ -1,4 +1,5 @@
 // ADR 0002 작업 11: 실제 구현이 모듈을 이어 붙인 결과. Supabase는 가짜 HTTP나 닿지 않는 주소, Google은 가짜 함수.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -476,6 +477,31 @@ void main() {
       up = true;
       await b.sync();
       expect(b.online.value, isTrue);
+    });
+
+    test('연결 오류가 아닌 예외(코드 버그)는 Zone으로 넘기고 오프라인으로 보지 않는다', () async {
+      final b = await signedIn((r) async => r.method == 'POST' ? throw StateError('bug') : accepting(r));
+      final s = b.startDaily();
+      askNext(s);
+      s.answer(right);
+
+      final errors = <Object>[];
+      await runZonedGuarded(b.sync, (e, _) => errors.add(e));
+      expect(errors, [isA<StateError>()]);
+      expect(b.online.value, isTrue);
+      expect(rows('attempts').single['synced'], isFalse);
+    });
+
+    test('연결 오류는 Zone으로 넘기지 않는다', () async {
+      final b = await signedIn(down);
+      final s = b.startDaily();
+      askNext(s);
+      s.answer(right);
+
+      final errors = <Object>[];
+      await runZonedGuarded(b.sync, (e, _) => errors.add(e));
+      expect(errors, isEmpty);
+      expect(b.online.value, isFalse);
     });
 
     test('Postgrest 5xx 응답은 서버에 닿은 것이다', () async {

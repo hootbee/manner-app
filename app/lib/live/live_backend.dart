@@ -128,6 +128,8 @@ class LiveBackend implements Backend {
       for (final t in tables) {
         await _store.sync(t);
       }
+    } on Error catch (e, s) {
+      Zone.current.handleUncaughtError(e, s); // 코드 버그는 연결 상태와 상관없다. 전역 처리기로 보낸다
     } catch (e) {
       error = e;
     }
