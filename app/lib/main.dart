@@ -1,8 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'backend.dart';
 import 'fake/fake_backend.dart';
+import 'firebase_options.dart';
 import 'live/live_backend.dart';
 
 // ADR 0002 §3. FAKE를 주면 가짜(묶음 이름은 FakeBackend.preset), 아니면 실제. 릴리스는 항상 실제다.
@@ -10,6 +12,7 @@ const fake = String.fromEnvironment('FAKE');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); // ADR 0006 §2
   backend = (kReleaseMode || fake.isEmpty) ? await LiveBackend.start() : FakeBackend.preset(fake);
   runApp(const MyApp());
 }

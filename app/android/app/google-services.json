@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "229419604641",
+    "project_id": "manner-app-54e2d",
+    "storage_bucket": "manner-app-54e2d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229419604641:android:395da1431afc335f6aeee0",
+        "android_client_info": {
+          "package_name": "com.hootbee.mannerfit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAA7Hf_rqT5Q9-mSBJPfpBNZ3oxK52a0P4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
