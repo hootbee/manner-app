@@ -15,14 +15,15 @@
 | `content/` | 없음 | 번들 JSON 로드, `vary` 펼치기. 형식은 ADR 0003 |
 | `engine/` | `content/` | 순수 Dart. Flutter, Supabase 금지. 기록 타입(`Attempt`, `DayCompletion`)을 여기 둔다 |
 | `sync/` | `engine/`의 기록 타입 | 로컬 기록 파일과 `sync(table)`(ADR 0001 §3, ADR 0005) |
-| `auth/` | 없음 | Google 로그인, `delete-account` 호출 |
+| `auth/` | 없음 | Google 로그인, `delete-account` 호출, 전송 오류 판정 `isOffline`(`live/`도 쓴다, ADR 0007 §2) |
 | `backend.dart` | 없음 (`package:flutter/foundation.dart`만) | 화면이 보는 인터페이스와 값 타입(2절) |
+| `logged_backend.dart` | `backend.dart` | 화면 동작을 크래시 보고에 기록하는 감싸개. `log` 함수를 받고 Firebase를 import하지 않는다(ADR 0007 §4) |
 | `live/` | `backend.dart`, `content/`, `engine/`, `sync/`, `auth/` | 인터페이스의 실제 구현. 펼친 문제를 화면 `Question`·`Explanation`으로 옮기고 채점과 세트 진행(다시 풀기)을 한다. 학습 계산은 `engine/`을 부른다. 분석 이벤트를 보낸다(ADR 0006) |
 | `fake/` | `backend.dart` | 가짜 구현(3절) |
 | `screens/` | `backend.dart` | Supabase, `google_sign_in`, 다른 앱 폴더 전부 금지 |
-| `main.dart` | `backend.dart`, `screens/`, `fake/`, `live/`, `firebase_options.dart` | 구현 하나를 골라 넣는다 |
+| `main.dart` | `backend.dart`, `logged_backend.dart`, `screens/`, `fake/`, `live/`, `firebase_options.dart` | 구현 하나를 골라 넣는다 |
 
-패키지는 `firebase_analytics`를 `live/`만, `firebase_core`를 `main.dart`만 import한다. 나머지 폴더는 `package:firebase_`를 import하지 않는다(ADR 0006).
+패키지는 `firebase_analytics`를 `live/`만, `firebase_core`와 `firebase_crashlytics`를 `main.dart`만 import한다. 나머지 폴더는 `package:firebase_`를 import하지 않는다(ADR 0006, 0007).
 
 Dart에는 폴더 단위 공개 범위가 없으므로 `app/test/boundaries_test.dart`가 `lib/` 아래 import 줄을 읽어 위 표를 검사한다. 패키지(`import_lint` 등)는 쓰지 않는다.
 
@@ -99,12 +100,22 @@ class Evidence { final String summary; final List<Source> sources; }  class Sour
 - 실행할 때는 이름 붙은 묶음을 고른다: `flutter run --dart-define=FAKE=<이름>`. 이름은 `guest`(기본, 첫 실행), `signedIn`, `doneToday`, `noDay`, `offline`, `signInFails`, `wouldLose`, `deleteFails`. 팀원이 버튼으로 고를 수 있게 `.vscode/launch.json`에 묶음마다 실행 설정을 둔다.
 
 ```dart
-// app/lib/main.dart. live/가 생기기 전에는 FakeBackend.preset(fake.isEmpty ? 'guest' : fake)만 둔다
+// app/lib/main.dart. 처리기와 감싸개는 ADR 0007 §1·§4
 const fake = String.fromEnvironment('FAKE');
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  backend = (kReleaseMode || fake.isEmpty) ? await LiveBackend.start() : FakeBackend.preset(fake); // 릴리스는 항상 실제
-  runApp(const MannerFitApp());
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); // ADR 0006 §2
+  final crashlytics = FirebaseCrashlytics.instance;
+  FlutterError.onError = crashlytics.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    crashlytics.recordError(error, stack, fatal: true);
+    return true;
+  };
+  final inner = (kReleaseMode || fake.isEmpty) // 릴리스는 항상 실제
+      ? await LiveBackend.start(report: crashlytics.recordError) // 잡은 실패는 non-fatal(ADR 0007 §3)
+      : FakeBackend.preset(fake);
+  backend = LoggedBackend(inner, log: crashlytics.log);
+  runApp(const MyApp());
 }
 ```
 
@@ -117,9 +128,9 @@ Future<void> main() async {
 - 화면이 엔진·동기화를 직접 호출: 팀원이 기록 구조와 오프라인 처리를 알아야 하고, 백엔드가 끝나기 전에는 화면을 만들 수 없다.
 
 ## 결과
-- **쉬워지는 것**: 팀원은 `backend.dart`와 `fake/`만 보고 모든 화면을 만들고, 경계 상태를 실행 설정 하나로 재현한다. 백엔드는 화면 없이 테스트한다. **어려워지는 것**: 화면에 새 값이 필요하면 `backend.dart`, 가짜, 실제 구현 세 곳을 함께 고친다. 인터페이스 변경은 사용자가 한다.
+- **쉬워지는 것**: 팀원은 `backend.dart`와 `fake/`만 보고 모든 화면을 만들고, 경계 상태를 실행 설정 하나로 재현한다. 백엔드는 화면 없이 테스트한다. **어려워지는 것**: 화면에 새 값이 필요하면 `backend.dart`, 가짜, 실제 구현, 감싸개(ADR 0007 §4) 네 곳을 함께 고친다. 인터페이스 변경은 사용자가 한다.
 - **확인할 점**
-  - 네트워크 없음: 풀이, 하루 완료, 홈 값은 모두 로컬에서 나온다. `online`은 로그인과 탈퇴 버튼에만 쓴다(ADR 0001 §5-1). 게스트는 항상 참이고(로그인 결과 `offline`이 알린다), 로그인한 사용자는 마지막 Supabase 요청이 서버에 닿았는가다. 앱이 앞으로 올 때마다 sync해서 연결이 돌아오면 다시 참이 된다. 연결 감지 패키지는 쓰지 않는다.
+  - 네트워크 없음: 풀이, 하루 완료, 홈 값은 모두 로컬에서 나온다. `online`은 로그인과 탈퇴 버튼에만 쓴다(ADR 0001 §5-1). 게스트는 항상 참이고(로그인 결과 `offline`이 알린다), 로그인한 사용자는 마지막 Supabase 요청이 서버에 닿았는가다(전송 오류인지는 `isOffline`이 판단한다, ADR 0007 §2). 앱이 앞으로 올 때마다 sync해서 연결이 돌아오면 다시 참이 된다. 연결 감지 패키지는 쓰지 않는다.
   - 같은 요청 두 번: `answer`는 `Asking`이 아니면 무시하고, `next`는 `Finished`에서 무시한다. 기록이 두 번 쓰이지 않는다. 실제 구현은 로컬 기록을 쓴 뒤에 `Answered`를 낸다.
   - 기기 두 대: pull 뒤 실제 구현이 `home`, `stats`를 다시 계산해 내보내면 화면은 저절로 다시 그려진다. 자정을 넘겨 켜 둔 앱도 앞으로 올 때 다시 계산한다.
   - 견본과 다른 점: 견본의 콤보 보너스 XP(+5)와 나가기 시트의 "XP는 하루를 마쳐야 받아요" 문구는 ADR 0001 §4와 어긋나므로 화면에 옮기지 않는다.

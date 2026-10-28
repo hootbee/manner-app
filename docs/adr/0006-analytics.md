@@ -57,7 +57,7 @@ final live = LiveBackend(/* ... */, log: (n, p) => logged.add((n, p)));
 
 - 로컬 기록을 쓴 다음에 보낸다. 결과를 기다리지 않는다(`await` 없음). 분석이 실패해도 학습은 그대로 이어진다.
 - `Firebase.initializeApp`은 `main.dart`에서 한 번 부른다. Crashlytics도 이것을 쓴다.
-- `firebase_analytics`를 import하는 앱 코드는 `live/`뿐이다. `main.dart`는 `firebase_core`와 `firebase_options.dart`만 import한다.
+- `firebase_analytics`를 import하는 앱 코드는 `live/`뿐이다. `main.dart`는 `firebase_core`, `firebase_options.dart`, `firebase_crashlytics`(ADR 0007)만 import한다.
 - 디버그 빌드도 똑같이 보낸다. 빌드별로 끄는 설정은 두지 않는다.
 
 ### 3. 개인정보
@@ -86,7 +86,7 @@ final live = LiveBackend(/* ... */, log: (n, p) => logged.add((n, p)));
 >
 > **개인정보의 국외 이전**: 이전받는 자 Google LLC(연락처: 작성할 때 Google 개인정보처리방침에서 확인해 적는다) / 이전 국가: 미국 등 Google 데이터센터 소재국 / 이전 항목: 위 앱 이용 통계 항목 / 이전 시기와 방법: 앱 사용 중 네트워크로 수시 전송 / 목적: 앱 이용 통계 / 보유 기간: 개별 기록 2개월 / 거부 방법과 효과: 앱을 삭제하면 수집이 멈춘다. 이미 모인 개별 기록은 2개월 뒤 삭제된다.
 
-**Play 데이터 보안 양식에 더할 줄** (Analytics만. Crashlytics 줄은 Crashlytics를 넣을 때 더한다)
+**Play 데이터 보안 양식에 더할 줄** (Analytics만. Crashlytics 줄은 ADR 0007 §8)
 
 | 데이터 유형 | 수집 | 공유 | 목적 | 이유 |
 | --- | --- | --- | --- | --- |
