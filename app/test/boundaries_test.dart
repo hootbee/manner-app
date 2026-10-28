@@ -5,14 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// 폴더나 파일 → (import해도 되는 다른 앱 폴더·파일, 금지 패키지 접두). ADR 0002 표의 줄을 여기에 더한다.
 const rules = <String, (List<String>, List<String>)>{
-  'content': ([], ['package:flutter', 'package:supabase', 'dart:ui']),
-  'engine': (['content'], ['package:flutter', 'package:supabase', 'dart:ui']),
-  'sync': (['engine'], ['package:flutter', 'dart:ui']), // ADR 0005 §3: supabase_flutter는 허용
-  'auth': ([], ['package:flutter', 'dart:ui']), // ADR 0002 §1: google_sign_in, supabase_flutter는 허용
+  'content': ([], ['package:flutter', 'package:supabase', 'dart:ui', 'package:firebase_']),
+  'engine': (['content'], ['package:flutter', 'package:supabase', 'dart:ui', 'package:firebase_']),
+  'sync': (['engine'], ['package:flutter', 'dart:ui', 'package:firebase_']), // ADR 0005 §3: supabase_flutter는 허용
+  'auth': ([], ['package:flutter', 'dart:ui', 'package:firebase_']), // ADR 0002 §1: google_sign_in, supabase_flutter는 허용
   'fake': (['backend.dart'], _screenBanned),
   'screens': (['backend.dart'], _screenBanned),
-  // Backend 구현이라 ValueNotifier, rootBundle에 package:flutter가 필요하다. firebase_analytics는 허용(ADR 0006).
-  'live': (['backend.dart', 'content', 'engine', 'sync', 'auth'], ['package:firebase_core']),
+  // Backend 구현이라 ValueNotifier, rootBundle에 package:flutter가 필요하다. firebase_analytics는 허용(ADR 0006). firebase_core·firebase_crashlytics는 main.dart만(ADR 0007 §7).
+  'live': (['backend.dart', 'content', 'engine', 'sync', 'auth'], ['package:firebase_core', 'package:firebase_crashlytics']),
   // backend.dart는 표에 없지만 3절 코드가 main.dart에서 전역 backend에 넣는다.
   'main.dart': (['backend.dart', 'screens', 'fake', 'live', 'firebase_options.dart'], ['package:supabase', 'package:google_sign_in', 'package:firebase_analytics']),
 };

@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <application>
+        <!-- ADR 0007 §6: 디버그 빌드는 Crashlytics로 보내지 않는다. -->
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false"/>
+    </application>
 </manifest>

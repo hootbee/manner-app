@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,13 @@ const fake = String.fromEnvironment('FAKE');
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); // ADR 0006 §2
+  // ADR 0007 §1: 잡지 않은 오류는 fatal. LiveBackend.start()보다 먼저 건다.
+  final crashlytics = FirebaseCrashlytics.instance;
+  FlutterError.onError = crashlytics.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    crashlytics.recordError(error, stack, fatal: true);
+    return true;
+  };
   backend = (kReleaseMode || fake.isEmpty) ? await LiveBackend.start() : FakeBackend.preset(fake);
   runApp(const MyApp());
 }
