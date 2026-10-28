@@ -41,10 +41,12 @@ class _Rig {
       googleIdToken: () async => googleToken(),
       googleSignOut: () async => log.add('google.signOut'),
       googleDisconnect: () async => log.add('google.disconnect'),
+      report: (e, _) => reported.add(e),
     );
   }
 
   final log = <String>[];
+  final reported = <Object>[]; // ADR 0007 §3: non-fatal로 보낸 오류
   var signedOut = 0; // signedOut 이벤트 수
   late final SupabaseClient client;
   late final Auth auth;
@@ -211,5 +213,53 @@ void main() {
         expect(rig.client.auth.currentUser, isNull);
       });
     }
+  });
+
+  group('non-fatal 보고 (ADR 0007 §3)', () {
+    for (final (name, google, server, want, sent) in [
+      ('Google 오류', () async => throw const GoogleSignInException(code: GoogleSignInExceptionCode.unknownError), null,
+          SignInStatus.failed, [isA<GoogleSignInException>()]),
+      ('Google 취소', () async => throw const GoogleSignInException(code: GoogleSignInExceptionCode.canceled), null,
+          SignInStatus.cancelled, []),
+      ('ID 토큰 없음', () async => null, null, SignInStatus.failed, [isA<StateError>()]),
+      ('Supabase 네트워크 오류', null, (http.Request r) async => throw http.ClientException('down'), SignInStatus.offline, []),
+      ('Supabase 거절', null, (http.Request r) async => _json({'code': 'bad_jwt', 'msg': 'bad'}, 400), SignInStatus.failed,
+          [isA<AuthException>()]),
+      ('Supabase 503', null, (http.Request r) async => _status(503), SignInStatus.failed, [isA<AuthException>()]),
+    ]) {
+      test('로그인: $name이면 ${want.name}이고 보내는 것은 ${sent.length}개', () async {
+        final rig = _Rig(server ?? (r) async => _json(_session('new')));
+        if (google != null) rig.googleToken = google;
+
+        expect(await rig.auth.signIn(), want);
+        expect(rig.reported, sent);
+      });
+    }
+
+    for (final code in [400, 500]) {
+      test('탈퇴: 함수가 $code이면 failed이고 하나를 보낸다', () async {
+        final rig = _Rig((r) async => _status(code));
+        await rig.signIn();
+
+        expect(await rig.auth.deleteAccount(), DeleteStatus.failed);
+        expect(rig.reported, [isA<FunctionsHttpException>()]);
+      });
+    }
+
+    test('탈퇴: 401 뒤 세션 갱신이 거절되면 failed이고 StateError 하나를 보낸다', () async {
+      final rig = _Rig((r) async => r.url.path == '/auth/v1/token' ? _rejected : _status(401));
+      await rig.signIn();
+
+      expect(await rig.auth.deleteAccount(), DeleteStatus.failed);
+      expect(rig.reported, [isA<StateError>()]);
+    });
+
+    test('탈퇴: 함수 요청이 전송 오류(FunctionsFetchException(details: ClientException))면 offline이고 보내지 않는다', () async {
+      final rig = _Rig((r) async => throw http.ClientException('down'));
+      await rig.signIn();
+
+      expect(await rig.auth.deleteAccount(), DeleteStatus.offline);
+      expect(rig.reported, isEmpty);
+    });
   });
 }

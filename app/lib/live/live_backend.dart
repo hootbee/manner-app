@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide Session;
 
 import '../auth/auth.dart';
+import '../auth/offline.dart';
 import '../backend.dart';
 import '../content/content.dart';
 import '../engine/areas.dart' as engine;
@@ -33,7 +34,9 @@ class LiveBackend implements Backend {
     required Auth auth,
     required SupabaseClient client,
     DateTime Function() now = DateTime.now,
+    required void Function(Object, StackTrace) report,
   })  : _content = content,
+        _report = report,
         _store = store,
         _auth = auth,
         _client = client,
@@ -43,19 +46,22 @@ class LiveBackend implements Backend {
   }
 
   /// ADR 0003 §5, ADR 0005 §4: 콘텐츠 고르기 → 저장소 → 인증. 새 콘텐츠 받기와 시작 sync는 기다리지 않는다.
-  static Future<LiveBackend> start() async {
+  /// [report]는 잡은 실패를 non-fatal로 보낸다(ADR 0007 §3). main.dart가 `recordError`를 그대로 넘긴다.
+  static Future<LiveBackend> start({required void Function(Object, StackTrace) report}) async {
     await Supabase.initialize(url: supabaseUrl, publishableKey: publishableKey);
     final client = Supabase.instance.client;
     final dir = await getApplicationSupportDirectory();
-    final content = pickContent(dir, parseContent(await rootBundle.loadString('assets/content.json')));
+    final content =
+        pickContent(dir, parseContent(await rootBundle.loadString('assets/content.json')), report: report);
     final store = Store(File('${dir.path}/records.json'), client);
     final b = LiveBackend(
       content: content,
       store: store,
       client: client,
-      auth: await Auth.google(client, clearLocal: store.clear),
+      auth: await Auth.google(client, clearLocal: store.clear, report: report),
+      report: report,
     );
-    unawaited(fetchContent(supabaseUrl, dir, content)); // 받은 것은 다음 시작부터 쓴다
+    unawaited(fetchContent(supabaseUrl, dir, content, report: report)); // 받은 것은 다음 시작부터 쓴다
     unawaited(b.sync());
     AppLifecycleListener(onResume: b.onResume);
     return b;
@@ -66,6 +72,7 @@ class LiveBackend implements Backend {
   final Auth _auth;
   final SupabaseClient _client;
   final DateTime Function() _now;
+  final void Function(Object, StackTrace) _report;
   final _rng = Random();
 
   final _home = ValueNotifier(const Home(today: null, streak: 0, reviewsDue: 0, xp: 0, level: 1, levelProgress: 0));
@@ -128,16 +135,16 @@ class LiveBackend implements Backend {
       for (final t in tables) {
         await _store.sync(t);
       }
-    } on Error catch (e, s) {
-      Zone.current.handleUncaughtError(e, s); // 코드 버그는 연결 상태와 상관없다. 전역 처리기로 보낸다
-    } catch (e) {
+    } catch (e, s) {
       error = e;
+      if (!isOffline(e)) _report(e, s); // 서버가 응답한 오류와 코드 버그(ADR 0007 §3)
     }
-    _online.value = error == null || _reached(error); // 게스트는 요청을 보내지 않으므로 늘 true다
+    _online.value = error == null || !isOffline(error); // 게스트는 요청을 보내지 않으므로 늘 true다
     final gone = error is PostgrestException && error.code == '23503';
     // 세션이 없는데 서버에서 온 행(synced=true)이 있으면 세션이 사라진 것이다. 게스트 행은 synced가 될 수 없다.
     final lost = _client.auth.currentUser == null &&
         _store.attempts.length + _store.dayCompletions.length > _store.unsynced;
+    if (lost) _report(StateError('session lost with synced rows'), StackTrace.current);
     if (gone || lost) {
       await _forget();
     } else {
@@ -190,14 +197,6 @@ class LiveBackend implements Backend {
     return DeleteResult.values.byName(r.name);
   }
 }
-
-/// 서버가 응답했는가. statusCode가 있는 AuthRetryableFetchException(5xx), PostgrestException, 그 밖의 AuthException은
-/// 닿은 것이다. 목록에 없는 오류(statusCode 없는 AuthRetryableFetchException, ClientException 같은 전송 오류)는 닿지 않은 것으로 본다.
-bool _reached(Object e) => switch (e) {
-      AuthRetryableFetchException(:final statusCode) => statusCode != null,
-      PostgrestException() || AuthException() => true,
-      _ => false,
-    };
 
 Account? _accountOf(User? u) => u == null
     ? null
