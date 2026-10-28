@@ -17,7 +17,7 @@
 | `sync/` | `engine/`의 기록 타입 | 로컬 기록 파일과 `sync(table)`(ADR 0001 §3, ADR 0005) |
 | `auth/` | 없음 | Google 로그인, `delete-account` 호출 |
 | `backend.dart` | 없음 (`package:flutter/foundation.dart`만) | 화면이 보는 인터페이스와 값 타입(2절) |
-| `live/` | `backend.dart`, `content/`, `engine/`, `sync/`, `auth/` | 인터페이스의 실제 구현. 계산 없이 모듈을 이어 붙이기만 한다. 분석 이벤트를 보낸다(ADR 0006) |
+| `live/` | `backend.dart`, `content/`, `engine/`, `sync/`, `auth/` | 인터페이스의 실제 구현. 펼친 문제를 화면 `Question`·`Explanation`으로 옮기고 채점과 세트 진행(다시 풀기)을 한다. 학습 계산은 `engine/`을 부른다. 분석 이벤트를 보낸다(ADR 0006) |
 | `fake/` | `backend.dart` | 가짜 구현(3절) |
 | `screens/` | `backend.dart` | Supabase, `google_sign_in`, 다른 앱 폴더 전부 금지 |
 | `main.dart` | `backend.dart`, `screens/`, `fake/`, `live/`, `firebase_options.dart` | 구현 하나를 골라 넣는다 |
@@ -119,7 +119,7 @@ Future<void> main() async {
 ## 결과
 - **쉬워지는 것**: 팀원은 `backend.dart`와 `fake/`만 보고 모든 화면을 만들고, 경계 상태를 실행 설정 하나로 재현한다. 백엔드는 화면 없이 테스트한다. **어려워지는 것**: 화면에 새 값이 필요하면 `backend.dart`, 가짜, 실제 구현 세 곳을 함께 고친다. 인터페이스 변경은 사용자가 한다.
 - **확인할 점**
-  - 네트워크 없음: 풀이, 하루 완료, 홈 값은 모두 로컬에서 나온다. `online`은 로그인과 탈퇴 버튼에만 쓴다(ADR 0001 §5-1).
+  - 네트워크 없음: 풀이, 하루 완료, 홈 값은 모두 로컬에서 나온다. `online`은 로그인과 탈퇴 버튼에만 쓴다(ADR 0001 §5-1). 게스트는 항상 참이고(로그인 결과 `offline`이 알린다), 로그인한 사용자는 마지막 Supabase 요청이 서버에 닿았는가다. 앱이 앞으로 올 때마다 sync해서 연결이 돌아오면 다시 참이 된다. 연결 감지 패키지는 쓰지 않는다.
   - 같은 요청 두 번: `answer`는 `Asking`이 아니면 무시하고, `next`는 `Finished`에서 무시한다. 기록이 두 번 쓰이지 않는다. 실제 구현은 로컬 기록을 쓴 뒤에 `Answered`를 낸다.
   - 기기 두 대: pull 뒤 실제 구현이 `home`, `stats`를 다시 계산해 내보내면 화면은 저절로 다시 그려진다. 자정을 넘겨 켜 둔 앱도 앞으로 올 때 다시 계산한다.
   - 견본과 다른 점: 견본의 콤보 보너스 XP(+5)와 나가기 시트의 "XP는 하루를 마쳐야 받아요" 문구는 ADR 0001 §4와 어긋나므로 화면에 옮기지 않는다.
@@ -134,7 +134,7 @@ Future<void> main() async {
 | 4 | 팀원 | 세트 완료, 로그인(설정의 "기록 백업하기") | `FakeBackend(signIn: failed)`에서 로그인을 누르면 실패 안내가 보이고 게스트로 남는다 |
 | 5 | 팀원 | 스테이터스(영역 육각형) | 레이아웃이므로 테스트를 먼저 쓰지 않는다(`CLAUDE.md`) |
 | 6 | 팀원 | 설정: 로그아웃, 탈퇴, 개인정보처리방침 링크 | `offline`에서 탈퇴 버튼이 막혀 있다. `FakeBackend(unsynced: 3)`에서 로그아웃하면 "3개" 확인 시트가 뜬다 |
-| 7 | 사용자 | `content/`: 번들 JSON → `Question` (ADR 0003 뒤) | `A-sidewalk`가 8문제로 펼쳐지고 `PositionQuestion.vars['mirror']`가 축 값과 같다 |
+| 7 | 사용자 | `content/`: 번들 JSON → 펼친 문제(`Json`) (ADR 0003 뒤). 화면 `Question`으로 옮기는 것은 `live/`(11) | `A-sidewalk`가 8문제로 펼쳐지고 펼친 문제의 `vars['mirror']`가 축 값과 같다 |
 | 8 | 사용자 | `engine/`: XP, 레벨, 연속 학습일, Leitner, 영역 스탯, 출제 순서 | ADR 0001 §4 규칙 그대로: `best, ok, avoid` 세 기록의 XP는 15다 |
 | 9 | 사용자 | `sync/`: 로컬 기록 파일과 `sync(table)`(ADR 0005) | 네트워크 없음, 같은 행 두 번 push, 기기 두 대 pull 뒤 같은 집합(ADR 0001 §3) |
 | 10 | 사용자 | `auth/`: Google 로그인, 탈퇴 순서. Android는 nonce 없이 ID 토큰을 보낸다(iOS 출시 때 다시 본다) | `delete-account`가 401을 주고 세션 갱신도 거절되면 로컬 기록이 지워지고 결과는 실패다(ADR 0001 §5-4) |

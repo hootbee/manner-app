@@ -68,7 +68,7 @@
 
 ## 규칙
 
-- 리포는 공개다. 비밀 키(서비스 키, DB 비밀번호, Claude API 키)를 코드, 설정, 문서 어디에도 넣지 않는다. Firebase 설정 파일(`firebase_options.dart`, `google-services.json`)의 API 키는 공개 식별자라 커밋한다(ADR 0006).
+- 리포는 공개다. 비밀 키(서비스 키, DB 비밀번호, Claude API 키)를 코드, 설정, 문서 어디에도 넣지 않는다. Firebase 설정 파일(`firebase_options.dart`, `google-services.json`)의 API 키와 Supabase URL·publishable 키(`sb_publishable_`)는 공개 식별자라 커밋한다(ADR 0006, `live/`).
 - 새 테이블은 RLS를 켠 마이그레이션으로만 만든다.
 - 구조가 바뀌는 변경(테이블, 동기화, 콘텐츠 형식, 모듈 경계)은 구현 전에 architect 에이전트로 ADR을 먼저 쓴다.
 - 결정이 바뀌면 `docs/decisions.md`를 고친다. 다른 문서에 결정 내용을 다시 적지 않는다.
