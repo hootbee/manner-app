@@ -17,16 +17,26 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); // ADR 0006 §2
   // ADR 0007 §1: 잡지 않은 오류는 fatal. LiveBackend.start()보다 먼저 건다.
   final crashlytics = FirebaseCrashlytics.instance;
-  FlutterError.onError = crashlytics.recordFlutterFatalError;
+  // Crashlytics로 가는 스택은 모두 trimStack을 지난다(ADR 0007 §1 "스택은 앞 50줄만 보낸다").
+  FlutterError.onError = (details) =>
+      crashlytics.recordFlutterFatalError(details.copyWith(stack: trimStack(details.stack)));
   PlatformDispatcher.instance.onError = (error, stack) {
-    crashlytics.recordError(error, stack, fatal: true);
+    crashlytics.recordError(error, trimStack(stack), fatal: true);
     return true;
   };
   final inner = (kReleaseMode || fake.isEmpty)
-      ? await LiveBackend.start(report: crashlytics.recordError) // ADR 0007 §3: 잡은 실패는 non-fatal(fatal 기본값 false)
+      ? await LiveBackend.start(report: (e, s) => crashlytics.recordError(e, trimStack(s))) // ADR 0007 §3: 잡은 실패는 non-fatal(fatal을 쓰지 않는다)
       : FakeBackend.preset(fake);
   backend = LoggedBackend(inner, log: crashlytics.log); // ADR 0007 §4: 가짜도 언제나 감싼다
   runApp(const MyApp());
+}
+
+/// ADR 0007 §1. Crashlytics는 깊은 스택(812줄)을 받고도 이슈로 만들지 않았다. 앞 50줄만 보낸다.
+/// 스택이 없으면 플러그인처럼 지금 스택을 쓰되, 그것도 깊을 수 있어 같이 자른다.
+StackTrace trimStack(StackTrace? stack) {
+  final text = stack?.toString() ?? '';
+  final lines = (text.isEmpty ? StackTrace.current.toString() : text).split('\n');
+  return StackTrace.fromString(lines.take(50).join('\n'));
 }
 
 class MyApp extends StatelessWidget {

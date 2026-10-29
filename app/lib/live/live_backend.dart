@@ -46,7 +46,7 @@ class LiveBackend implements Backend {
   }
 
   /// ADR 0003 §5, ADR 0005 §4: 콘텐츠 고르기 → 저장소 → 인증. 새 콘텐츠 받기와 시작 sync는 기다리지 않는다.
-  /// [report]는 잡은 실패를 non-fatal로 보낸다(ADR 0007 §3). main.dart가 `recordError`를 그대로 넘긴다.
+  /// [report]는 잡은 실패를 non-fatal로 보낸다(ADR 0007 §3). main.dart가 스택을 `trimStack`으로 자른 뒤 `recordError`로 보내는 람다를 넘긴다.
   static Future<LiveBackend> start({required void Function(Object, StackTrace) report}) async {
     await Supabase.initialize(url: supabaseUrl, publishableKey: publishableKey);
     final client = Supabase.instance.client;
