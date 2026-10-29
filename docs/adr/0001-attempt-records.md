@@ -173,6 +173,8 @@ jobs:
 - GitHub Free의 비공개 리포 한도는 Actions 월 2,000분, 아티팩트 저장 500MB다. 덤프를 30개 보관하므로 `backup.tgz`가 15MB를 넘으면 다시 본다.
 - CLI 버전은 고정한다. CLI가 올라가면 `pg_dump` 버전도 같이 바뀌기 때문이다. `pg_dump`는 자기보다 새 메이저 버전 서버를 덤프하지 못하므로, Supabase 프로젝트의 Postgres가 18 이상이 되면 `version`을 함께 올린다.
 - 워크플로에 `--debug`나 `--dry-run`을 붙이지 않는다. 디코딩된 DB 비밀번호가 로그에 평문으로 나온다(로컬에서 확인).
+- `data.sql`에는 `public`의 기록 테이블과 함께 `auth` 스키마 데이터(사용자, identities 등)도 들어간다. 그래서 복원하면 계정도 함께 돌아온다(2026-10-29 첫 백업에서 확인).
+- 시크릿의 비밀번호에 특수문자가 있으면 퍼센트 인코딩해서 넣는다. 그대로 넣으면 `failed to parse connection string`으로 실패한다.
 
 ### 검증 (로컬 `supabase start`)
 ```sql
@@ -208,7 +210,7 @@ rollback;
 없음. 운영 이메일, 처리 기한 7일, 웹 로그인 삭제 흐름을 넣을 기준은 2026-10-25에 정했다.
 
 ## 확인하지 못한 것
-`ignore-duplicates`가 실제로 만드는 SQL, JWT 서명 키 종류에 따른 `getClaims` 동작, GitHub 호스티드 러너가 IPv4 전용인지(Session pooler를 고른 근거), data dump에 `auth` 데이터가 포함되는지, 결제 수단이 없을 때 아티팩트 한도를 넘기면 어떻게 되는지.
+`ignore-duplicates`가 실제로 만드는 SQL, JWT 서명 키 종류에 따른 `getClaims` 동작, GitHub 호스티드 러너가 IPv4 전용인지(Session pooler를 고른 근거), 결제 수단이 없을 때 아티팩트 한도를 넘기면 어떻게 되는지.
 
 ## 참고
 - Supabase: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [cascade와 삭제 뒤 JWT](https://supabase.com/docs/guides/auth/managing-user-data), [deleteUser](https://supabase.com/docs/reference/javascript/auth-admin-deleteuser), [getClaims](https://supabase.com/docs/reference/javascript/auth-getclaims), [함수 인증](https://supabase.com/docs/guides/functions/auth), [함수 환경 변수](https://supabase.com/docs/guides/functions/secrets), [연결 방식](https://supabase.com/docs/guides/database/connecting-to-postgres), [백업 명령](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), [요금](https://supabase.com/pricing)
