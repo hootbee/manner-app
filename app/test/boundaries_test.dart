@@ -13,8 +13,9 @@ const rules = <String, (List<String>, List<String>)>{
   'screens': (['backend.dart'], _screenBanned),
   // Backend 구현이라 ValueNotifier, rootBundle에 package:flutter가 필요하다. firebase_analytics는 허용(ADR 0006). firebase_core·firebase_crashlytics는 main.dart만(ADR 0007 §7).
   'live': (['backend.dart', 'content', 'engine', 'sync', 'auth'], ['package:firebase_core', 'package:firebase_crashlytics']),
+  'logged_backend.dart': (['backend.dart'], _screenBanned), // ADR 0007 §7: Firebase를 모른다. log 함수만 받는다
   // backend.dart는 표에 없지만 3절 코드가 main.dart에서 전역 backend에 넣는다.
-  'main.dart': (['backend.dart', 'screens', 'fake', 'live', 'firebase_options.dart'], ['package:supabase', 'package:google_sign_in', 'package:firebase_analytics']),
+  'main.dart': (['backend.dart', 'logged_backend.dart', 'screens', 'fake', 'live', 'firebase_options.dart'], ['package:supabase', 'package:google_sign_in', 'package:firebase_analytics']),
 };
 const _screenBanned = ['package:supabase', 'package:google_sign_in', 'package:firebase_'];
 
