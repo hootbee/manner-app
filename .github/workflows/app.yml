@@ -1,4 +1,4 @@
-# 앱 analyze와 테스트. 로컬 Supabase를 띄워 sync 테스트도 skip 없이 돈다 (ADR 0005 §6)
+# 앱 analyze, 테스트, 릴리스 APK 빌드. 로컬 Supabase를 띄워 sync 테스트도 skip 없이 돈다 (ADR 0005 §6)
 name: app
 
 on:
@@ -36,3 +36,24 @@ jobs:
           eval "$env"; export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
           : "${SUPABASE_URL:?}" "${SUPABASE_ANON_KEY:?}" "${SUPABASE_SERVICE_ROLE_KEY:?}"
           cd app && flutter pub get && flutter analyze && flutter test
+
+  # flutter test는 Gradle과 Kotlin 컴파일을 돌리지 않는다. 스토어에 나가는 릴리스 APK를 빌드해 플러그인 컴파일, R8, lint까지 확인한다
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.2 # 로컬과 같은 버전
+          cache: true
+
+      # 릴리스 서명은 아직 디버그 키라 비밀 값이 필요 없다
+      - run: cd app && flutter build apk --release
