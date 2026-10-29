@@ -1,7 +1,7 @@
 # 0007. 크래시와 오류 보고: 잡지 않은 오류는 fatal, 잡은 실패는 non-fatal
 
-상태: 채택
-날짜: 2026-10-28
+상태: 채택 (2026-10-29 1절 "스택은 앞 50줄만 보낸다" 수정 채택)
+날짜: 2026-10-28, 고침 2026-10-29
 
 ## 배경
 크래시를 Firebase Crashlytics로 받는다는 것은 이미 정했다(`docs/decisions.md` 운영). 여기서는 어떻게 넣을지를 정한다. 어디서 켜는지, 무엇을 보내는지, 보고 직전에 무슨 일이 있었는지 어떻게 남기는지, 어느 빌드에서 보내는지, 무엇이 모이는지, 어떻게 확인하는지다.
@@ -13,6 +13,14 @@
 - 오프라인은 전송 오류 목록에 있는 것뿐이다. 모르는 오류를 포함해 나머지는 모두 보낸다.
 - 다른 기기에서 탈퇴한 흔적(`23503`, 세션 갱신 거절, 세션 없음 + `synced` 행)도 모두 보낸다.
 - 사용자는 많아야 약 1,000명으로 본다. 무료 한도는 이 숫자로 판단한다(11절).
+
+2026-10-29 기기 확인에서 나온 문제 (에뮬레이터 Pixel_2 Android 16, 릴리스 APK, dev `7cde653`)
+- 10절 수동 확인 2·3·4·6은 콘솔에서 확인했다. 확인 1(화면 `build`에서 `throw`)은 세 번 모두 업로드가 `Status Code: 200`이었는데 콘솔에 이슈가 생기지 않았다.
+- 같은 오류를 non-fatal(`recordFlutterError`)로 보내도 생기지 않았다. 그래서 fatal 경로 문제가 아니다.
+- 그 오류의 스택은 812줄이었다(맨 위 `#0 _MyHomePageState.build (package:mannerfit/main.dart:103)`, 아래는 위젯 재빌드 프레임워크 프레임). 같은 실행에서 앞 50줄로 자른 스택(`StackTrace.fromString`)은 콘솔에 떴고, 원래 스택은 뜨지 않았다.
+- 결론: 스택이 깊으면 Crashlytics는 받기만 하고(200) 이슈를 만들지 않는다. 몇 줄부터인지는 모른다. 812줄은 안 되고 50줄은 된다. 공식 문서에서 한도를 찾지 못했다. 화면 `build` 오류는 늘 이만큼 깊어서, 고치지 않으면 운영에서 화면 오류가 보이지 않는다.
+- 플러그인(`firebase_crashlytics` 6.0.1)은 `recordFlutterFatalError` → `recordFlutterError` → `recordError(details.exceptionAsString(), details.stack, …)`로 부르고, 스택을 자르지 않는다. 스택이 `null`이거나 비면 `StackTrace.current`로 채운다(로컬 pub 캐시 `lib/src/firebase_crashlytics.dart`).
+- 그래서 1절에 스택 규칙 하나를 더한다. 이 수정의 코드 기준은 dev `7cde653`이다.
 
 이미 정한 것은 다시 적지 않고 가리킨다.
 - Firebase 프로젝트 준비, `flutterfire configure`, 설정 파일 커밋: ADR 0006 §4
@@ -39,7 +47,7 @@
 | 네이티브(C·C++) 크래시 | 받지 않는다. Play Console Android vitals에서 본다(ADR 0008 G3) |
 
 ```dart
-// app/lib/main.dart (dev e3dc314의 main에 더하는 줄)
+// app/lib/main.dart (dev 7cde653 기준. 2026-10-29에 trimStack을 더했다)
 import 'dart:ui' show PlatformDispatcher;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -50,22 +58,41 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); // ADR 0006 §2
   final crashlytics = FirebaseCrashlytics.instance;
-  FlutterError.onError = crashlytics.recordFlutterFatalError;
+  // Crashlytics로 가는 스택은 모두 trimStack을 지난다(아래 "스택은 앞 50줄만 보낸다").
+  FlutterError.onError = (details) =>
+      crashlytics.recordFlutterFatalError(details.copyWith(stack: trimStack(details.stack)));
   PlatformDispatcher.instance.onError = (error, stack) {
-    crashlytics.recordError(error, stack, fatal: true);
+    crashlytics.recordError(error, trimStack(stack), fatal: true);
     return true;
   };
   final inner = (kReleaseMode || fake.isEmpty)
-      ? await LiveBackend.start(report: crashlytics.recordError) // 3절. 함수를 그대로 넘긴다(fatal 기본값 false)
+      ? await LiveBackend.start(report: (e, s) => crashlytics.recordError(e, trimStack(s))) // 3절. fatal을 쓰지 않는다(기본값 false)
       : FakeBackend.preset(fake);
   backend = LoggedBackend(inner, log: crashlytics.log); // 4절
   runApp(const MyApp());
 }
+
+/// ADR 0007 §1. Crashlytics는 깊은 스택(812줄)을 받고도 이슈로 만들지 않았다. 앞 50줄만 보낸다.
+/// 스택이 없으면 플러그인처럼 지금 스택을 쓰되, 그것도 깊을 수 있어 같이 자른다.
+StackTrace trimStack(StackTrace? stack) {
+  final text = stack?.toString() ?? '';
+  final lines = (text.isEmpty ? StackTrace.current.toString() : text).split('\n');
+  return StackTrace.fromString(lines.take(50).join('\n'));
+}
 ```
 
 - 순서는 `initializeApp` → 두 처리기 → `LiveBackend.start()` → `runApp`이다. 그래서 시작 중 기록 파일 읽기 실패(ADR 0005 §1)도 Crashlytics에 간다.
-- 처리기 코드는 [FlutterFire 시작 문서](https://firebase.google.com/docs/crashlytics/flutter/get-started) 그대로다. fatal 보고는 앱을 다시 켜지 않아도 바로 보내진다([보고서 맞춤 설정](https://firebase.google.com/docs/crashlytics/flutter/customize-crash-reports)).
-- `recordFlutterError`는 보내기 전에 `FlutterError.presentError`를 부르고, `recordError`는 디버그 빌드에서 오류를 콘솔에 찍는다([플러그인 소스](https://github.com/firebase/flutterfire/blob/main/packages/firebase_crashlytics/firebase_crashlytics/lib/src/firebase_crashlytics.dart)). 개발 중에 보던 오류 출력은 그대로 나온다.
+- 처리기 코드는 [FlutterFire 시작 문서](https://firebase.google.com/docs/crashlytics/flutter/get-started)의 것에 스택 자르기만 더했다. fatal 보고는 앱을 다시 켜지 않아도 바로 보내진다([보고서 맞춤 설정](https://firebase.google.com/docs/crashlytics/flutter/customize-crash-reports)).
+- `recordFlutterError`는 보내기 전에 `FlutterError.presentError`를 부르고, `recordError`는 디버그 빌드에서 오류를 콘솔에 찍는다([플러그인 소스](https://github.com/firebase/flutterfire/blob/main/packages/firebase_crashlytics/firebase_crashlytics/lib/src/firebase_crashlytics.dart)). 개발 중에 보던 오류 출력은 그대로 나오지만, 스택은 자른 뒤의 50줄이다(맨 위 프레임은 같다).
+
+**스택은 앞 50줄만 보낸다** (2026-10-29)
+- 규칙: **Crashlytics로 보내는 스택은 경로와 관계없이 앞 50줄만 보낸다.** `main.dart`의 `crashlytics.record…` 호출 세 곳(`FlutterError.onError`, `PlatformDispatcher.onError`, 3절 `report`)이 모두 `trimStack`을 지난다. 예외는 없다.
+- 세 곳 모두에 쓰는 이유: 812줄 스택은 non-fatal로 보내도 뜨지 않았다. 문제는 경로가 아니라 깊이다. 화면 오류만 자르면 "깊은 non-fatal은 보이지 않는다"는 예외가 남는다.
+- 한 곳으로 묶지 못하는 이유: `FlutterError.onError` 경로는 `recordFlutterFatalError`가 `presentError`, `reason`, `information`을 채워 주므로 `details.copyWith(stack: …)`로 스택만 바꿔 넘긴다. 나머지 둘은 `recordError`에 바로 넘긴다. 감싸는 함수를 하나 더 두면 같은 일을 하는 이름이 하나 더 생길 뿐이다.
+- 50의 근거: 2026-10-29 확인한 값이다. 그 이상은 확인하지 않았다. 50줄이면 맨 위의 우리 프레임(`build`, 감싸개가 다시 던진 곳)과 그 아래 호출 프레임 49개가 남는다. 이슈 묶음과 원인 찾기에는 맨 위 프레임이 쓰인다. 더 키워야 할 일이 생기면 그 값을 10절 수동 확인 1로 먼저 확인한다.
+- "줄"은 `StackTrace.toString()`을 `\n`으로 나눈 것이다(`<asynchronous suspension>` 줄도 한 줄로 센다). 50줄 이하면 내용은 그대로다.
+- 스택이 `null`이거나 비면 플러그인이 `StackTrace.current`로 채운다. 화면 `build` 중이면 이것도 깊으므로 `trimStack`이 먼저 `StackTrace.current`를 써서 자른다. 그래서 맨 위 프레임은 플러그인 안이 아니라 `trimStack`이다(어느 쪽이든 원인은 스택보다 오류 메시지와 `reason`으로 본다).
+- `trimStack`은 `main.dart`의 최상위 함수다. 순수 함수라 `app/test/main_test.dart`가 `package:mannerfit/main.dart`를 import해서 검사한다(`widget_test.dart`가 이미 그렇게 import한다). `main()`은 여전히 단위 테스트로 돌리지 않는다. 세 호출이 `trimStack`을 지나는지는 리뷰와 10절 수동 확인 1로 본다.
 - 처리기와 `recordError`는 예외의 문자열(`toString()`)과 Flutter 오류의 추가 정보(`informationCollector`)를 그대로 보낸다. 그래서 처리방침에 "오류 메시지"를 수집 항목으로 적는다(8절). 우리 코드가 만드는 예외 메시지에는 이름·이메일·답 내용을 넣지 않는다.
 - `setCustomKey`, `setUserIdentifier`는 부르지 않는다.
 - 앱은 isolate를 따로 만들지 않는다(`lib/`에 `Isolate`·`compute` 없음). isolate 오류 처리는 두지 않는다.
@@ -95,7 +122,7 @@ bool isOffline(Object e) => switch (e) {
 - 받아들이는 것: Google 로그인 단계에서 네트워크가 없으면 `GoogleSignInException(unknownError)`로 올 수 있다. 목록으로 가릴 수 없어 non-fatal로 간다. 사용자가 로그인 버튼을 눌렀을 때만 생기는 일이라 드물다.
 
 ### 3. 잡은 실패: `report` 함수 하나 (non-fatal)
-`main.dart`는 `crashlytics.recordError`를 함수 그대로 `LiveBackend.start(report:)`에 넘긴다. `start()`는 같은 함수를 `LiveBackend` 생성자, `Auth.google(report:)`, `pickContent(report:)`, `fetchContent(report:)`에 넘긴다. 받는 쪽의 타입은 `void Function(Object, StackTrace)`라서 `fatal` 인자를 넘길 자리가 없다. 그래서 `report`로 가는 보고는 언제나 `recordError`의 기본값인 non-fatal이다. `live/`와 `auth/`는 Firebase를 import하지 않는다(ADR 0006의 `LogEvent`와 같은 방식). 테스트에서는 목록에 쌓는다.
+`main.dart`는 `(e, s) => crashlytics.recordError(e, trimStack(s))`를 `LiveBackend.start(report:)`에 넘긴다(1절 스택 규칙. 2026-10-29 전에는 `recordError`를 그대로 넘겼다). 이 람다는 `fatal`을 쓰지 않는다. `start()`는 같은 함수를 `LiveBackend` 생성자, `Auth.google(report:)`, `pickContent(report:)`, `fetchContent(report:)`에 넘긴다. 받는 쪽의 타입은 `void Function(Object, StackTrace)`라서 `fatal` 인자를 넘길 자리가 없다. 그래서 `report`로 가는 보고는 언제나 `recordError`의 기본값인 non-fatal이다. `live/`와 `auth/`는 Firebase를 import하지 않는다(ADR 0006의 `LogEvent`와 같은 방식). 테스트에서는 목록에 쌓는다.
 
 부르는 곳은 실패를 결과로 바꾸는 `catch`다. 모양은 하나다: **`isOffline(e)`가 아니면 `report(e, s)` 한 줄.** 예외가 없는 실패는 고정 문구의 `StateError`와 `StackTrace.current`로 보낸다.
 
@@ -202,6 +229,7 @@ if (delErr && delErr.status !== 404) {
 // fake, screens는 이미 package:firebase_ 전부 금지.
 ```
 
+- 1절 `trimStack`(2026-10-29)은 `main.dart` 안의 함수라 새 파일이 없다. 그래서 경계 규칙, `boundaries_test.dart`, ADR 0002 §1 표에 더할 것이 없다. Crashlytics를 아는 코드는 여전히 `main.dart` 하나다.
 - `content`·`engine`·`sync`·`auth`에 `package:firebase_`를 더하는 것은 새 규칙이 아니다. ADR 0002 §1의 "나머지 폴더는 `package:firebase_`를 import하지 않는다"를 지금 테스트가 검사하지 않아서 채운다.
 
 ### 8. 수집 항목과 개인정보
@@ -261,13 +289,14 @@ if (delErr && delErr.status !== 404) {
 - `app/test/auth/offline_test.dart`: 2절 목록의 각 타입은 참, 목록 밖(`PostgrestException`, `AuthException`, 5xx `AuthRetryableFetchException`, `StateError`)은 거짓
 - `app/test/auth/auth_test.dart`, `app/test/live/live_backend_test.dart`, `app/test/live/content_update_test.dart`: 3절 표의 보내는 것과 보내지 않는 것
 - `app/test/logged_backend_test.dart`: 4절 표의 줄 모양, 예외를 다시 던지는지, 이름·이메일이 줄에 없는지
-- fatal 여부는 `main.dart`에만 있다. `report`는 `recordError`를 그대로 넘기므로 `fatal`을 쓸 자리가 없고, 받는 쪽 타입(`void Function(Object, StackTrace)`)도 `fatal`을 받지 않는다. 누가 람다로 바꿔 `fatal: true`를 넣으면 수동 확인 4에서 콘솔의 "fatal" 표시로 잡는다. `main.dart`는 단위 테스트로 돌리지 않는다.
+- `app/test/main_test.dart`: 1절 `trimStack`. 812줄 스택은 50줄이 되고 첫 줄이 같다, 50줄 이하 스택은 내용이 그대로다, `null`과 `StackTrace.empty`는 비지 않은 50줄 이하 스택이 된다
+- fatal 여부는 `main.dart`에만 있다. `report` 람다는 `fatal`을 쓰지 않고, 받는 쪽 타입(`void Function(Object, StackTrace)`)도 `fatal`을 받지 않는다. 누가 람다에 `fatal: true`를 넣으면 수동 확인 4에서 콘솔의 "fatal" 표시로 잡는다. `main()`은 단위 테스트로 돌리지 않는다. 세 `crashlytics.record…` 호출이 모두 `trimStack`을 지나는지는 리뷰에서 본다.
 
 **기기에서 손으로 확인하는 것** (`main.dart`의 연결과 콘솔 도착은 단위 테스트로 볼 수 없다)
 
-`flutter run --release`로 실기기나 에뮬레이터에서 하나씩 한다. 임시 줄은 커밋하지 않는다. 콘솔에 5분 안에 안 보이면 `adb shell setprop log.tag.FirebaseCrashlytics DEBUG`를 하고 `adb logcat -s FirebaseCrashlytics`에서 `Crashlytics report upload complete`를 찾는다([구현 테스트](https://firebase.google.com/docs/crashlytics/android/test-implementation)).
+`flutter run --release`로 실기기나 에뮬레이터에서 하나씩 한다. 임시 줄은 커밋하지 않는다. 콘솔에 5분 안에 안 보이면 `adb shell setprop log.tag.FirebaseCrashlytics DEBUG`를 하고 `adb logcat -s FirebaseCrashlytics`에서 `Crashlytics report upload complete`를 찾는다([구현 테스트](https://firebase.google.com/docs/crashlytics/android/test-implementation)). 업로드가 200인데 이슈가 없으면 보낸 스택이 50줄을 넘는지 본다(1절 스택 규칙). 업로드 200만으로는 통과가 아니다.
 
-1. 프레임워크 오류: 아무 화면의 `build`에 `throw StateError('crash-check-1')` → 콘솔에 `crash-check-1` fatal 이슈가 생긴다.
+1. 프레임워크 오류: 아무 화면의 `build`에 `throw StateError('crash-check-1')` → 콘솔에 `crash-check-1` fatal 이슈가 생긴다. 이슈의 스택 맨 위 프레임이 그 `build`(예: `_MyHomePageState.build (package:mannerfit/main.dart:…)`)이고, 스택이 50줄 이하다. 이것이 깊은 스택 경로다. 2026-10-29에는 자르기 전 812줄 스택이 세 번 모두 업로드 200을 받고도 이슈가 생기지 않았다.
 2. 시작 중 오류: `main.dart`의 처리기 다음 줄에 `throw StateError('crash-check-2')` → 콘솔에 fatal로 생긴다. 처리기가 `LiveBackend.start()`보다 먼저 걸렸는지를 본다.
 3. Android 크래시: `runApp` 뒤에 `Future.delayed(const Duration(seconds: 3), FirebaseCrashlytics.instance.crash)` → 앱이 닫힌다. 다시 켜면 보고가 올라간다. 스택 트레이스의 클래스 이름이 읽히는지(R8 매핑 업로드)도 본다.
 4. non-fatal: `content_update.dart`의 manifest 주소를 잠깐 없는 경로로 바꿔 404를 받게 한다 → 앱을 다시 켜면 콘솔에 `HTTP 404` 이슈가 **non-fatal**로 생긴다. 비행기 모드로 켜면 생기지 않는다.
@@ -302,7 +331,15 @@ if (delErr && delErr.status !== 404) {
 
 **모르는 오류를 오프라인으로 보기(지금 `_reached`)**: 코드 버그나 처음 보는 서버 오류가 "연결 없음"으로 숨는다.
 
-**`report`를 작은 함수(`nonFatal(record)`)로 감싸 테스트하기**: 테스트할 수 있지만 `main.dart`가 그 함수를 쓰는지는 여전히 테스트 밖이다. `recordError`를 그대로 넘기면 `fatal`을 쓸 자리 자체가 없어 더 단순하다.
+**`report`를 작은 함수(`nonFatal(record)`)로 감싸 테스트하기**: 테스트할 수 있지만 `main.dart`가 그 함수를 쓰는지는 여전히 테스트 밖이다. `main.dart`의 람다 한 줄이 더 단순하다(처음에는 `recordError`를 그대로 넘겼고, 2026-10-29 1절 스택 규칙 때문에 람다가 됐다).
+
+**화면 오류(`FlutterError.onError`)만 자르기** (2026-10-29): 확인 1을 고치는 데는 충분하다. 그러나 812줄 스택은 non-fatal로도 뜨지 않았으므로 문제는 깊이다. 경로 하나만 자르면 "깊은 non-fatal과 깊은 비동기 오류는 보이지 않는다"는 예외가 남는다.
+
+**`trimStack`을 따로 파일(`lib/crash_stack.dart`)로 두기** (2026-10-29): 순수 함수라 따로 두어도 되지만 파일, `boundaries_test` 규칙, `main.dart` 허용 목록, ADR 0002 §1 표 줄이 하나씩 는다. `main.dart`는 테스트가 이미 import하므로 그 안의 최상위 함수도 테스트할 수 있다.
+
+**프레임워크 프레임을 걸러 내기(예: `package:flutter/` 프레임 빼기)** (2026-10-29): 남는 줄 수가 우리 코드의 깊이에 달려서 한도 안에 든다고 보장하지 못하고, 규칙이 "어떤 프레임을 빼는가"로 길어진다.
+
+**세 처리기를 감싸는 함수 하나(`record(e, s, {fatal})`) 두기** (2026-10-29): `FlutterError.onError`는 `recordFlutterFatalError`(오류 표시, `reason`, `information`)를 써야 하므로 셋을 다 덮지 못한다. 두 곳만 덮는 이름이 하나 더 생긴다.
 
 **`report`를 전역 변수로 두기**: 생성자 인자가 줄지만, `auth/`·`live/`가 공유 파일을 import하게 되고 테스트끼리 값이 섞인다. 이 코드는 이미 함수 주입을 쓴다.
 
@@ -314,7 +351,7 @@ if (delErr && delErr.status !== 404) {
 
 ## 결과
 - **쉬워지는 것**: Crashlytics를 부르는 코드는 `main.dart`의 몇 줄뿐이다. 다른 모듈은 함수 하나(`report` 또는 `log`)와 `isOffline`만 안다. 크래시와 실패마다 직전의 동작 순서와 결과가 붙는다. fatal은 잡지 않은 오류뿐이라 크래시 통계에 잡은 실패가 섞이지 않는다.
-- **어려워지는 것**: `Backend`나 `Session`에 메서드가 생기면 `backend.dart`, 가짜, 실제 구현에 더해 감싸개까지 네 곳을 고친다(빠뜨리면 컴파일이 안 된다). 실패를 결과로 바꾸는 `catch`를 새로 쓸 때마다 `report` 한 줄을 잊지 않아야 한다(리뷰에서 본다). 새 전송 오류 타입이 보이면 2절 목록에 더한다. 처리방침과 데이터 보안 양식에 줄이 는다.
+- **어려워지는 것**: `Backend`나 `Session`에 메서드가 생기면 `backend.dart`, 가짜, 실제 구현에 더해 감싸개까지 네 곳을 고친다(빠뜨리면 컴파일이 안 된다). 실패를 결과로 바꾸는 `catch`를 새로 쓸 때마다 `report` 한 줄을 잊지 않아야 한다(리뷰에서 본다). `main.dart`에 Crashlytics로 보내는 호출을 새로 쓰면 `trimStack`을 지나게 해야 한다(리뷰에서 본다). 스택의 51번째 줄부터는 콘솔에도 디버그 출력에도 보이지 않는다. 새 전송 오류 타입이 보이면 2절 목록에 더한다. 처리방침과 데이터 보안 양식에 줄이 는다.
 - **확인할 점**
   - 네트워크 없음: 학습은 영향이 없다. 전송 오류는 보내지 않는다. 처리기와 감싸개는 기록만 하고 기다리지 않는다. 오프라인에서 난 크래시를 기기에 두었다가 언제 보내는지는 공식 문서에서 확인하지 못했다.
   - 같은 요청 두 번: 두 번째 탭도 한 줄로 남는다(`answer Answered` 두 줄). 그래서 두 번 탭이 무시됐는지 보고서에서 보인다. 같은 오류는 콘솔에서 이슈 하나로 묶인다.
@@ -330,12 +367,19 @@ if (delErr && delErr.status !== 404) {
   - NDK: Android vitals에 우리 탓으로 보이는 네이티브 크래시가 늘면.
   - 사용자 식별자: 특정 사용자의 신고를 크래시와 맞춰 봐야 하는 일이 반복되면.
 - **다시 볼 조건**: iOS 출시(dSYM 업로드, Info.plist 설정, Apple 쪽 전송 오류 타입이 다르다), `--obfuscate`를 쓰게 될 때, 법률 확인에서 동의나 앱 안 거부 수단이 필요하다고 나올 때, 사용자가 1,000명을 크게 넘을 때(11절).
+- **스택 50줄의 한계와 다시 볼 조건** (2026-10-29): 50은 확인한 값일 뿐 Crashlytics의 한도가 아니다. 한도가 줄 수인지 바이트인지도 모른다. 다음 중 하나면 N과 `trimStack`을 다시 본다.
+  - Crashlytics 한도가 공식 문서에 나오거나, 플러그인이 스택을 스스로 자르게 될 때
+  - 50줄로 원인을 못 찾는 이슈가 생길 때. 더 큰 값은 10절 수동 확인 1로 먼저 확인한 뒤 올린다
+  - 50줄 이하인데도 업로드 200 뒤 이슈가 생기지 않는 일이 보일 때(한도가 바이트라면 줄 길이가 문제일 수 있다)
+  - `--obfuscate`를 쓰게 될 때. 기호 없는 스택의 머리줄(`build_id` 등)은 맨 앞에 있어 잘리지 않을 것으로 보지만 확인하지 않았다
 
 ## 다른 문서에 미치는 영향
 - `docs/decisions.md`: 결정이 바뀌는 것은 없다. 운영 줄의 "크래시는 Firebase Crashlytics로 받는다"를 따른다. 크래시가 아닌 실패도 Crashlytics로 보낸다는 것을 그 줄에 적을지("크래시와 오류는 Firebase Crashlytics로 받는다"), 사용자 규모(약 1,000명)를 예산 줄에 적을지는 사람이 정한다. 개인정보 줄은 ADR 0006 열린 질문 3에서 정한 대로 계정 정보 규칙으로 읽는다.
 - ADR 0001 §6: 수집 항목, 처리 목적, 보유 기간, 탈퇴로 지우는 범위, Crashlytics 줄이 이 ADR 8절과 맞게 고쳤다(2026-10-28).
 - ADR 0006 §2 `main.dart` import 줄, §3 Play 양식 머리말: 이 ADR을 가리키게 고쳤다(2026-10-28).
 - ADR 0002 §1(표의 `auth/`·`logged_backend.dart`·`main.dart` 줄, 패키지 문장), §3 `main.dart` 코드, 결과 절(네 곳, `isOffline`): 이 ADR에 맞게 고쳤다(2026-10-28 채택).
+- ADR 0002 §3 `main.dart` 코드: 1절 `trimStack`에 맞게 고쳤다(2026-10-29). §1 표는 새 파일이 없어 그대로다.
+- `docs/decisions.md`: 2026-10-29 수정으로 바뀌는 것은 없다.
 - 작업 2에서 바뀌는 것
   - `Backend` 인터페이스(ADR 0002 §2)는 바뀌지 않는다. 바뀌는 시그니처는 `LiveBackend` 생성자, `LiveBackend.start`, `Auth` 생성자와 `Auth.google`, `pickContent`, `fetchContent`에 `report` 인자 하나씩이다.
   - 바뀌는 코드 동작(작업 2): `sync()`의 `on Error` → `Zone.current.handleUncaughtError` 줄을 없애고 `report`로 보낸다. `auth.dart` `_unreachable`과 `live_backend.dart` `_reached`를 `isOffline`으로 바꾼다. `httpGet`은 비-200에 `HttpException` 대신 `Exception('HTTP …')`을 던진다. 이에 따라 `content_update_test.dart`의 `throwsA(isA<HttpException>())` 기대값이 바뀐다(설계 변경이므로 이 ADR이 근거다). `package:http`를 `dependencies`로 옮긴다.
@@ -353,6 +397,7 @@ if (delErr && delErr.status !== 404) {
 | 4 | 사용자 | `docs: 처리방침에 오류 보고 항목 더하기`: 8절 문구를 `docs/privacy/index.html`에 넣는다. Sessions 데이터는 Google이 정한 기간과 Firebase 개인정보 문서 링크로 적는다(2026-10-29) | 문서라 테스트를 먼저 쓰지 않는다 | 페이지를 열어 1·2·3·4·5·6·8절이 8절 문구와 같은지 본다. 시행일은 출시 때 적는다 |
 | 5 | 사용자 | `fix: 탈퇴 함수 500 응답에 원인 로그 남기기`: 5절 `console.error` 한 줄 | 동작(응답 코드)이 바뀌지 않는 로그 한 줄이라 테스트를 먼저 쓰지 않는다. 기존 `deno test`가 그대로 통과해야 한다 | `supabase functions serve` 출력에서 500 경로의 줄을 보거나 코드 리뷰로 본다. 줄에 uid·이메일이 없다 |
 | 6 | 사용자 | Play Console 데이터 보안 양식에 8절 줄 더하기(PR 없음, ADR 0006 작업 5와 함께) | 콘솔 설정이라 없다 | ADR 0008 출시 점검 |
+| 7 | 사용자 | `fix: 깊은 스택의 화면 오류가 Crashlytics에 보이게 하기` (dev `7cde653` 위, 2026-10-29): 1절 `trimStack`을 `main.dart`에 더하고 세 `crashlytics.record…` 호출이 모두 지나게 한다. `live_backend.dart` `start`의 주석 "main.dart가 `recordError`를 그대로 넘긴다"를 람다에 맞게 고친다 | `app/test/main_test.dart`(`package:mannerfit/main.dart` import): `'#$i f (package:mannerfit/x.dart:1)'` 812줄로 만든 `StackTrace.fromString`을 `trimStack`에 넣으면 결과 `toString().split('\n')`이 50줄이고 첫 줄이 `#0 f …`다. 3줄 스택은 `toString()`이 입력과 같다. `null`과 `StackTrace.empty`는 비지 않고 50줄 이하다. 함수가 없어 컴파일 오류로 실패하면, 먼저 `StackTrace trimStack(StackTrace? s) => s ?? StackTrace.empty;`로 두고 812줄 경우가 "50" 기대에서 실패하는지 본다 | `cd app && flutter analyze && flutter test`. 릴리스 빌드로 10절 수동 확인 1(콘솔에 fatal 이슈, 맨 위 프레임이 `build`, 50줄 이하)과 2·4(전처럼 뜬다)를 다시 하고 PR 본문에 적는다 |
 
 ## 열린 질문 (사용자 결정 필요)
 없음.
@@ -375,6 +420,7 @@ if (delErr && delErr.status !== 404) {
    - 출시 전 법률 확인에서 앱 안 거부 수단이 필요하다고 나오면, Analytics와 Crashlytics를 함께 끄는 스위치 하나로 (B)를 한다.
 
 ## 확인하지 못한 것
+- Crashlytics가 깊은 스택을 받고도(업로드 200) 이슈를 만들지 않는 기준. 줄 수인지 바이트인지, 어디서부터인지 모른다. 2026-10-29 에뮬레이터에서 50줄은 떴고 812줄은 뜨지 않았다. 공식 문서에서 찾지 못했다.
 - 오프라인에서 난 fatal 크래시를 기기에 얼마나 두었다가 언제 보내는지.
 - Crashlytics Gradle 플러그인의 매핑 파일 업로드가 릴리스 빌드에서 기본으로 켜지는지(10절 수동 확인 3으로 본다). 문서는 `mappingFileUploadEnabled` 설정만 보이고 기본값을 적지 않았다.
 - `flutterfire configure`가 Crashlytics를 위해 바꾸는 Gradle 파일 목록.
