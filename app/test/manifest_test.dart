@@ -1,5 +1,5 @@
 // ADR 0007 §6: 디버그 빌드만 Crashlytics 보고를 끈다.
-// ADR 0006 §3: 광고 ID를 모으지 않는다(수집 설정 false, AD_ID 권한 제거).
+// ADR 0006 §3: 광고 ID를 모으지 않는다(수집 설정 false, AD_ID·AdServices 권한 제거).
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -42,4 +42,15 @@ void main() {
     expect(tags, hasLength(1));
     expect(tags.single, contains('tools:node="remove"'));
   });
+
+  for (final name in ['ACCESS_ADSERVICES_AD_ID', 'ACCESS_ADSERVICES_ATTRIBUTION']) {
+    test('main manifest는 $name 권한을 뺀다', () {
+      final tags = RegExp(r'<uses-permission[^>]*>')
+          .allMatches(File('android/app/src/main/AndroidManifest.xml').readAsStringSync())
+          .map((m) => m[0]!)
+          .where((t) => t.contains('android:name="android.permission.$name"'));
+      expect(tags, hasLength(1));
+      expect(tags.single, contains('tools:node="remove"'));
+    });
+  }
 }
