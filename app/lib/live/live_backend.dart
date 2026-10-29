@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -26,6 +27,9 @@ import 'question.dart';
 const supabaseUrl = 'https://zyjrygavqubomqgojavw.supabase.co';
 const publishableKey = 'sb_publishable_EbqpO11yypaObh3k_vREFQ_XWUaEh3F';
 
+/// 분석 이벤트 하나를 보낸다(ADR 0006 §2). 값은 String이나 int만 넣는다.
+typedef LogEvent = void Function(String name, Map<String, Object> params);
+
 class LiveBackend implements Backend {
   /// 테스트는 자기 저장소, 인증, 콘텐츠, 날짜를 넣는다. 앱은 [start]를 쓴다.
   LiveBackend({
@@ -35,8 +39,10 @@ class LiveBackend implements Backend {
     required SupabaseClient client,
     DateTime Function() now = DateTime.now,
     required void Function(Object, StackTrace) report,
+    required LogEvent log,
   })  : _content = content,
         _report = report,
+        _log = log,
         _store = store,
         _auth = auth,
         _client = client,
@@ -60,6 +66,8 @@ class LiveBackend implements Backend {
       client: client,
       auth: await Auth.google(client, clearLocal: store.clear, report: report),
       report: report,
+      // 기다리지 않고 오류도 버린다. 빠진 이벤트는 받아들이고(ADR 0006 결과), 분석은 ADR 0007 §3 보고 대상이 아니다
+      log: (name, params) => FirebaseAnalytics.instance.logEvent(name: name, parameters: params).ignore(),
     );
     unawaited(fetchContent(supabaseUrl, dir, content, report: report)); // 받은 것은 다음 시작부터 쓴다
     unawaited(b.sync());
@@ -73,6 +81,7 @@ class LiveBackend implements Backend {
   final SupabaseClient _client;
   final DateTime Function() _now;
   final void Function(Object, StackTrace) _report;
+  final LogEvent _log;
   final _rng = Random();
 
   final _home = ValueNotifier(const Home(today: null, streak: 0, reviewsDue: 0, xp: 0, level: 1, levelProgress: 0));
@@ -120,6 +129,7 @@ class LiveBackend implements Backend {
     final pos = engine.dailyPosition(_content, _store.dayCompletions, today);
     if (pos == null || pos.doneToday) throw StateError('준비된 하루가 없거나 오늘 이미 마쳤다');
     final plan = engine.planDay(_content, pos.day, attempts, engine.boxes(_content, attempts), today, _rng);
+    _log('daily_start', {'day_id': pos.day['id'] as String});
     return _LiveSession(this, pos.day, plan);
   }
 
@@ -167,6 +177,7 @@ class LiveBackend implements Backend {
     final r = await _auth.signIn();
     if (r == SignInStatus.ok) {
       _account.value = _accountOf(_client.auth.currentUser);
+      _log('login', {'method': 'google'});
       await sync(); // 게스트 기록을 올리고 다른 기기 기록을 받는다(ADR 0001 §3)
     }
     return SignInResult.values.byName(r.name);
@@ -245,6 +256,7 @@ class _LiveSession implements Session {
     _b._store.addAttempt(attempt); // 파일에 쓰고 돌아온다
     _b._refresh();
     _attempts.add(attempt);
+    _b._log('answer', {'scenario_id': shown.id, 'grade': grade.name, 'retry': retry ? 1 : 0});
 
     _combo = grade == Grade.best ? _combo + 1 : 0;
     _bestCombo = max(_bestCombo, _combo);
@@ -269,6 +281,7 @@ class _LiveSession implements Session {
         _phase.value = _asking();
       case Answered(last: true):
         _b._store.addDayCompletion(engine.DayCompletion(id: newId(), dayId: _day['id'] as String, completedOn: _b._now()));
+        _b._log('daily_complete', {'day_id': _day['id'] as String});
         _b._refresh();
         _phase.value = Finished(
           xpGained: engine.xp(_attempts),
@@ -289,6 +302,14 @@ class _LiveSession implements Session {
     }
   }
 
+  /// 중간 저장 없음. 답한 기록은 answer에서 이미 썼다.
+  /// scene은 지금 문제가 처음 나온 장면(1부터). Intro에서는 _i가 이미 그 장면의 첫 문제다(ADR 0006 §1).
+  /// Finished 뒤에는 세트를 버리므로 보내지 않는다(ADR 0002, ADR 0006 결과 "받아들여진 호출에서만").
   @override
-  void quit() => unawaited(_b.sync()); // 중간 저장 없음. 답한 기록은 answer에서 이미 썼다
+  void quit() {
+    if (_phase.value is! Finished) {
+      _b._log('daily_quit', {'day_id': _day['id'] as String, 'scene': _queue[_i].scene + 1});
+    }
+    unawaited(_b.sync());
+  }
 }
