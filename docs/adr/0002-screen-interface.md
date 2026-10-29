@@ -100,19 +100,20 @@ class Evidence { final String summary; final List<Source> sources; }  class Sour
 - 실행할 때는 이름 붙은 묶음을 고른다: `flutter run --dart-define=FAKE=<이름>`. 이름은 `guest`(기본, 첫 실행), `signedIn`, `doneToday`, `noDay`, `offline`, `signInFails`, `wouldLose`, `deleteFails`. 팀원이 버튼으로 고를 수 있게 `.vscode/launch.json`에 묶음마다 실행 설정을 둔다.
 
 ```dart
-// app/lib/main.dart. 처리기와 감싸개는 ADR 0007 §1·§4
+// app/lib/main.dart. 처리기, trimStack, 감싸개는 ADR 0007 §1·§4
 const fake = String.fromEnvironment('FAKE');
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); // ADR 0006 §2
   final crashlytics = FirebaseCrashlytics.instance;
-  FlutterError.onError = crashlytics.recordFlutterFatalError;
+  FlutterError.onError = (details) =>
+      crashlytics.recordFlutterFatalError(details.copyWith(stack: trimStack(details.stack)));
   PlatformDispatcher.instance.onError = (error, stack) {
-    crashlytics.recordError(error, stack, fatal: true);
+    crashlytics.recordError(error, trimStack(stack), fatal: true);
     return true;
   };
   final inner = (kReleaseMode || fake.isEmpty) // 릴리스는 항상 실제
-      ? await LiveBackend.start(report: crashlytics.recordError) // 잡은 실패는 non-fatal(ADR 0007 §3)
+      ? await LiveBackend.start(report: (e, s) => crashlytics.recordError(e, trimStack(s))) // 잡은 실패는 non-fatal(ADR 0007 §3)
       : FakeBackend.preset(fake);
   backend = LoggedBackend(inner, log: crashlytics.log);
   runApp(const MyApp());
