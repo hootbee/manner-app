@@ -7,6 +7,7 @@ import 'backend.dart';
 import 'fake/fake_backend.dart';
 import 'firebase_options.dart';
 import 'live/live_backend.dart';
+import 'logged_backend.dart';
 
 // ADR 0002 §3. FAKE를 주면 가짜(묶음 이름은 FakeBackend.preset), 아니면 실제. 릴리스는 항상 실제다.
 const fake = String.fromEnvironment('FAKE');
@@ -21,9 +22,10 @@ Future<void> main() async {
     crashlytics.recordError(error, stack, fatal: true);
     return true;
   };
-  backend = (kReleaseMode || fake.isEmpty)
+  final inner = (kReleaseMode || fake.isEmpty)
       ? await LiveBackend.start(report: crashlytics.recordError) // ADR 0007 §3: 잡은 실패는 non-fatal(fatal 기본값 false)
       : FakeBackend.preset(fake);
+  backend = LoggedBackend(inner, log: crashlytics.log); // ADR 0007 §4: 가짜도 언제나 감싼다
   runApp(const MyApp());
 }
 
