@@ -216,23 +216,24 @@ if (delErr && delErr.status !== 404) {
 **정한 것** (2026-10-28 사용자)
 - 사용자 식별자(`setUserIdentifier`)는 붙이지 않는다. 커스텀 키도 쓰지 않는다. 로그는 4절 감싸개만 쓴다.
 - 동의와 거부: Analytics와 같게 동의 화면 없이 처리방침에 공개하고, 거부 방법은 앱 삭제다.
-- 보존 기간: Crashlytics는 스택 트레이스와 식별자를 90일 동안 두었다가 지우기 시작한다([Firebase 개인정보](https://firebase.google.com/support/privacy)). 우리가 바꿀 설정은 없다. Sessions 데이터의 기간은 확인하지 못했다.
+- 보존 기간: Crashlytics는 스택 트레이스와 식별자를 90일 동안 두었다가 지우기 시작한다([Firebase 개인정보](https://firebase.google.com/support/privacy)). 우리가 바꿀 설정은 없다. Sessions 데이터의 기간은 공개 문서에 없어서, 처리방침에는 Google이 정한 기간 동안 보관된다고 적고 Firebase 개인정보 문서에 링크한다(2026-10-29 사용자).
 - 탈퇴: 사용자 식별자를 붙이지 않으므로 탈퇴 순서(ADR 0001 §5)에 더할 것이 없다.
 - 오류 메시지에는 서버나 라이브러리가 만든 문장이 그대로 들어간다(1절). 그래서 처리방침에 "이름·이메일은 보내지 않는다"고 단정하지 않는다.
 
-**개인정보처리방침에 더할 문구** (`docs/privacy/index.html`, 작업 4. 게시하기 전에 Sessions 데이터의 보관 기간을 확인해 넣는다)
+**개인정보처리방침에 더할 문구** (`docs/privacy/index.html`, 작업 4. Sessions 데이터의 보관 기간은 Google이 정한 기간 동안 보관된다고 적고 Firebase 개인정보 문서에 링크한다)
 - 1절 수집하는 항목: "계정과 연결하지 않는 앱 이용 통계" 줄을 "계정과 연결하지 않는 앱 이용 통계와 오류 보고: 아래 3절"로 바꾼다.
+- 1절 아래 문단: "3절의 앱 이용 통계는 로그인과 상관없이 수집합니다."를 "3절의 앱 이용 통계와 오류 보고는 로그인과 상관없이 수집합니다."로 바꾼다.
 - 3절 제목을 "3. 앱 이용 통계와 오류 보고"로 바꾸고 문단 하나를 더한다.
 
-> **오류 보고**: 오류를 고치기 위해 Google Firebase Crashlytics를 씁니다. 앱을 쓸 때마다 앱·기기 정보(앱 이름, OS·SDK 버전, 네트워크 연결 종류, 기기 제조사·모델)와 앱을 연 시각을 보냅니다. 앱이 비정상 종료되거나, 응답하지 않거나, 로그인·탈퇴·동기화·콘텐츠 받기·읽기가 실패하면 오류 내용(스택 트레이스와 오류 메시지), 그때의 앱 상태와 기기 정보(CPU 종류, 메모리·저장 공간, 앱 버전), 오류 직전의 앱 동작 기록(사용한 기능, 결과의 종류, 걸린 시간)과 앱 이용 기록(위 앱 이용 통계 항목)을 보냅니다. 앱 설치마다 무작위로 만든 식별자를 함께 보내며, 이 기록은 Google 계정과 연결하지 않습니다. 오류 내용과 식별자는 90일이 지나면 삭제됩니다.
+> **오류 보고**: 오류를 고치기 위해 Google Firebase Crashlytics를 씁니다. 앱을 쓸 때마다 앱·기기 정보(앱 이름, OS·SDK 버전, 네트워크 연결 종류, 기기 제조사·모델)와 앱을 연 시각을 보냅니다. 앱이 비정상 종료되거나, 응답하지 않거나, 로그인·탈퇴·동기화·콘텐츠 받기·읽기가 실패하면 오류 내용(스택 트레이스와 오류 메시지), 그때의 앱 상태와 기기 정보(CPU 종류, 메모리·저장 공간, 앱 버전), 오류 직전의 앱 동작 기록(사용한 기능, 결과의 종류, 걸린 시간)과 앱 이용 기록(위 앱 이용 통계 항목)을 보냅니다. 앱 설치마다 무작위로 만든 식별자를 함께 보내며, 이 기록은 Google 계정과 연결하지 않습니다. 오류 내용과 식별자는 90일이 지나면 삭제됩니다. 앱을 쓸 때마다 보내는 앱·기기 정보와 앱을 연 시각은 Google이 정한 기간 동안 보관됩니다([Firebase 개인정보 문서](https://firebase.google.com/support/privacy)).
 
-- 4절 보유 기간: "오류 보고의 오류 내용과 식별자는 90일 뒤 삭제됩니다."를 더한다.
+- 4절 보유 기간: "오류 보고의 오류 내용과 식별자는 90일 뒤 삭제됩니다."와 "오류 보고 중 앱을 쓸 때마다 보내는 앱·기기 정보와 앱을 연 시각은 Google이 정한 기간 동안 보관됩니다(3절)."를 더한다.
 - 6절 국외 이전은 ADR 0006 §3의 항목 하나를 넓힌다(이전받는 자, 국가, 시기와 방법은 같다).
   - 이전 항목: "3절의 앱 이용 통계와 오류 보고 항목"
   - 목적: "앱 이용 통계, 오류 수정"
-  - 보유 기간: "앱 이용 통계 개별 기록 2개월, 오류 보고의 오류 내용과 식별자 90일"
+  - 보유 기간: "앱 이용 통계 개별 기록 2개월, 오류 보고의 오류 내용과 식별자 90일, 앱을 쓸 때마다 보내는 앱·기기 정보와 앱을 연 시각은 Google이 정한 기간(3절)"
   - 거부 방법과 효과: "앱을 삭제하면 수집이 멈춥니다. 이미 모인 기록은 위 보유 기간이 지나면 삭제됩니다."
-- 8절 탈퇴: "앱 이용 통계는 2개월, 오류 보고는 90일, 백업은 30일 뒤 사라집니다."
+- 8절 탈퇴: "앱 이용 통계는 2개월, 오류 보고의 오류 내용과 식별자는 90일, 백업은 30일 뒤 사라집니다. 앱을 쓸 때마다 보내는 앱·기기 정보와 앱을 연 시각은 4절의 기간을 따릅니다."
 - 2절 처리 목적의 "크래시 보고: 오류 수정"을 "오류 보고: 오류 수정"으로, 5절 처리 위탁의 Crashlytics 줄 설명을 "앱 오류 보고"로 바꾼다.
 
 **Play 데이터 보안 양식에 더할 줄** (ADR 0006 §3 표에 더한다)
@@ -349,7 +350,7 @@ if (delErr && delErr.status !== 404) {
 | 1 | 사용자 | `feat: 잡지 않은 오류를 Crashlytics로 보내기`: 9절 1~2, 1절 처리기(`report` 연결 빼고), 6절 디버그 manifest, 7절 경계(감싸개 줄 빼고) | `manifest_test`: `src/debug/AndroidManifest.xml`에 `firebase_crashlytics_collection_enabled`=`false` `meta-data`가 없거나 `src/main/AndroidManifest.xml`에 그 이름이 있으면 실패한다. `boundaries_test`: 규칙을 더한 뒤 `lib/live/`의 파일에 `import 'package:firebase_crashlytics/firebase_crashlytics.dart';`, `lib/engine/`에 `import 'package:firebase_core/firebase_core.dart';`를 잠깐 넣어 실패를 보고 뺀다 | `cd app && flutter analyze && flutter test`. 10절 수동 확인 1·2·3·5 결과를 PR 본문에 적는다 |
 | 2 | 사용자 | `feat: 잡은 실패를 non-fatal로 보내기`: 2절 `isOffline`, 3절 `report`를 `main.dart` → `LiveBackend.start` → `LiveBackend`·`Auth`·`pickContent`·`fetchContent`로 넘기고 표의 다섯 곳에 한 줄씩. "작업 2에서 바뀌는 것"의 코드 동작 변경 전부 | `offline_test`: 2절 목록 타입마다 참, `PostgrestException`·`AuthException`·`AuthRetryableFetchException(statusCode: '503')`·`StateError`는 거짓, `FunctionsFetchException(details: ClientException(..))`은 참, `details: AuthException(..)`은 거짓. `auth_test` 로그인: `googleIdToken`이 `GoogleSignInException(code: unknownError)`를 던지면 `failed`이고 `reported`에 하나, `canceled`면 `cancelled`이고 없음, `googleIdToken`이 `null`을 돌려주면 `failed`이고 `StateError` 하나, `signInWithIdToken`이 `ClientException`이면 `offline`이고 없음. `auth_test` 탈퇴: 함수가 400·500이면 `failed`이고 하나, 401 뒤 세션 갱신이 거절되면 `failed`이고 `StateError` 하나, `FunctionsFetchException(details: ClientException)`이면 `offline`이고 없음. `live_backend_test` sync: `PostgrestException(code: '42501')`이면 하나이고 `online`은 참, `ClientException`이면 없음이고 `online`은 거짓, `23503`이면 하나이고 로컬이 지워진다, 저장소가 `TypeError`를 던지면 하나이고 `online`은 참, 세션 없음 + `synced` 행이면 `StateError` 하나. `content_update_test`: `get`이 `SocketException`·`TimeoutException`이면 없음, `HttpException`(도중 끊김)이면 없음, `httpGet`이 404를 받으면 `Exception`을 던지고(`HttpException` 아님) `_fetch`는 하나를 보낸다, 깨진 JSON이면 하나, 검사에 실패하는 본문이면 하나, `pickContent`는 파일이 없으면 없음이고 깨진 파일이면 하나. `fatal`을 넘길 수 없는 것은 타입으로 막는다(테스트가 아니다. 10절 수동 확인 4가 본다) | `cd app && flutter analyze && flutter test`(Supabase 환경 변수 넣고, `CLAUDE.md`). 10절 수동 확인 4(콘솔에 non-fatal로 뜬다) |
 | 3 | 사용자 | `feat: 화면 동작을 크래시 보고에 기록`: `logged_backend.dart`, `main.dart`에서 감싸기, 7절 경계의 감싸개 줄 | `logged_backend_test`: `LoggedBackend(FakeBackend(signIn: SignInResult.offline), log: lines.add)`에서 `signIn()` 뒤 `lines`가 `^signIn offline \d+ms$` 한 줄이다. 이어서: `startDaily()` → `startDaily Intro`, 첫 문제에 답을 두 번 → `answer Answered` 두 줄, 안쪽이 `StateError`를 던지면 `… threw StateError …` 한 줄이 남고 같은 예외가 밖으로 나온다, `FakeBackend(account: Account(name: '홍길동', email: 'a@b.c'))`로 모든 메서드를 부른 뒤 어느 줄에도 `홍길동`이나 `@`가 없다 | `flutter analyze && flutter test`. 10절 수동 확인 6 |
-| 4 | 사용자 | `docs: 처리방침에 오류 보고 항목 더하기`: 8절 문구를 `docs/privacy/index.html`에 넣는다. Sessions 데이터 보관 기간을 먼저 확인한다 | 문서라 테스트를 먼저 쓰지 않는다 | 페이지를 열어 1·2·3·4·5·6·8절이 8절 문구와 같은지 본다. 시행일을 고친다 |
+| 4 | 사용자 | `docs: 처리방침에 오류 보고 항목 더하기`: 8절 문구를 `docs/privacy/index.html`에 넣는다. Sessions 데이터는 Google이 정한 기간과 Firebase 개인정보 문서 링크로 적는다(2026-10-29) | 문서라 테스트를 먼저 쓰지 않는다 | 페이지를 열어 1·2·3·4·5·6·8절이 8절 문구와 같은지 본다. 시행일은 출시 때 적는다 |
 | 5 | 사용자 | `fix: 탈퇴 함수 500 응답에 원인 로그 남기기`: 5절 `console.error` 한 줄 | 동작(응답 코드)이 바뀌지 않는 로그 한 줄이라 테스트를 먼저 쓰지 않는다. 기존 `deno test`가 그대로 통과해야 한다 | `supabase functions serve` 출력에서 500 경로의 줄을 보거나 코드 리뷰로 본다. 줄에 uid·이메일이 없다 |
 | 6 | 사용자 | Play Console 데이터 보안 양식에 8절 줄 더하기(PR 없음, ADR 0006 작업 5와 함께) | 콘솔 설정이라 없다 | ADR 0008 출시 점검 |
 
@@ -378,7 +379,7 @@ if (delErr && delErr.status !== 404) {
 - Crashlytics Gradle 플러그인의 매핑 파일 업로드가 릴리스 빌드에서 기본으로 켜지는지(10절 수동 확인 3으로 본다). 문서는 `mappingFileUploadEnabled` 설정만 보이고 기본값을 적지 않았다.
 - `flutterfire configure`가 Crashlytics를 위해 바꾸는 Gradle 파일 목록.
 - 디버그 빌드에서 수집이 꺼진 채 기기에 쌓인 보고를, 같은 기기에 릴리스 빌드를 덮어 깔았을 때 보내는지(개발 기기에서만 생기는 일이다).
-- Firebase Sessions 데이터의 보관 기간, 그리고 언제·얼마나 자주 보내는지. Firebase 개인정보 문서와 Play 공개 안내에 없다. 처리방침(작업 4)을 게시하기 전에 확인해야 한다.
+- Firebase Sessions 데이터의 보관 기간, 그리고 언제·얼마나 자주 보내는지. Firebase 개인정보 문서와 Play 공개 안내에 없다. 보관 기간은 공개 문서에 없어 처리방침에는 Google이 정한 기간으로 적었다(2026-10-29 사용자). 언제·얼마나 자주 보내는지는 모른다.
 - Android에서 네트워크가 없을 때 Google 로그인(Credential Manager)이 어떤 `GoogleSignInExceptionCode`로 오는지(2절에서 non-fatal로 받아들였다).
 - `functions_client`가 `FunctionsFetchException.details`에 넣는 값의 종류 전체(2.7.1 소스에서 요청 중 오류를 그대로 넣는 것만 봤다).
 - Supabase 무료 플랜의 Edge Function 로그 보관 기간. 요금표에는 "API·DB 로그 1일"만 있고, 로그 문서는 "요금제에 따라 다르다"고만 한다.
