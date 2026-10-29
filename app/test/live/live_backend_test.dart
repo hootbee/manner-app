@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mannerfit/auth/auth.dart';
@@ -101,16 +102,23 @@ void main() {
   late File file;
   late List<String> log; // 서버 요청과 Google 콜백을 부른 순서
   late List<Object> reported; // ADR 0007 §3: non-fatal로 보낸 오류
+  late List<(String, Map<String, Object>)> logged; // ADR 0006 §2: 분석 이벤트
+  late List<({int attempts, int days})> rowsAtLog; // 이벤트를 받은 순간의 로컬 행 수(logged와 같은 순서)
   setUp(() {
     dir = Directory.systemTemp.createTempSync('live_backend_test');
     file = File('${dir.path}/records.json');
     log = [];
     reported = [];
+    logged = [];
+    rowsAtLog = [];
     today = DateTime(2026, 10, 27, 9);
   });
   tearDown(() => dir.deleteSync(recursive: true));
 
-  LiveBackend make(SupabaseClient client, [Content? c]) {
+  int rowCount(String table) =>
+      file.existsSync() ? ((jsonDecode(file.readAsStringSync()) as Map)[table] as List? ?? []).length : 0;
+
+  LiveBackend make(SupabaseClient client, [Content? c, Future<String?> Function()? googleIdToken]) {
     final store = Store(file, client);
     return LiveBackend(
       content: c ?? content,
@@ -118,14 +126,21 @@ void main() {
       client: client,
       auth: Auth(client,
           clearLocal: store.clear,
-          googleIdToken: () async => 'gid',
+          googleIdToken: googleIdToken ?? () async => 'gid',
           googleSignOut: () async => log.add('google.signOut'),
           googleDisconnect: () async => log.add('google.disconnect'),
           report: (e, _) => reported.add(e)),
       now: () => today,
       report: (e, _) => reported.add(e),
+      log: (n, p) {
+        logged.add((n, p));
+        rowsAtLog.add((attempts: rowCount('attempts'), days: rowCount('day_completions')));
+      },
     );
   }
+
+  /// 레코드 안의 Map은 ==로 비교되지 않아 목록으로 바꿔 비교한다.
+  List<List<Object>> events() => [for (final (n, p) in logged) [n, p]];
 
   /// 게스트. 닿지 않는 주소라 요청을 보내면 예외가 난다.
   LiveBackend guest() => make(SupabaseClient('http://127.0.0.1:1', 'x'));
@@ -690,6 +705,127 @@ void main() {
       expect(b.account.value, isNull);
       expect(b.online.value, isTrue);
       expect(reported, [isA<AuthException>()]); // ADR 0007 §3: 서버가 응답한 오류. synced 행이 없어 StateError는 없다
+    });
+  });
+
+  group('분석 이벤트 (ADR 0006 작업 4)', () {
+    test('startDaily()는 daily_start 하나를 보낸다', () {
+      guest().startDaily();
+      expect(events(), [
+        ['daily_start', {'day_id': 'day-01'}],
+      ]);
+    });
+
+    test('첫 문제에 best를 두 번 탭하면 answer 하나뿐이다. 로컬 기록을 쓴 뒤에 보낸다', () {
+      final s = guest().startDaily();
+      logged.clear();
+      askNext(s);
+      s.answer(right);
+      s.answer(right);
+      expect(events(), [
+        ['answer', {'scenario_id': rows('attempts').single['scenario_id'], 'grade': 'best', 'retry': 0}],
+      ]);
+    });
+
+    test('다시 풀기 문제의 answer는 retry가 1이고 grade는 채점 결과다', () {
+      final s = guest().startDaily();
+      askNext(s);
+      s.answer(wrong);
+      for (var i = 0; i < 5; i++) {
+        askNext(s);
+        s.answer(right);
+      }
+      askNext(s);
+      s.answer(right);
+      final answers = logged.where((e) => e.$1 == 'answer').map((e) => e.$2).toList();
+      expect(answers.first, containsPair('grade', 'avoid'));
+      expect(answers.first, containsPair('retry', 0));
+      expect(answers.last, {'scenario_id': answers.first['scenario_id'], 'grade': 'best', 'retry': 1});
+    });
+
+    test('둘째 장면에서 quit()하면 daily_quit의 scene이 2다', () {
+      final s = guest().startDaily();
+      askNext(s);
+      s.answer(right);
+      askNext(s);
+      s.answer(right); // 장면 1의 마지막 문제
+      askNext(s); // 장면 2의 Intro를 지나 첫 문제
+      logged.clear();
+      s.quit();
+      expect(events(), [
+        ['daily_quit', {'day_id': 'day-01', 'scene': 2}],
+      ]);
+    });
+
+    test('장면 소개(Intro)에서 quit()하면 그 장면 번호다', () {
+      final s = guest().startDaily();
+      for (var i = 0; i < 2; i++) {
+        askNext(s);
+        s.answer(right);
+      }
+      s.next();
+      expect((s.phase.value as Intro).scene.title, '장면2');
+      logged.clear();
+      s.quit();
+      expect(events(), [
+        ['daily_quit', {'day_id': 'day-01', 'scene': 2}],
+      ]);
+    });
+
+    test('세트를 끝까지 풀면 daily_complete 하나다. Finished 뒤 next는 다시 보내지 않는다. 모든 값은 String이나 int다', () {
+      final s = guest().startDaily();
+      finishDay(s);
+      s.next();
+      expect(events().where((e) => e[0] == 'daily_complete'), [
+        ['daily_complete', {'day_id': 'day-01'}],
+      ]);
+      expect(logged.map((e) => e.$1), ['daily_start', ...List.filled(6, 'answer'), 'daily_complete']);
+      for (final (_, p) in logged) {
+        expect(p.values, everyElement(anyOf(isA<String>(), isA<int>())));
+      }
+    });
+
+    test('answer와 daily_complete는 로컬 기록을 쓴 뒤에 보낸다', () {
+      finishDay(guest().startDaily());
+      var answers = 0;
+      for (final (i, (n, _)) in logged.indexed) {
+        final rows = rowsAtLog[i];
+        if (n == 'answer') expect(rows.attempts, ++answers, reason: '$answers번째 answer를 보낼 때 attempts 행');
+        if (n == 'daily_complete') expect(rows.days, 1, reason: 'daily_complete를 보낼 때 day_completions 행');
+      }
+      expect(answers, 6);
+    });
+
+    test('Finished 뒤 quit()은 daily_quit을 보내지 않는다', () {
+      final s = guest().startDaily();
+      finishDay(s);
+      logged.clear();
+      s.quit();
+      s.quit();
+      expect(logged, isEmpty);
+    });
+
+    test('오늘 이미 마쳐 startDaily()가 StateError를 던지면 daily_start를 보내지 않는다', () {
+      final b = guest();
+      finishDay(b.startDaily());
+      logged.clear();
+      expect(b.startDaily, throwsStateError);
+      expect(logged, isEmpty);
+    });
+
+    test('signIn()이 cancelled면 login이 없다', () async {
+      final b = make(mock(accepting), null,
+          () async => throw const GoogleSignInException(code: GoogleSignInExceptionCode.canceled));
+      expect(await b.signIn(), SignInResult.cancelled);
+      expect(logged, isEmpty);
+    });
+
+    test('signIn()이 ok면 login이 {method: google}로 하나다', () async {
+      final b = make(mock(accepting));
+      expect(await b.signIn(), SignInResult.ok);
+      expect(events(), [
+        ['login', {'method': 'google'}],
+      ]);
     });
   });
 
