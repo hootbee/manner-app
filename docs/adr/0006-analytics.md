@@ -1,6 +1,6 @@
 # 0006. 사용자 행동 분석: Firebase Analytics 이벤트 5개
 
-상태: 채택
+상태: 채택 (2026-10-29 3절 "AdServices 광고 권한도 뺀다" 수정 채택)
 날짜: 2026-10-27
 
 ## 배경
@@ -67,9 +67,13 @@ final live = LiveBackend(/* ... */, log: (n, p) => logged.add((n, p)));
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" tools:node="remove"/>
     <application ...>
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false"/>
 ```
+
+`firebase_analytics` 13.0.1은 Android Privacy Sandbox 권한 `ACCESS_ADSERVICES_AD_ID`와 `ACCESS_ADSERVICES_ATTRIBUTION`(광고 측정과 귀속용)도 합쳐 넣는다. 2026-10-29 `./gradlew :app:processReleaseMainManifest`의 병합 manifest에서 확인했고, AD_ID와 같이 `tools:node="remove"`로 뺀다([병합 규칙](https://developer.android.com/build/manage-manifests#merge_rule_markers)).
 
 - Google 신호, Google Ads 연결, BigQuery 연결은 켜지 않는다.
 - **사용자 ID(`setUserId`)는 설정하지 않는다.**
@@ -137,7 +141,7 @@ final live = LiveBackend(/* ... */, log: (n, p) => logged.add((n, p)));
   - 사용자 속성(user property): 사용자를 나눠 볼 기준(예: 로그인 여부별 재방문)이 필요해지면.
   - 디버그 빌드 수집 끄기: 개발 중 이벤트가 보고서를 흐리면.
   - BigQuery 내보내기: 문제 수천 개의 `scenario_id`가 표준 보고서에서 "(other)"로 묶여 안 보이면.
-- **다시 볼 조건**: iOS 출시 때(광고 식별자 설정이 다르다), 법률 확인 결과 동의나 거부 수단이 필요할 때, 사용자 ID가 필요해질 때.
+- **다시 볼 조건**: iOS 출시 때(광고 식별자 설정이 다르다), 법률 확인 결과 동의나 거부 수단이 필요할 때, 사용자 ID가 필요해질 때, 앱에 광고를 넣을 때.
 
 ## 작업 목록
 4절 1~3이 끝나야 2·4를 시작할 수 있다. 2·3·4는 ADR 0002 작업 11(`live/`)과 같은 시기에 한다.
@@ -149,6 +153,7 @@ final live = LiveBackend(/* ... */, log: (n, p) => logged.add((n, p)));
 | 3 | 사용자 | 광고 ID 끄기(3절 manifest) | `app/test/manifest_test.dart`: `AndroidManifest.xml`에 `google_analytics_adid_collection_enabled`가 `false`인 `meta-data`와 AD_ID 권한의 `tools:node="remove"`가 없으면 실패한다 |
 | 4 | 사용자 | `live/`에서 이벤트 5개 보내기 | 기록용 `log`를 넣은 `LiveBackend`에서 첫 문제에 `best`를 두 번 탭하면 `logged`가 `[('answer', {scenario_id: <그 문제 id>, grade: 'best', retry: 0})]` 하나뿐이다. 이어서: `startDaily()` → `daily_start` 하나, 둘째 장면에서 `quit()` → `daily_quit`의 `scene`이 2, 세트를 끝까지 풀면 `daily_complete` 하나, `signIn()`이 `cancelled`면 `login`이 없다. 모든 파라미터 값은 `String`이나 `int`다 |
 | 5 | 사용자 | 4절 5~7: 보존 기간, 맞춤 측정기준, Play Console 선언. 처리방침에 3절 문구 넣기(ADR 0001 §6 페이지 작업) | 콘솔 설정과 문서라 테스트를 먼저 쓰지 않는다. 출시 점검표에서 확인한다 |
+| 6 | 사용자 | AdServices 광고 권한 빼기(3절 manifest) | `manifest_test`: `ACCESS_ADSERVICES_AD_ID`와 `ACCESS_ADSERVICES_ATTRIBUTION` 각각에 `tools:node="remove"`인 `uses-permission`이 하나씩 없으면 실패한다. 작업 4 머지 뒤 `processReleaseMainManifest`의 병합 manifest에 두 권한이 없는지 손으로 확인한다 |
 
 ## 열린 질문 (사용자 결정 필요)
 없음.
