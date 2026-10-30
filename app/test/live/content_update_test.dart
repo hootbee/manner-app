@@ -9,7 +9,7 @@ import 'package:mannerfit/live/content_update.dart';
 
 void main() {
   final bundleJson = File('assets/content.json').readAsStringSync();
-  final bundle = parseContent(bundleJson); // schema 1, version 1
+  final bundle = parseContent(bundleJson); // schema 1
 
   /// 번들을 고친 콘텐츠 JSON.
   String variant({int? schema, int? version, void Function(Map<String, dynamic>)? edit}) {
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('저장된 파일의 version이 번들 이하이면 번들을 쓰고 저장 파일을 지운다', () {
-      saved.writeAsStringSync(variant(version: 1));
+      saved.writeAsStringSync(variant(version: bundle.version));
       expect(pickContent(dir, bundle, report: report), same(bundle));
       expect(saved.existsSync(), isFalse);
     });
@@ -73,8 +73,8 @@ void main() {
     });
 
     test('schema가 같고 version이 번들보다 크면 저장된 파일을 쓴다', () {
-      saved.writeAsStringSync(variant(version: 2));
-      expect(pickContent(dir, bundle, report: report).version, 2);
+      saved.writeAsStringSync(variant(version: bundle.version + 1));
+      expect(pickContent(dir, bundle, report: report).version, bundle.version + 1);
       expect(saved.existsSync(), isTrue);
     });
   });
@@ -144,12 +144,13 @@ void main() {
     }
 
     test('새 version이 검사를 통과하면 저장 파일을 바꾸고 다음 pickContent가 그것을 고른다', () async {
-      final next = variant(version: 3);
-      final get = fake({manifestUri: '{"version": 3}', bodyUri(3): next});
+      final v = bundle.version + 1; // 번들(2 이상)보다 크므로 지금 것(2)보다도 크다
+      final next = variant(version: v);
+      final get = fake({manifestUri: '{"version": $v}', bodyUri(v): next});
       await fetchContent(url, dir, parseContent(current), get: get, report: report);
       expect(saved.readAsStringSync(), next);
       expect(dir.listSync().map((e) => e.path), [saved.path]); // 임시 파일은 rename되어 남지 않는다
-      expect(pickContent(dir, bundle, report: report).version, 3);
+      expect(pickContent(dir, bundle, report: report).version, v);
     });
 
     test('동시에 두 번 불러도 요청은 한 번이다', () async {

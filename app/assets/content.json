@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": 1,
+  "version": 2,
   "principles": [
     {
       "id": "A",
@@ -60,18 +60,10 @@
         "summary": "'안쪽이 더 안전하다'는 공식 안전수칙이다. 그 자리를 상대에게 양보하는 것은 배려 관례다.",
         "sources": [
           {
-            "title": "봄철 어린이 보행자 교통사고 발생 주의 당부",
-            "publisher": "메디컬데일리 (질병관리본부 보행 안전수칙 인용)",
-            "date": "2019-03-05",
-            "locator": "안전수칙: 보도 이용, 보도가 없으면 길 안쪽으로 통행",
-            "url": "https://medicaldaily.co.kr/news/8529"
-          },
-          {
-            "title": "[기고문] 어린이 보행 교통사고 예방 우리 모두 동참하자",
-            "publisher": "쿠키뉴스 (삼척경찰서 경찰관 기고)",
-            "date": "2020-06-11",
-            "locator": "수칙 ④ 차도와 먼 안쪽 인도로 걷기",
-            "url": "https://www.kukinews.com/article/view/kuk202006110102"
+            "title": "어린이안전 공부방: 도로/교통",
+            "publisher": "세종특별자치시",
+            "date": "2026-09-01",
+            "url": "https://www.sejong.go.kr/safety/sub05_0203.do"
           }
         ]
       },
@@ -146,14 +138,13 @@
         "why": "인도가 없어도 같아요. {other은} 벽 쪽, 나는 {other와} 차 사이."
       },
       "evidence": {
-        "summary": "보도가 없으면 길 안쪽(가장자리)으로 다니라는 것이 공식 안전수칙이다. 그 자리를 상대에게 주고 내가 차 쪽을 맡는 것은 배려 관례다.",
+        "summary": "보도와 차도가 나뉘지 않은 길이라도 중앙선이 있으면 길가장자리로 다니도록 법이 정한다. 골목에서 상대를 벽 쪽에 두고 내가 차 쪽을 맡는 것은 같은 취지의 배려 관례다.",
         "sources": [
           {
-            "title": "봄철 어린이 보행자 교통사고 발생 주의 당부",
-            "publisher": "메디컬데일리 (질병관리본부 보행 안전수칙 인용)",
-            "date": "2019-03-05",
-            "locator": "안전수칙: 보도 이용, 보도가 없으면 길 안쪽으로 통행",
-            "url": "https://medicaldaily.co.kr/news/8529"
+            "title": "찾기쉬운 생활법령정보: 통행방법 지키기",
+            "publisher": "법제처",
+            "date": "2026-10-15",
+            "url": "https://www.easylaw.go.kr/CSP/CnpClsMain.laf?csmSeq=661&ccfNo=4&cciNo=2&cnpClsNo=1"
           }
         ]
       },
@@ -205,14 +196,13 @@
       ],
       "answer": "below",
       "evidence": {
-        "summary": "환자 보행을 돕는 의료 안내문의 기준이다. 보조자는 오를 때 뒤, 내려갈 때 앞에 선다. 일상 동행에도 같은 이유(넘어지는 쪽에서 받친다)가 적용된다.",
+        "summary": "장애인 보행을 돕는 지자체 안내의 기준이다. 돕는 사람은 오를 때 뒤, 내려갈 때 앞에 선다. 일상 동행에도 같은 이유(넘어지는 쪽에서 받친다)가 적용된다.",
         "sources": [
           {
-            "title": "목발 보행 (Crutch Walking, 한국어판)",
-            "publisher": "UW Medicine 환자 안내문",
-            "date": "2013",
-            "locator": "2쪽 '계단 오르기': 도와주는 사람은 오를 때 뒤, 내려갈 때 앞",
-            "url": "https://healthonline.washington.edu/document/health_online/pdf/Crutch-Walking-KO.pdf"
+            "title": "장애인 에티켓: 기타 장애인",
+            "publisher": "인천광역시 연수구",
+            "date": "2026-10-30",
+            "url": "https://www.yeonsu.go.kr/welfare/user/disabled/etiquette/etc.asp"
           }
         ]
       },
