@@ -6,6 +6,7 @@ on:
     branches: [dev]
     paths:
       - app/assets/content*.json
+      - pipeline/sources/**
       - app/lib/content/**
       - app/tool/**
       - .github/scripts/**

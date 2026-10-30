@@ -44,7 +44,15 @@ run "스키마 위반 (모르는 속성)" "$root" "$work/extra.json"
 [ "$status" -ne 0 ]; check "실패" $?
 grep -q 'must NOT have additional properties' "$work/out"; check "ajv가 알림" $?
 
+# 출처는 늘 pipeline/sources/sources.json과 대조한다(ADR 0009 §6, 작업 A4).
+jq '(.scenarios[] | select(.id == "A-stairs") | .evidence.sources[0].url) = "https://example.test/other"' \
+  "$root/$real" > "$work/other-url.json"
+run "색인에 없는 출처" "$root" "$work/other-url.json"
+[ "$status" -ne 0 ]; check "실패" $?
+grep -q '색인과 맞지 않는 출처: A-stairs https://example.test/other' "$work/out"; check "출력에 그 출처가 있음" $?
+
 # locator는 선택이다(ADR 0009 §6). 모든 출처에서 지워도 ajv와 validate_content가 통과한다.
+# 지금 파일에는 locator가 없어 jq가 바꾸는 것이 없지만, 나중에 콘텐츠에 locator가 생겨도 이 확인은 남는다.
 jq '(.scenarios[] | select(.evidence) | .evidence.sources[]) |= del(.locator)' "$root/$real" > "$work/no-locator.json"
 run "출처에 locator 없음" "$root" "$work/no-locator.json"
 [ "$status" -eq 0 ]; check "종료 코드 0" $?
