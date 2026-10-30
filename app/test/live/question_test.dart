@@ -61,7 +61,21 @@ final c = parseContent(jsonEncode({
       'feedback': _feedback,
       'evidence': {'summary': '출처 없음', 'sources': <Object>[]},
     },
-    {'id': 'X', 'manner': 1, 'format': 'ox', 'area': '공공장소', 'prompt': '맞나', 'answer': false, 'feedback': _feedback},
+    {
+      'id': 'X',
+      'manner': 1,
+      'format': 'ox',
+      'area': '공공장소',
+      'prompt': '맞나',
+      'answer': false,
+      'feedback': _feedback,
+      'evidence': {
+        'summary': '요약',
+        'sources': [
+          {for (final e in _source.entries) if (e.key != 'locator') e.key: e.value}, // locator는 선택(ADR 0009 §6)
+        ],
+      },
+    },
     {
       'id': 'O',
       'manner': 1,
@@ -108,6 +122,11 @@ void main() {
     expect(s.q, isA<OxQuestion>());
     expect([s.explain(Grade.best, 10, 1).correct, s.grade(const PickOx(false)), s.grade(const PickOx(true))],
         [['x'], Grade.best, Grade.avoid]);
+  });
+
+  test('locator 없는 출처는 locator가 null인 Source가 된다', () {
+    final source = Shown(c, 'X', rng).explain(Grade.best, 10, 1).evidence!.sources.single;
+    expect([source.title, source.publisher, source.locator], ['출처', '기관', isNull]);
   });
 
   test('order: 카드 id는 맞는 순서의 순번이다. 모두 맞으면 best, 하나라도 틀리면 avoid', () {

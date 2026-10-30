@@ -37,7 +37,7 @@
 - 문장 자리 표시는 `{변수}`나 `{변수+조사}`(조사: 와 과 은 는 이 가 을 를)이다. 견본 `fill()`과 같다.
 - 형식별 필드: `position`은 `template`, `spots[{id, label}]`, `answer`(spot id)를 쓰고 `vars.other`가 상대 이름이다. `choice`는 `options[{text, grade, note?}]`를 쓰고 `best`가 정확히 하나다. `ox`는 `answer: true|false`를 쓴다. `order`는 `cards`(맞는 순서의 문장 배열)를 쓴다.
 - choice 보기 id와 order 카드 id는 배열 순번(`"0"`, `"1"`…)으로 앱이 붙인다. 기록에 남지 않으므로 고정할 필요가 없다.
-- `evidence`는 선택이다. `sources`가 비어 있으면 앱은 `Evidence`를 null로 넘긴다(ADR 0002). 출처 없는 관례라는 메모는 검토자를 위해 남겨 둔다.
+- `evidence`는 선택이다. `sources`가 비어 있으면 앱은 `Evidence`를 null로 넘긴다(ADR 0002). 출처 없는 관례라는 메모는 검토자를 위해 남겨 둔다. 출처의 `locator`(문서 안 위치)는 선택이다. 출처는 근거 색인(`pipeline/sources/sources.json`)과 맞아야 한다(ADR 0009 §6).
 - `tags`: 시나리오에 붙는 선택 배열(`key`와 같은 형식)이다. 카테고리 기준이 정해지면 쓴다. 지금은 뜻을 정하지 않고, 앱도 읽지 않는다.
 - 데일리는 `{id, title, scenes[3], retired?}`이고 장면은 `{time, title, short, intro, manner}`이다. 배열 순서가 경로 순서다. 다음 하루는 `day_completions`와 배열 순서로 계산하므로 `locked`가 필요 없다. 장면당 2문제(2026-10-25 결정)는 엔진 상수로 두고 콘텐츠에 적지 않는다.
 

@@ -1,4 +1,4 @@
-// 콘텐츠 검사 (ADR 0003 §6): 파일 하나 검사와 --previous 비교. 순수 Dart. JSON Schema 검사는 ajv가 따로 한다.
+// 콘텐츠 검사 (ADR 0003 §6): 파일 하나 검사, --previous 비교, --sources 출처 대조(ADR 0009 §6). 순수 Dart. JSON Schema 검사는 ajv가 따로 한다.
 import 'dart:convert';
 
 import 'content.dart';
@@ -145,6 +145,32 @@ List<Issue> compare(Content prev, Content next) {
   String body(Content c) => jsonEncode([c.schema, c.principles, c.manners, c.scenarios, c.days]);
   if (next.version < prev.version || (next.version == prev.version && body(prev) != body(next))) {
     out.add(Issue(true, 'version이 크지 않음: ${prev.version} → ${next.version}'));
+  }
+  return out;
+}
+
+/// `--sources`의 색인(`pipeline/sources/sources.json`, ADR 0009 §6)과 출처를 대조한다.
+/// 글자 수는 코드 포인트(runes)로 센다. 한글은 UTF-16 길이와 같고, 이모지 같은 BMP 밖 글자도 1자다.
+List<Issue> checkSources(Content c, List<Json> index) {
+  final out = <Issue>[];
+  for (final (i, e) in index.indexed) {
+    for (final k in ['publisher', 'title', 'date', 'url', 'manners', 'summary']) {
+      final v = e[k];
+      if (v == null || (v is String && v.trim().isEmpty) || (v is List && v.isEmpty)) {
+        out.add(Issue(true, '$k 없음: 색인 $i'));
+      }
+    }
+    if (e['summary'] case String s when s.runes.length > 1000) {
+      out.add(Issue(true, 'summary 1,000자 초과: 색인 $i (${s.runes.length}자)'));
+    }
+  }
+  for (final s in c.scenarios) {
+    for (final src in (((s['evidence'] as Json?)?['sources'] as List?) ?? const []).cast<Json>()) {
+      final ok = index.any((e) =>
+          ((e['manners'] as List?) ?? const []).contains(s['manner']) &&
+          ['url', 'publisher', 'title', 'date'].every((k) => e[k] == src[k]));
+      if (!ok) out.add(Issue(true, '색인과 맞지 않는 출처: ${s['id']} ${src['url']}'));
+    }
   }
   return out;
 }

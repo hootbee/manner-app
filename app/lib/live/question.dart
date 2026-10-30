@@ -30,7 +30,7 @@ class Shown {
                 title: s['title'] as String,
                 publisher: s['publisher'] as String,
                 date: s['date'] as String,
-                locator: s['locator'] as String,
+                locator: s['locator'] as String?,
                 url: s['url'] as String,
               ),
           ]);

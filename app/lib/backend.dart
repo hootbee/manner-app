@@ -237,8 +237,9 @@ class Source {
     required this.title,
     required this.publisher,
     required this.date,
-    required this.locator,
+    this.locator,
     required this.url,
   });
-  final String title, publisher, date, locator, url;
+  final String title, publisher, date, url;
+  final String? locator; // 선택(ADR 0009 §6)
 }

@@ -44,4 +44,9 @@ run "스키마 위반 (모르는 속성)" "$root" "$work/extra.json"
 [ "$status" -ne 0 ]; check "실패" $?
 grep -q 'must NOT have additional properties' "$work/out"; check "ajv가 알림" $?
 
+# locator는 선택이다(ADR 0009 §6). 모든 출처에서 지워도 ajv와 validate_content가 통과한다.
+jq '(.scenarios[] | select(.evidence) | .evidence.sources[]) |= del(.locator)' "$root/$real" > "$work/no-locator.json"
+run "출처에 locator 없음" "$root" "$work/no-locator.json"
+[ "$status" -eq 0 ]; check "종료 코드 0" $?
+
 [ "$fails" -eq 0 ] && echo "모두 통과" || { echo "실패 $fails개"; exit 1; }
