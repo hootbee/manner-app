@@ -148,6 +148,7 @@
       },
       "allOf": [
         {
+          "description": "위치 문제: `template` 장소 그림에서 내가 설 자리를 고른다. `spots`에 그 장소의 자리 id와 라벨을, `answer`에 맞는 자리 id를 적고, 상대 이름은 `vary` 보기의 `vars.other`로 넣는다.",
           "if": { "properties": { "format": { "const": "position" } } },
           "then": {
             "required": ["template", "spots", "answer"],
@@ -155,6 +156,7 @@
           }
         },
         {
+          "description": "선택 문제: 상황에서 할 행동을 보기 2~5개 가운데 고른다. `options`마다 `text`와 `grade`(best, ok, avoid)를 적고 best는 정확히 하나이며, 아닌 보기에는 `note`로 이유를 적을 수 있다.",
           "if": { "properties": { "format": { "const": "choice" } } },
           "then": {
             "required": ["options"],
@@ -162,6 +164,7 @@
           }
         },
         {
+          "description": "OX 문제: `prompt`에 적은 행동이 맞는 매너인지 O/X로 고른다. `answer`는 맞으면 true(O), 틀리면 false(X)다.",
           "if": { "properties": { "format": { "const": "ox" } } },
           "then": {
             "required": ["answer"],
@@ -169,6 +172,7 @@
           }
         },
         {
+          "description": "순서 문제: 카드 3~6장을 맞는 순서로 늘어놓는다. `cards`에 문장을 맞는 순서대로 적으면 앱이 섞어서 보여 준다.",
           "if": { "properties": { "format": { "const": "order" } } },
           "then": {
             "required": ["cards"],
