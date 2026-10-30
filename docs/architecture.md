@@ -43,7 +43,7 @@ flowchart TB
   app -->|"새 콘텐츠"| storage
   app -->|"탈퇴 요청"| del
   app -->|"크래시, 이벤트"| firebase
-  app -->|"처리방침 링크"| pages
+  app -->|"처리방침 링크 (예정)"| pages
 
   del -->|"사용자 삭제"| auth
   auth -.->|"사용자 삭제가 기록 삭제로 이어진다"| db
