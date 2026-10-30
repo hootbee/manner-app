@@ -238,6 +238,101 @@ void main() {
     expect((await cli('assets/content.json')).exitCode, 0);
   }, timeout: const Timeout(Duration(minutes: 2)));
 
+  group('checkSources (ADR 0009 §6)', () {
+    const doc = {
+      'publisher': '기관',
+      'title': '문서',
+      'date': '2026',
+      'url': 'https://a.test',
+      'manners': [1],
+      'summary': '요약',
+    };
+    const source = {'title': '문서', 'publisher': '기관', 'date': '2026', 'url': 'https://a.test'};
+    const mismatch = ['오류: 색인과 맞지 않는 출처: ox-1 https://a.test'];
+
+    /// 견본 ox-1(매너 1)의 출처를 [sources]로 두고 [index]와 대조한 결과.
+    List<String> check(List<Json> index, [List<Object> sources = const [source]]) {
+      final c = jsonDecode(jsonEncode(_fixture));
+      scenario(c, 'ox-1')['evidence'] = {'summary': 's', 'sources': sources};
+      return checkSources(parseContent(jsonEncode(c)), index).map((i) => '$i').toList();
+    }
+
+    test('색인 항목과 url·publisher·title·date가 같으면 통과한다', () {
+      expect(check([doc]), isEmpty);
+    });
+    test('빈 sources는 통과한다', () {
+      expect(check([], []), isEmpty);
+      expect(check([doc], []), isEmpty);
+    });
+    test('색인에 없는 url을 가진 출처는 오류다', () {
+      expect(check([]), mismatch);
+      expect(check([doc], [{...source, 'url': 'https://b.test'}]), ['오류: 색인과 맞지 않는 출처: ox-1 https://b.test']);
+    });
+    test('매너 4에만 묶인 문서를 매너 1 시나리오가 들면 오류다', () {
+      expect(check([{...doc, 'manners': [4]}]), mismatch);
+    });
+    test('매너와 네 칸은 같은 색인 항목에서 맞아야 한다', () {
+      final b = {...source, 'url': 'https://b.test'};
+      expect(check([doc, {...doc, ...b, 'manners': [4]}], [b]), ['오류: 색인과 맞지 않는 출처: ox-1 https://b.test']);
+    });
+    test('은퇴한 시나리오의 출처도 대조한다(모든 시나리오)', () {
+      final c = jsonDecode(jsonEncode(_fixture));
+      scenario(c, 'ox-1')
+        ..['retired'] = true
+        ..['evidence'] = {'summary': 's', 'sources': [source]};
+      expect(checkSources(parseContent(jsonEncode(c)), []).map((i) => '$i'), mismatch);
+    });
+    test('publisher나 title(그리고 date)이 색인과 다르면 오류다', () {
+      expect(check([doc], [{...source, 'publisher': '다른 기관'}]), mismatch);
+      expect(check([doc], [{...source, 'title': '다른 문서'}]), mismatch);
+      expect(check([doc], [{...source, 'date': '2025'}]), mismatch);
+    });
+    test('색인 항목에 필수 칸이 없거나 비면 오류다', () {
+      expect(check([{...doc}..remove('publisher')], []), ['오류: publisher 없음: 색인 0']);
+      expect(check([{...doc}..remove('summary')], []), ['오류: summary 없음: 색인 0']);
+      expect(check([doc, {...doc, 'title': ' '}], []), ['오류: title 없음: 색인 1']);
+      expect(check([{...doc, 'manners': []}], []), ['오류: manners 없음: 색인 0']);
+      expect(check([{}], []), [
+        for (final k in ['publisher', 'title', 'date', 'url', 'manners', 'summary']) '오류: $k 없음: 색인 0',
+      ]);
+    });
+    test('summary가 1,001자면 오류다(1,000자는 통과). 글자 수는 코드 포인트로 센다', () {
+      expect(check([{...doc, 'summary': '가' * 1000}]), isEmpty);
+      expect(check([{...doc, 'summary': '😀' * 1000}]), isEmpty); // UTF-16 코드 단위로는 2,000
+      expect(check([{...doc, 'summary': '가' * 1001}]), ['오류: summary 1,000자 초과: 색인 0 (1001자)']);
+    });
+  });
+
+  test('CLI --sources: 출처가 색인과 맞지 않으면 오류를 출력하고 1, 맞으면 0으로 끝난다', () async {
+    final dir = Directory.systemTemp.createTempSync('validate_content');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final index = File('${dir.path}/sources.json')..writeAsStringSync('[]');
+    final c = jsonDecode(File('assets/content.json').readAsStringSync());
+    for (final s in c['scenarios']) {
+      s.remove('evidence');
+    }
+    final ok = File('${dir.path}/ok.json')..writeAsStringSync(jsonEncode(c));
+    final s = c['scenarios'][0];
+    s['evidence'] = {
+      'summary': 's',
+      'sources': [
+        {'title': 't', 'publisher': 'p', 'date': '2026', 'url': 'https://a.test'},
+      ],
+    };
+    final bad = File('${dir.path}/bad.json')..writeAsStringSync(jsonEncode(c));
+
+    Future<ProcessResult> cli(String file) =>
+        Process.run('dart', ['run', 'tool/validate_content.dart', file, '--sources=${index.path}']);
+    expect((await cli(ok.path)).exitCode, 0);
+    // 모르는 플래그(오타)는 조용히 무시하지 않는다.
+    final typo = await Process.run('dart', ['run', 'tool/validate_content.dart', ok.path, '--source=${index.path}']);
+    expect(typo.stderr, contains('--source='));
+    expect(typo.exitCode, 1);
+    final r = await cli(bad.path);
+    expect(r.stdout, contains('오류: 색인과 맞지 않는 출처: ${s['id']} https://a.test'));
+    expect(r.exitCode, 1);
+  }, timeout: const Timeout(Duration(minutes: 2)));
+
   group('id 중복', () {
     test('매너', () {
       expect(run((c) => c['manners'].add({'id': 1, 'principle': 'A'})), has('오류: 중복 id: 매너 1'));

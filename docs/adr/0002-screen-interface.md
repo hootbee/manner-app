@@ -86,7 +86,7 @@ class Explanation {
   final Map<String, ({Grade grade, String? note})> options; // choice만. 나머지는 빈 맵
   final Evidence? evidence;                 // 출처가 없으면 null → "근거 보기" 숨김
 }
-class Evidence { final String summary; final List<Source> sources; }  class Source { final String title, publisher, date, locator, url; }
+class Evidence { final String summary; final List<Source> sources; }  class Source { final String title, publisher, date, url; final String? locator; }  // locator는 선택(ADR 0009 §6)
 ```
 
 - 위는 필드만 보인 것이다(생성자는 구현할 때 붙인다). `Account`, `Phase`는 Supabase `User`, Material `Step`·`Card`와 이름이 겹치지 않게 골랐다.

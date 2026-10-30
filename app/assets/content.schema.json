@@ -71,7 +71,7 @@
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["title", "publisher", "date", "locator", "url"],
+      "required": ["title", "publisher", "date", "url"],
       "properties": {
         "title": { "$ref": "#/definitions/text" },
         "publisher": { "$ref": "#/definitions/text" },
