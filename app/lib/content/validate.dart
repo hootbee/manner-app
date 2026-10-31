@@ -15,6 +15,9 @@ class Issue {
 
 final _placeholder = RegExp(r'\{[^{}]*\}');
 
+/// 금지 표현 (ADR 0009 §7). 펼친 문제의 문자열에 들어 있으면 오류다. 예외 표시는 없다.
+const bannedWords = <String>['여자친구', '남자친구', '여친', '남친', '여자', '남자', '여성', '남성', '밀당', '꼬시'];
+
 List<Issue> validate(Content c) {
   final out = <Issue>[];
   void err(String m) => out.add(Issue(true, m));
@@ -75,6 +78,11 @@ List<Issue> validate(Content c) {
     if (q['feedback'] == null) err('feedback 없음: $id');
     for (final p in {..._strings(q).expand((s) => _placeholder.allMatches(s).map((m) => m[0]))}) {
       err('남은 자리 표시: $id $p');
+    }
+    // evidence는 출처 제목이라 금지 낱말을 보지 않는다.
+    final text = _strings({...q}..remove('evidence')).toList();
+    for (final w in bannedWords) {
+      if (text.any((s) => s.contains(w))) err('금지 낱말: $id $w');
     }
     switch (q['format']) {
       case 'position':
