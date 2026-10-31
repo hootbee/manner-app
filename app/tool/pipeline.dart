@@ -1,8 +1,9 @@
-// 콘텐츠 생성·검토 파이프라인의 순수 함수 (ADR 0009 §9). main과 Messages API 호출은 A7·A8에서 더한다.
+// 콘텐츠 생성·검토 파이프라인의 순수 함수와 Messages API 호출 (ADR 0009 §9). main은 A8에서 더한다.
 // 형식 이름과 장소 이름은 쓰지 않는다. 스키마와 templates.dart에서 읽는다(§4, 테스트가 확인한다).
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:http/http.dart' as http;
 import 'package:mannerfit/content/content.dart';
 import 'package:mannerfit/content/templates.dart';
 
@@ -90,4 +91,73 @@ String prBody({
     '- [ ] content CI가 통과했다',
     '',
   ].join('\n');
+}
+
+/// 모델은 세 호출이 같다 (§8).
+const claudeModel = 'claude-opus-5-5';
+
+// 요청 본문 상한 (§8 "200KB"). ADR이 단위를 정하지 않아 1024 기준으로 읽었다. 비용 상한(§12)이 이 값에서 나온다.
+const maxRequestBytes = 200 * 1024;
+
+/// Messages API 호출 하나 (§5, §8, §9). 재시도하지 않고, 200이 아니거나 `stop_reason`이 `end_turn`이 아니면 예외다.
+/// 돌려주는 `usage`는 PR 본문에 옮길 네 값이다. 키는 메시지에 넣지 않는다(§10).
+Future<({String text, Map<String, int> usage})> callClaude(
+  http.Client client, {
+  required String apiKey,
+  required String system,
+  required String user,
+}) async {
+  // 빈 키면 아래 오류 메시지의 키 치환(replaceAll('', '***'))이 글자마다 ***를 끼운다.
+  if (apiKey.trim().isEmpty) throw Exception('API 키가 비어 있다');
+  final body = utf8.encode(
+    jsonEncode({
+      'model': claudeModel,
+      'max_tokens': 16000,
+      'cache_control': {'type': 'ephemeral'},
+      'system': system,
+      'messages': [
+        {'role': 'user', 'content': user},
+      ],
+    }),
+  );
+  if (body.length > maxRequestBytes) {
+    throw Exception('요청 본문 ${body.length}바이트가 상한 $maxRequestBytes를 넘는다');
+  }
+  final res = await client.post(
+    Uri.parse('https://api.anthropic.com/v1/messages'),
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: body,
+  );
+  if (res.statusCode != 200) {
+    final detail = utf8
+        .decode(res.bodyBytes, allowMalformed: true)
+        .replaceAll(apiKey, '***');
+    throw Exception(
+      'Messages API ${res.statusCode}: ${detail.length > 300 ? detail.substring(0, 300) : detail}',
+    );
+  }
+  final j = jsonDecode(utf8.decode(res.bodyBytes)) as Json;
+  if (j['stop_reason'] != 'end_turn') {
+    throw Exception('stop_reason이 end_turn이 아니다: ${j['stop_reason']}');
+  }
+  final usage = j['usage'] as Json;
+  return (
+    text: [
+      for (final b in j['content'] as List)
+        if ((b as Map)['type'] == 'text') b['text'],
+    ].join(),
+    usage: {
+      for (final k in [
+        'input_tokens',
+        'cache_creation_input_tokens',
+        'cache_read_input_tokens',
+        'output_tokens',
+      ])
+        k: (usage[k] as int?) ?? 0,
+    },
+  );
 }
