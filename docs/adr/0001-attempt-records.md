@@ -95,7 +95,7 @@ Future<void> sync(String table) async {
 - **Leitner**: (매너, 날짜) 단위로 판정한다. 예를 들어 그날 기록이 모두 `best`면 승급하고, 아니면 1단계로 돌린다. 확정은 학습 엔진 ADR에서 한다.
 
 ### 5. 탈퇴
-탈퇴는 Edge Function `delete-account`가 처리한다. 앱에서만 호출하고, service role이 필요한 곳은 이 함수 하나다.
+탈퇴는 Edge Function `delete-account`가 처리한다. 앱에서만 호출한다. 운영 프로젝트의 service role 키를 코드에서 쓰는 곳은 이 함수와 콘텐츠 올리기 워크플로(ADR 0003 §5)뿐이다.
 
 ```ts
 import { createClient } from 'npm:@supabase/supabase-js@2'
