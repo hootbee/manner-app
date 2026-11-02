@@ -113,6 +113,9 @@ void main() {
     test('오류가 없다', () {
       expect(issues.where((i) => i.error), isEmpty);
     });
+    test('금지 낱말 오류가 없다', () {
+      expect(issues.map((i) => '$i'), isNot(has('오류: 금지 낱말')));
+    });
   });
 
   test('CLI는 오류가 없으면 0, 있으면 1로 끝난다', () async {
@@ -467,5 +470,119 @@ void main() {
     test('은퇴한 매너는 문제가 없어도 된다', () {
       expect(run((c) => c['manners'].add({'id': 2, 'principle': 'A', 'retired': true})), isEmpty);
     });
+  });
+
+  group('금지 낱말 (ADR 0009 §7)', () {
+    const word = '여자친구';
+
+    test('bannedWords는 ADR 첫 목록 그대로다(순서도)', () {
+      expect(bannedWords, ['여자친구', '남자친구', '여친', '남친', '여자', '남자', '여성', '남성', '밀당', '꼬시']);
+    });
+
+    test('선택지 문장에 있으면 오류다', () {
+      expect(run((c) => scenario(c, 'choice-1')['options'][0]['text'] = '$word에게 말한다'),
+          anyElement(allOf(startsWith('오류: 금지 낱말: choice-1 '), endsWith(' $word'))));
+    });
+
+    test('낱말마다 오류다', () {
+      for (final w in bannedWords) {
+        expect(run((c) => scenario(c, 'ox-1')['prompt'] = 'a${w}b'), has('오류: 금지 낱말: ox-1 $w'), reason: w);
+      }
+    });
+
+    test('evidence(출처 제목)에만 있으면 오류가 아니다', () {
+      expect(
+        run((c) => scenario(c, 'ox-1')['evidence'] = {
+              'summary': 's',
+              'sources': [
+                {'title': '$word 예절', 'publisher': '기관', 'date': '2026', 'url': 'https://a.test'},
+              ],
+            }),
+        isEmpty,
+      );
+    });
+
+    // 모든 문자열 칸을 담은 견본: 형식 넷(position, choice, ox, order)과 vary 보기의 덮어쓰기.
+    void rich(dynamic c) {
+      final choice = scenario(c, 'choice-1');
+      choice['options'][1]['note'] = '이유';
+      // vary 보기의 feedback은 기본 feedback을 덮으므로 기본 feedback이 없는 시나리오를 따로 둔다.
+      c['scenarios'].add({
+        ...scenario(c, 'pos-1'),
+        'id': 'pos-2',
+        'vary': [
+          [
+            {
+              'key': 'mom',
+              'area': '어른·가족',
+              'vars': {'other': '어머니'},
+              'feedback': {'title': 'vt', 'why': 'vw'},
+            },
+          ],
+        ],
+      }..remove('feedback'));
+      c['scenarios'].add({
+        'id': 'order-1',
+        'manner': 1,
+        'format': 'order',
+        'area': '친구',
+        'prompt': 'p',
+        'cards': ['하나', '둘', '셋'],
+        'feedback': {..._fb},
+      });
+    }
+
+    // 말(텍스트)이 아니라 식별자·열거값인 키는 낱말을 심을 칸이 아니다.
+    const notText = {'id', 'format', 'template', 'area', 'grade', 'key', 'answer', 'tags', 'evidence'};
+    Iterable<List<Object>> leaves(Object? v, [List<Object> path = const []]) => switch (v) {
+          String _ => [path],
+          List l => [for (var i = 0; i < l.length; i++) ...leaves(l[i], [...path, i])],
+          Map m => [
+              for (final e in m.entries)
+                if (!notText.contains(e.key)) ...leaves(e.value, [...path, e.key as Object]),
+            ],
+          _ => const [],
+        };
+
+    final richContent = jsonDecode(jsonEncode(_fixture));
+    rich(richContent);
+    final cells = [
+      for (final s in richContent['scenarios'] as List)
+        for (final p in leaves(s)) (s['id'] as String, p),
+    ];
+
+    test('견본에는 금지 낱말이 없다', () {
+      expect(run(rich), isNot(has('오류: 금지 낱말')));
+    });
+
+    test('훑은 칸이 content.schema.json의 문자열 칸을 모두 덮는다', () {
+      final defs = (jsonDecode(File('assets/content.schema.json').readAsStringSync()) as Map)['definitions'] as Map;
+      bool isText(Object? p) => p is Map && ((p[r'$ref'] ?? (p['items'] as Map?)?[r'$ref']) as String?)?.endsWith('/text') == true;
+      final fields = {
+        for (final d in ['scenario', 'feedback', 'spot', 'choiceOption'])
+          for (final e in ((defs[d] as Map)['properties'] as Map).entries)
+            if (isText(e.value)) e.key,
+      };
+      final seen = {for (final (_, p) in cells) ...p.map((x) => '$x')};
+      expect(fields, containsAll(['prompt', 'cards', 'title', 'why', 'label', 'text', 'note']));
+      expect(seen, containsAll(fields));
+      expect(seen, containsAll(['vars', 'other'])); // vary 보기의 vars
+    });
+
+    for (final (sid, path) in cells) {
+      test('$sid ${path.join('.')}', () {
+        expect(
+          run((c) {
+            rich(c);
+            dynamic node = scenario(c, sid);
+            for (final k in path.take(path.length - 1)) {
+              node = node[k];
+            }
+            node[path.last] = 'a${word}b';
+          }),
+          anyElement(allOf(startsWith('오류: 금지 낱말: $sid'), endsWith(' $word'))),
+        );
+      });
+    }
   });
 }
