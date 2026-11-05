@@ -18,7 +18,7 @@ void main() {
     t.view.devicePixelRatio = 1;
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
-    if (output.isNotEmpty)
+    if (output.isNotEmpty) {
       await t.runAsync(() async {
         for (final entry in [
           ('Korean', 'C:/Windows/Fonts/malgun.ttf'),
@@ -33,6 +33,7 @@ void main() {
               .load();
         }
       });
+    }
     await t.pumpWidget(
       MaterialApp(
         theme: ThemeData(fontFamily: 'Korean'),
@@ -77,11 +78,12 @@ void main() {
       expect(schoolQuestions.map((q) => q.id).toSet().length, 10);
       final store = TransportProgress(persist: false);
       for (final q in [...transportQuestions, ...schoolQuestions]) {
-        if (q.kind == QuestionKind.sequence)
+        if (q.kind == QuestionKind.sequence) {
           expect(
             q.order.toSet(),
             Set.of(List.generate(q.options.length, (i) => i)),
           );
+        }
         store.submit(q, true);
         expect(store.complete(q.id), 10);
       }
@@ -150,7 +152,7 @@ void main() {
     );
     expect(t.takeException(), isNull);
   });
-  for (var i = 0; i < 10; i++)
+  for (var i = 0; i < 10; i++) {
     testWidgets('school topic ${i + 1} opens, input and explanation', (
       t,
     ) async {
@@ -220,4 +222,5 @@ void main() {
       expect(store.xp, 330);
       expect(t.takeException(), isNull);
     });
+  }
 }

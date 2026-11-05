@@ -21,7 +21,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    if (output.isNotEmpty)
+    if (output.isNotEmpty) {
       await tester.runAsync(() async {
         for (final (family, path) in [
           ('PreviewKorean', 'C:/Windows/Fonts/malgun.ttf'),
@@ -35,6 +35,7 @@ void main() {
               .load();
         }
       });
+    }
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(fontFamily: 'PreviewKorean'),

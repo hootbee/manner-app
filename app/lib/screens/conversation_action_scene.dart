@@ -57,10 +57,11 @@ class _ConversationActionSceneState extends State<ConversationActionScene> {
   @override
   void initState() {
     super.initState();
-    if (widget.number == 2)
+    if (widget.number == 2) {
       _speech = Timer(const Duration(seconds: 3), () {
         if (mounted) setState(() => speaking = false);
       });
+    }
   }
 
   @override

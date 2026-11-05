@@ -140,8 +140,9 @@ class _SchoolActionSceneState extends State<SchoolActionScene> {
                               if ((table
                                       ? ['laptop', 'book', 'cup']
                                       : ['own-paper'])
-                                  .every(completed.containsKey))
+                                  .every(completed.containsKey)) {
                                 widget.onAnswer(true);
+                              }
                             },
                             child: Container(
                               padding: const EdgeInsets.all(3),

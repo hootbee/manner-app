@@ -558,9 +558,7 @@ class _CategoryArt extends StatelessWidget {
                 child: Transform.translate(
                   offset: Offset(-source.left, -source.top),
                   child: Image.asset(
-                    'assets/welcome/learning_' +
-                        _assets[index] +
-                        '_reference.png',
+                    'assets/welcome/learning_${_assets[index]}_reference.png',
                     width: width,
                     height: height,
                     fit: BoxFit.fill,

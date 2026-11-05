@@ -20,8 +20,9 @@ class LearningLesson {
         !id.startsWith('dining-') &&
         !id.startsWith('conversation-') &&
         !id.startsWith('school-work-') &&
-        !id.startsWith('digital-'))
+        !id.startsWith('digital-')) {
       return _status;
+    }
     final session = TransportProgress.instance.sessions[id];
     return session?.firstCompletedAt != null
         ? LessonStatus.completed

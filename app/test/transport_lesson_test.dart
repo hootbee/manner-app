@@ -107,8 +107,11 @@ void main() {
     final list = t.widget<ReorderableListView>(
       find.byType(ReorderableListView),
     );
+    // Flutter versions differ in callback nullability.
+    // ignore: unnecessary_non_null_assertion, deprecated_member_use
     list.onReorder!(1, 0);
     await t.pump();
+    // ignore: unnecessary_non_null_assertion, deprecated_member_use
     list.onReorder!(3, 1);
     await t.pump();
     expect(store.session('transport-2').order, [1, 3, 0, 2]);

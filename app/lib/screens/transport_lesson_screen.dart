@@ -86,8 +86,9 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
   void _prepare() {
     if (s.phase == 'complete') store.restart(q.id);
     _wrong = s.lastCorrect == false;
-    if (s.order.isEmpty && q.kind == QuestionKind.sequence)
+    if (s.order.isEmpty && q.kind == QuestionKind.sequence) {
       s.order = List.generate(q.options.length, (i) => i);
+    }
   }
 
   Future<void> _answer(bool correct, {String? selected}) async {
@@ -505,7 +506,7 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
                                   answered: true,
                                   success: true,
                                   placements: s.placements,
-                                  onPlacement: (_, __) {},
+                                  onPlacement: (_, _) {},
                                   onAnswer: (_) {},
                                 )
                               : isSchool
@@ -951,11 +952,7 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
                     builder: (context, value, _) => Column(
                       children: [
                         Text(
-                          'Lv. ' +
-                              (2 + value.round() ~/ 400).toString() +
-                              ' · ' +
-                              (value.round() % 400).toString() +
-                              ' / 400 XP',
+                          'Lv. ${2 + value.round() ~/ 400} · ${value.round() % 400} / 400 XP',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
@@ -1334,7 +1331,7 @@ class _DiningReferenceArt extends StatelessWidget {
               child: Transform.translate(
                 offset: Offset(-src.left, -src.top),
                 child: Image.asset(
-                  'assets/dining/question_' + number.toString() + '.png',
+                  'assets/dining/question_$number.png',
                   width: 941,
                   height: 1672,
                   fit: BoxFit.contain,
@@ -1377,7 +1374,7 @@ class _ConversationReferenceArt extends StatelessWidget {
               child: Transform.translate(
                 offset: Offset(-50, -top),
                 child: Image.asset(
-                  'assets/conversation/question_' + number.toString() + '.png',
+                  'assets/conversation/question_$number.png',
                   width: 863,
                   height: 1822,
                   fit: BoxFit.fill,
@@ -1412,7 +1409,7 @@ class _SchoolReferenceArt extends StatelessWidget {
             child: Transform.translate(
               offset: const Offset(-510, -303),
               child: Image.asset(
-                'assets/school-work/question_' + number.toString() + '.png',
+                'assets/school-work/question_$number.png',
                 width: 941,
                 height: 1672,
                 fit: BoxFit.contain,

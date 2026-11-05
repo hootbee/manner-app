@@ -842,8 +842,9 @@ class _GaugePainter extends CustomPainter {
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
         );
       }
-      if (value > 0)
+      if (value > 0) {
         canvas.drawArc(circle, -math.pi / 2, value * math.pi * 2, false, p);
+      }
       if (complete) {
         canvas.drawCircle(
           center,
@@ -869,7 +870,7 @@ class _GaugePainter extends CustomPainter {
       }
       final angle = -math.pi / 2 + value * math.pi * 2;
       final tip = center + Offset(math.cos(angle), math.sin(angle)) * radius;
-      if (value > 0 && !complete)
+      if (value > 0 && !complete) {
         canvas.drawCircle(
           tip,
           5,
@@ -877,6 +878,7 @@ class _GaugePainter extends CustomPainter {
             ..color = colors[(t * 4).floor() % 4].withValues(alpha: .55)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
         );
+      }
     } else {
       final round = RRect.fromRectAndRadius(rect, const Radius.circular(10));
       canvas.drawRRect(round, Paint()..color = const Color(0xFFE5E5E5));

@@ -426,8 +426,9 @@ class _DigitalActionSceneState extends State<DigitalActionScene> {
                                   widget.onPlacement(id, 'closed');
                                   if (widget.placements.containsKey(
                                     i == 0 ? 'contacts' : 'messenger',
-                                  ))
+                                  )) {
                                     widget.onAnswer(true);
+                                  }
                                 },
                           child: window(
                             i == 0 ? '개인 메신저' : '연락처',
