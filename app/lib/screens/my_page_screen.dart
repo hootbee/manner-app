@@ -1,3 +1,5 @@
+import '../backend.dart';
+import 'manner_stats_screen.dart';
 import 'partner_artwork.dart';
 
 import 'dart:math' as math;
@@ -224,7 +226,21 @@ class _MyPageScreenState extends State<MyPageScreen>
                         ),
                       ),
                       trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => _notice(_menus[i].$2),
+                      onTap: () {
+                        if (i == 0) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => MannerStatsScreen(
+                                stats: backend.stats,
+                                partner: widget.partner,
+                                preview: widget.preview,
+                              ),
+                            ),
+                          );
+                        } else {
+                          _notice(_menus[i].$2);
+                        }
+                      },
                     ),
                   ],
                 ],
