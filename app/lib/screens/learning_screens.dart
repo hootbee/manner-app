@@ -1,3 +1,4 @@
+import 'challenges_screen.dart';
 import 'transport_progress.dart';
 import 'transport_lesson_screen.dart';
 import 'dart:math' as math;
@@ -844,6 +845,20 @@ class _LearningNavigation extends StatelessWidget {
                     return;
                   }
                   if (i == 1) return;
+                  if (i == 2) {
+                    Navigator.of(context)
+                        .push<String>(
+                          MaterialPageRoute(
+                            builder: (_) => const ChallengesScreen(),
+                          ),
+                        )
+                        .then((destination) {
+                          if (context.mounted && destination == 'home') {
+                            onHome();
+                          }
+                        });
+                    return;
+                  }
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
