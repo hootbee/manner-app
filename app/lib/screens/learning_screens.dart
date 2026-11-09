@@ -845,6 +845,10 @@ class _LearningNavigation extends StatelessWidget {
                     return;
                   }
                   if (i == 1) return;
+                  if (i == 3) {
+                    Navigator.of(context).pop('profile');
+                    return;
+                  }
                   if (i == 2) {
                     Navigator.of(context)
                         .push<String>(
@@ -853,6 +857,9 @@ class _LearningNavigation extends StatelessWidget {
                           ),
                         )
                         .then((destination) {
+                          if (context.mounted && destination == 'profile') {
+                            Navigator.of(context).pop('profile');
+                          }
                           if (context.mounted && destination == 'home') {
                             onHome();
                           }

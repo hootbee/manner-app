@@ -45,9 +45,15 @@ class _AmbientMotionState extends State<AmbientMotion>
 }
 
 class PartnerArtwork extends StatelessWidget {
-  const PartnerArtwork({super.key, required this.partner, this.stage = 3});
+  const PartnerArtwork({
+    super.key,
+    required this.partner,
+    this.stage = 3,
+    this.showSparkles = true,
+  });
   final MannerPartner partner;
   final int stage;
+  final bool showSparkles;
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: AmbientMotion(
@@ -57,7 +63,7 @@ class PartnerArtwork extends StatelessWidget {
         return Stack(
           fit: StackFit.expand,
           children: [
-            CustomPaint(painter: _Sparkles(t)),
+            if (showSparkles) CustomPaint(painter: _Sparkles(t)),
             Transform.translate(
               offset: Offset(0, wave * 2.2),
               child: Transform.rotate(

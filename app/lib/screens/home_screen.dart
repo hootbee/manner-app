@@ -1,3 +1,4 @@
+import 'my_page_screen.dart';
 import 'challenges_screen.dart';
 import 'digital_questions.dart';
 import 'school_questions.dart';
@@ -49,13 +50,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _expanded = false;
   int? _focusedRecord;
-  void _openLearning() => Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const LearningCategoryScreen()),
-  );
-  Future<void> _openChallenges() async {
-    final destination = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const ChallengesScreen()));
-    if (mounted && destination == 'learn') _openLearning();
+  Future<void> _openLearning() async {
+    final destination = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const LearningCategoryScreen()),
+    );
+    if (mounted && destination == 'profile') _openProfile();
   }
+
+  Future<void> _openProfile() async {
+    final destination = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => MyPageScreen(partner: widget.partner)),
+    );
+    if (!mounted) return;
+    if (destination == 'learn') _openLearning();
+    if (destination == 'challenges') _openChallenges();
+  }
+
+  Future<void> _openChallenges() async {
+    final destination = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const ChallengesScreen()));
+    if (mounted && destination == 'learn') _openLearning();
+    if (mounted && destination == 'profile') _openProfile();
+  }
+
   void _notice(String text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
@@ -104,8 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       _openLearning();
                     } else if (i == 2) {
                       _openChallenges();
-                    } else if (i != 0) {
-                      _notice('다음 화면은 준비 중이에요.');
+                    } else if (i == 3) {
+                      _openProfile();
                     }
                   },
                   child: Padding(
