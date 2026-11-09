@@ -1,3 +1,4 @@
+import 'package:mannerfit/screens/settings_screen.dart';
 import 'package:mannerfit/backend.dart';
 import 'package:mannerfit/fake/fake_backend.dart';
 import 'package:mannerfit/screens/stat_share_screen.dart';
@@ -62,5 +63,15 @@ void main() {
     expect(find.byType(MyPageScreen), findsNothing);
     expect(tester.takeException(), isNull);
   });
-
+  testWidgets('profile settings icon opens frontend settings', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: MyPageScreen(partner: MannerPartner.dog)),
+    );
+    await tester.tap(find.byTooltip('설정'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(SettingsScreen), findsOneWidget);
+    expect(find.text('알림 설정'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

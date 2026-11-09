@@ -1,3 +1,4 @@
+import 'settings_screen.dart';
 import 'stat_share_screen.dart';
 import '../backend.dart';
 import 'manner_stats_screen.dart';
@@ -39,6 +40,9 @@ class _MyPageScreenState extends State<MyPageScreen>
   void _notice(String label) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text('$label는 준비 중이에요.')));
+  void _openSettings() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
   void _react() {
     _laugh.forward(from: 0);
   }
@@ -84,7 +88,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                 ),
                 IconButton(
                   tooltip: '설정',
-                  onPressed: () => _notice('설정'),
+                  onPressed: _openSettings,
                   icon: const Icon(Icons.settings_outlined),
                 ),
               ],
@@ -287,6 +291,8 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
+                        } else if (i == 5) {
+                          _openSettings();
                         } else {
                           _notice(_menus[i].$2);
                         }
