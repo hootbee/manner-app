@@ -1,3 +1,5 @@
+import 'fake/wardrobe_preview.dart';
+import 'screens/wardrobe_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +8,7 @@ import 'screens/welcome_screen.dart';
 import 'screens/transport_progress.dart';
 import 'screens/partner_selection_screen.dart';
 
-/// UI preview: deliberately starts without initializing the backend.
+/// UI preview: wardrobe state only; no live service initialization.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
@@ -22,18 +24,35 @@ Future<void> main() async {
   runApp(const MannersPrototype());
 }
 
-class MannersPrototype extends StatelessWidget {
+class MannersPrototype extends StatefulWidget {
   const MannersPrototype({super.key});
+  @override
+  State<MannersPrototype> createState() => _MannersPrototypeState();
+}
+
+class _MannersPrototypeState extends State<MannersPrototype> {
+  final _wardrobe = WardrobePreview();
+
+  @override
+  void dispose() {
+    _wardrobe.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: '매너스',
     debugShowCheckedModeBanner: false,
     // Desktop browsers preview the same 360 x 780 mobile canvas.
-    builder: kIsWeb
-        ? (context, child) =>
-              Center(child: SizedBox(width: 360, height: 780, child: child))
-        : null,
+    builder: (context, child) => WardrobeBinding(
+      state: _wardrobe.state,
+      catalog: WardrobePreview.catalog,
+      purchase: _wardrobe.purchase,
+      equip: _wardrobe.equip,
+      child: kIsWeb
+          ? Center(child: SizedBox(width: 360, height: 780, child: child))
+          : child!,
+    ),
     theme: ThemeData(
       brightness: Brightness.light,
       scaffoldBackgroundColor: const Color(0xFFF8F8F8),

@@ -1,3 +1,4 @@
+import 'wardrobe_screen.dart';
 import 'my_page_screen.dart';
 import 'challenges_screen.dart';
 import 'digital_questions.dart';
@@ -201,7 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           top: 32,
                           width: 115,
                           height: _expanded ? 108 : 132,
-                          child: PartnerArtwork(partner: widget.partner),
+                          child: AppliedClothingCharacter(
+                            partner: widget.partner,
+                          ),
                         ),
                         Positioned(
                           left: 10,

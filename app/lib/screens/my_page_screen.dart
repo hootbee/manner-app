@@ -1,4 +1,4 @@
-import 'partner_artwork.dart';
+import 'wardrobe_screen.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'partner_selection_screen.dart';
@@ -169,7 +169,9 @@ class _MyPageScreenState extends State<MyPageScreen>
                                     offset: Offset(0, -bounce.abs() * 9),
                                     child: Transform.rotate(
                                       angle: bounce * .06,
-                                      child: PartnerArtwork(partner: widget.partner, showSparkles: false),
+                                      child: AppliedClothingCharacter(
+                                        partner: widget.partner,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -197,7 +199,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                       children: [
                         Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
                         SizedBox(width: 8),
-                        Expanded(child: Text('—\n꾸미기 코인', style: TextStyle(fontSize: 12, height: 1.5))),
+                        Expanded(child: PreviewCoinLabel()),
                       ],
                     ),
                   ),
@@ -251,7 +253,20 @@ class _MyPageScreenState extends State<MyPageScreen>
                         ),
                       ),
                       trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => _notice(_menus[i].$2),
+                      onTap: () {
+                        if (i < 2) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => WardrobeScreen(
+                                partner: widget.partner,
+                                shop: i == 1,
+                              ),
+                            ),
+                          );
+                        } else {
+                          _notice(_menus[i].$2);
+                        }
+                      },
                     ),
                   ],
                 ],
