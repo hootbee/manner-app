@@ -1,3 +1,6 @@
+import 'package:mannerfit/backend.dart';
+import 'package:mannerfit/fake/fake_backend.dart';
+import 'package:mannerfit/screens/stat_share_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mannerfit/screens/my_page_screen.dart';
@@ -5,6 +8,7 @@ import 'package:mannerfit/screens/home_screen.dart';
 import 'package:mannerfit/screens/partner_selection_screen.dart';
 
 void main() {
+  setUp(() => backend = FakeBackend());
   testWidgets(
     'selected partner reacts to tap and drag; menu remains reachable',
     (tester) async {
@@ -32,7 +36,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       await tester.tap(find.text('스탯 공유'));
       await tester.pump();
-      expect(find.text('스탯 공유는 준비 중이에요.'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byType(StatShareScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
