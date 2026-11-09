@@ -1,3 +1,5 @@
+import '../backend.dart';
+import 'manner_stats_screen.dart';
 import 'wardrobe_screen.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -260,6 +262,16 @@ class _MyPageScreenState extends State<MyPageScreen>
                               builder: (_) => WardrobeScreen(
                                 partner: widget.partner,
                                 shop: i == 1,
+                              ),
+                            ),
+                          );
+                        } else if (i == 2) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => MannerStatsScreen(
+                                stats: backend.stats,
+                                partner: widget.partner,
+                                preview: true,
                               ),
                             ),
                           );
