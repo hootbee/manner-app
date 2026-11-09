@@ -80,7 +80,7 @@ class PartnerArtwork extends StatelessWidget {
                             -stage * 512.0,
                           ),
                           child: Image.asset(
-                            'assets/welcome/growth_stages.png',
+                            'assets/welcome/growth_stages.webp',
                             width: 1536,
                             height: 2048,
                             fit: BoxFit.fill,

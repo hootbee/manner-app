@@ -152,7 +152,7 @@ void main() {
           (w) =>
               w is Image &&
               w.image is AssetImage &&
-              (w.image as AssetImage).assetName.endsWith('touch_success.png'),
+              (w.image as AssetImage).assetName.endsWith('touch_success.webp'),
         ),
         findsOneWidget,
       );
@@ -200,7 +200,9 @@ void main() {
             (w) =>
                 w is Image &&
                 w.image is AssetImage &&
-                (w.image as AssetImage).assetName.endsWith('touch_success.png'),
+                (w.image as AssetImage).assetName.endsWith(
+                  'touch_success.webp',
+                ),
           ),
           findsOneWidget,
         );

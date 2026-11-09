@@ -41,28 +41,16 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
   bool get isConversation => widget.categoryId == 'conversation';
   bool get isDigital => widget.categoryId == 'digital';
   bool get isSchool => widget.categoryId == 'school-work';
-  String get categoryTitle => isPublic
-      ? '공공장소 매너'
-      : isDining
-      ? '식사 매너'
-      : isConversation
-      ? '대화 매너'
-      : isDigital
-      ? '디지털 매너'
-      : isSchool
-      ? '학교·직장 매너'
-      : '대중교통 매너';
-  TransportQuestion get q => (isPublic
-      ? publicQuestions
-      : isDining
-      ? diningQuestions
-      : isConversation
-      ? conversationQuestions
-      : isDigital
-      ? digitalQuestions
-      : isSchool
-      ? schoolQuestions
-      : transportQuestions)[index];
+  static const _categories = {
+    'transport': ('대중교통 매너', transportQuestions),
+    'public': ('공공장소 매너', publicQuestions),
+    'dining': ('식사 매너', diningQuestions),
+    'conversation': ('대화 매너', conversationQuestions),
+    'digital': ('디지털 매너', digitalQuestions),
+    'school-work': ('학교·직장 매너', schoolQuestions),
+  };
+  String get categoryTitle => _categories[widget.categoryId]!.$1;
+  TransportQuestion get q => _categories[widget.categoryId]!.$2[index];
   QuestionSession get s => store.session(q.id);
   bool _wrong = false, _busy = false;
   int _reward = 0, _before = 0, _round = 0;
@@ -519,8 +507,8 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
                               ? const PublicSceneArtwork(panel: 3)
                               : Image.asset(
                                   isPublic
-                                      ? 'assets/public/action_scenes.png'
-                                      : 'assets/transport/drag_success.png',
+                                      ? 'assets/public/action_scenes.webp'
+                                      : 'assets/transport/drag_success.webp',
                                   key: const ValueKey('drag-success-scene'),
                                   fit: BoxFit.contain,
                                 ),
@@ -645,6 +633,8 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         buildDefaultDragHandles: false,
                         itemCount: s.order.length,
+                        // Keep compatibility with the CI Flutter version's callback API.
+                        // ignore: deprecated_member_use
                         onReorder: (old, next) {
                           setState(() {
                             if (next > old) next--;
@@ -1016,44 +1006,26 @@ class _ReferenceArt extends StatelessWidget {
   final bool public, dining, conversation, school, digital;
   final int number;
   @override
-  Widget build(BuildContext context) => digital
-      ? DigitalReferenceArt(number: number)
-      : school
-      ? _SchoolReferenceArt(number: number)
-      : conversation
-      ? _ConversationReferenceArt(number: number)
-      : dining
-      ? _DiningReferenceArt(number: number)
-      : ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: SizedBox(
-              width: public ? 360 : 298,
-              height: public ? 380 : 247,
-              child: ClipRect(
-                child: OverflowBox(
-                  alignment: Alignment.topLeft,
-                  minWidth: public ? 941 : 900,
-                  maxWidth: public ? 941 : 900,
-                  minHeight: public ? 1672 : 1680,
-                  maxHeight: public ? 1672 : 1680,
-                  child: Transform.translate(
-                    offset: public
-                        ? const Offset(-491, -275)
-                        : const Offset(-510, -301),
-                    child: Image.asset(
-                      'assets/${public ? 'public' : 'transport'}/question_$number.png',
-                      width: public ? 941 : 900,
-                      height: public ? 1672 : 1680,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+  Widget build(BuildContext context) {
+    final category = digital
+        ? 'digital'
+        : school
+        ? 'school-work'
+        : conversation
+        ? 'conversation'
+        : dining
+        ? 'dining'
+        : public
+        ? 'public'
+        : 'transport';
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.asset(
+        'assets/$category/question_$number.webp',
+        fit: BoxFit.contain,
+      ),
+    );
+  }
 }
 
 /// Interactive scene has no baked-in arrows, finger markers or highlighted answer.
@@ -1225,7 +1197,7 @@ class _ActionBackdrop extends StatelessWidget {
               0,
             ),
             child: Image.asset(
-              'assets/transport/action_scenes.png',
+              'assets/transport/action_scenes.webp',
               width: 2172,
               height: 724,
               fit: BoxFit.fill,
@@ -1284,136 +1256,10 @@ class _SuccessBackdrop extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(number == 1 ? 0 : -887, 0),
             child: Image.asset(
-              'assets/transport/touch_success.png',
+              'assets/transport/touch_success.webp',
               width: 1774,
               height: 887,
               fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-class _DiningReferenceArt extends StatelessWidget {
-  const _DiningReferenceArt({required this.number});
-  final int number;
-  static const regions = [
-    Rect.fromLTWH(520, 292, 330, 310),
-    Rect.fromLTWH(463, 302, 390, 350),
-    Rect.fromLTWH(543, 300, 310, 280),
-    Rect.fromLTWH(494, 320, 360, 310),
-    Rect.fromLTWH(535, 290, 320, 245),
-    Rect.fromLTWH(505, 322, 350, 330),
-    Rect.fromLTWH(513, 299, 337, 300),
-    Rect.fromLTWH(521, 309, 323, 260),
-    Rect.fromLTWH(527, 295, 320, 322),
-    Rect.fromLTWH(472, 313, 390, 415),
-  ];
-  @override
-  Widget build(BuildContext context) {
-    final src = regions[number - 1];
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: SizedBox(
-          width: src.width,
-          height: src.height,
-          child: ClipRect(
-            child: OverflowBox(
-              alignment: Alignment.topLeft,
-              minWidth: 941,
-              maxWidth: 941,
-              minHeight: 1672,
-              maxHeight: 1672,
-              child: Transform.translate(
-                offset: Offset(-src.left, -src.top),
-                child: Image.asset(
-                  'assets/dining/question_$number.png',
-                  width: 941,
-                  height: 1672,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ConversationReferenceArt extends StatelessWidget {
-  const _ConversationReferenceArt({required this.number});
-  final int number;
-  @override
-  Widget build(BuildContext context) {
-    final top = number == 1
-        ? 880.0
-        : number == 4
-        ? 914.0
-        : number == 8
-        ? 900.0
-        : 874.0;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: SizedBox(
-          width: 760,
-          height: 300,
-          child: ClipRect(
-            child: OverflowBox(
-              alignment: Alignment.topLeft,
-              minWidth: 863,
-              maxWidth: 863,
-              minHeight: 1822,
-              maxHeight: 1822,
-              child: Transform.translate(
-                offset: Offset(-50, -top),
-                child: Image.asset(
-                  'assets/conversation/question_$number.png',
-                  width: 863,
-                  height: 1822,
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SchoolReferenceArt extends StatelessWidget {
-  const _SchoolReferenceArt({required this.number});
-  final int number;
-  @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(12),
-    child: FittedBox(
-      fit: BoxFit.contain,
-      child: SizedBox(
-        width: 345,
-        height: 300,
-        child: ClipRect(
-          child: OverflowBox(
-            alignment: Alignment.topLeft,
-            minWidth: 941,
-            maxWidth: 941,
-            minHeight: 1672,
-            maxHeight: 1672,
-            child: Transform.translate(
-              offset: const Offset(-510, -303),
-              child: Image.asset(
-                'assets/school-work/question_$number.png',
-                width: 941,
-                height: 1672,
-                fit: BoxFit.contain,
-              ),
             ),
           ),
         ),

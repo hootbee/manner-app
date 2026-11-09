@@ -11,17 +11,10 @@ const _muted = Color(0xFF6B7079);
 /// 360 × 780 reference including the device's real safe areas.
 /// Callbacks are UI boundaries; this screen never calls authentication APIs.
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({
-    super.key,
-    this.onStart,
-    this.onGoogle,
-    this.onKakao,
-    this.onLogin,
-  });
+  const WelcomeScreen({super.key, this.onStart, this.onGoogle, this.onLogin});
 
   final VoidCallback? onStart;
   final VoidCallback? onGoogle;
-  final VoidCallback? onKakao;
   final VoidCallback? onLogin;
 
   @override
@@ -45,8 +38,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
-    _load('assets/welcome/design_reference.png', (image) => _reference = image);
-    _load('assets/welcome/characters.png', (image) => _characters = image);
+    _load(
+      'assets/welcome/design_reference.webp',
+      (image) => _reference = image,
+    );
+    _load('assets/welcome/characters.webp', (image) => _characters = image);
   }
 
   Future<void> _load(String path, void Function(ui.Image) assign) async {
@@ -262,15 +258,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       painter: _GoogleMark(),
                                     ),
                                     onPressed: () => _activate(widget.onGoogle),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  WelcomeButton(
-                                    label: '카톡으로 계속하기',
-                                    icon: const CustomPaint(
-                                      size: Size(24, 24),
-                                      painter: _KakaoMark(),
-                                    ),
-                                    onPressed: () => _activate(widget.onKakao),
                                   ),
                                   Center(
                                     child: TextButton(
@@ -578,24 +565,4 @@ class _GoogleMark extends CustomPainter {
 
   @override
   bool shouldRepaint(_GoogleMark oldDelegate) => false;
-}
-
-class _KakaoMark extends CustomPainter {
-  const _KakaoMark();
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p = Paint()..color = _ink;
-    canvas.drawOval(Rect.fromLTWH(0, 2, size.width, size.height * 0.73), p);
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width * 0.25, size.height * 0.65)
-        ..lineTo(size.width * 0.19, size.height * 0.98)
-        ..lineTo(size.width * 0.51, size.height * 0.75)
-        ..close(),
-      p,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_KakaoMark oldDelegate) => false;
 }

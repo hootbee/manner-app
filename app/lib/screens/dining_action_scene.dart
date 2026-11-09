@@ -19,7 +19,7 @@ class DiningSceneArtwork extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(-(panel % 3) * 512.0, -(panel ~/ 3) * 512.0),
             child: Image.asset(
-              'assets/dining/action_scenes.png',
+              'assets/dining/action_scenes.webp',
               width: 1536,
               height: 1024,
               fit: BoxFit.contain,

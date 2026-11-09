@@ -25,12 +25,10 @@ void main() {
     if (output.isNotEmpty) {
       await tester.runAsync(() async {
         for (final (family, path) in [
-          ('PreviewKorean', 'C:/Windows/Fonts/malgun.ttf'),
-          (
-            'MaterialIcons',
-            'C:/Users/gjo49/flutter/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
-          ),
+          ('PreviewKorean', const String.fromEnvironment('PREVIEW_FONT')),
+          ('MaterialIcons', const String.fromEnvironment('PREVIEW_ICONS_FONT')),
         ]) {
+          if (path.isEmpty) continue;
           await (FontLoader(family)
                 ..addFont(File(path).readAsBytes().then(ByteData.sublistView)))
               .load();

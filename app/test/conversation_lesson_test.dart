@@ -52,12 +52,10 @@ void main() {
     if (output.isNotEmpty) {
       await t.runAsync(() async {
         for (final entry in [
-          ('Korean', 'C:/Windows/Fonts/malgun.ttf'),
-          (
-            'MaterialIcons',
-            'C:/Users/gjo49/flutter/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
-          ),
+          ('Korean', const String.fromEnvironment('PREVIEW_FONT')),
+          ('MaterialIcons', const String.fromEnvironment('PREVIEW_ICONS_FONT')),
         ]) {
+          if (entry.$2.isEmpty) continue;
           await (FontLoader(entry.$1)..addFont(
                 File(entry.$2).readAsBytes().then(ByteData.sublistView),
               ))

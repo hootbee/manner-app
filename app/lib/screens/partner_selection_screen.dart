@@ -74,7 +74,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen>
   }
 
   Future<void> _loadImage() async {
-    final data = await rootBundle.load('assets/welcome/characters.png');
+    final data = await rootBundle.load('assets/welcome/characters.webp');
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
     final frame = await codec.getNextFrame();
     codec.dispose();

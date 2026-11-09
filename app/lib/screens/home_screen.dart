@@ -756,7 +756,7 @@ class _Wordmark extends StatelessWidget {
             child: Transform.translate(
               offset: const Offset(-89, -91),
               child: Image.asset(
-                'assets/welcome/design_reference.png',
+                'assets/welcome/design_reference.webp',
                 width: 351,
                 height: 797,
                 fit: BoxFit.fill,

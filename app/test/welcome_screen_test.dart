@@ -23,7 +23,6 @@ void main() {
           home: WelcomeScreen(
             onStart: () => calls.add('start'),
             onGoogle: () => calls.add('google'),
-            onKakao: () => calls.add('kakao'),
             onLogin: () => calls.add('login'),
           ),
         ),
@@ -35,11 +34,11 @@ void main() {
       });
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1800));
-      for (final label in ['시작하기', '구글로 계속하기', '카톡으로 계속하기']) {
+      for (final label in ['시작하기', '구글로 계속하기']) {
         await tester.tap(find.text(label));
       }
       await tester.tap(find.byType(TextButton));
-      expect(calls, ['start', 'google', 'kakao', 'login']);
+      expect(calls, ['start', 'google', 'login']);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },
@@ -86,8 +85,8 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 400));
       });
       await tester.pump();
-      await tester.ensureVisible(find.text('카톡으로 계속하기'));
-      await tester.tap(find.text('카톡으로 계속하기'));
+      await tester.ensureVisible(find.text('구글로 계속하기'));
+      await tester.tap(find.text('구글로 계속하기'));
       await tester.pump();
       expect(find.text('프로토타입 화면입니다. 기능은 추후 연결됩니다.'), findsOneWidget);
       expect(tester.takeException(), isNull);

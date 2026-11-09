@@ -520,58 +520,14 @@ class _CategoryArt extends StatelessWidget {
     'school-work',
     'digital',
   ];
-  static const _regions = [
-    Rect.fromLTWH(211, 59, 126, 149),
-    Rect.fromLTWH(480, 131, 342, 354),
-    Rect.fromLTWH(421, 139, 400, 326),
-    Rect.fromLTWH(421, 139, 400, 318),
-    Rect.fromLTWH(421, 139, 400, 318),
-    Rect.fromLTWH(449, 133, 372, 343),
-  ];
   @override
-  Widget build(BuildContext context) {
-    final source = _regions[index];
-    final width = index == 0
-        ? 351.0
-        : index == 4
-        ? 852.0
-        : 851.0;
-    final height = index == 0
-        ? 819.0
-        : index == 1
-        ? 1849.0
-        : 1847.0;
-    return ExcludeSemantics(
-      child: ClipRect(
-        child: FittedBox(
-          fit: hero ? BoxFit.contain : BoxFit.cover,
-          child: SizedBox(
-            width: source.width,
-            height: source.height,
-            child: ClipRect(
-              child: OverflowBox(
-                alignment: Alignment.topLeft,
-                minWidth: width,
-                maxWidth: width,
-                minHeight: height,
-                maxHeight: height,
-                child: Transform.translate(
-                  offset: Offset(-source.left, -source.top),
-                  child: Image.asset(
-                    'assets/welcome/learning_${_assets[index]}_reference.png',
-                    width: width,
-                    height: height,
-                    fit: BoxFit.fill,
-                    filterQuality: FilterQuality.high,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Image.asset(
+      'assets/welcome/category_${_assets[index]}.webp',
+      fit: hero ? BoxFit.contain : BoxFit.cover,
+      filterQuality: FilterQuality.high,
+    ),
+  );
 }
 
 class _ProgressLine extends StatelessWidget {

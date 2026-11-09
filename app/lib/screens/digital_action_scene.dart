@@ -5,31 +5,8 @@ class DigitalReferenceArt extends StatelessWidget {
   const DigitalReferenceArt({super.key, required this.number});
   final int number;
   @override
-  Widget build(BuildContext context) => FittedBox(
-    fit: BoxFit.contain,
-    child: SizedBox(
-      width: 370,
-      height: 345,
-      child: ClipRect(
-        child: OverflowBox(
-          alignment: Alignment.topLeft,
-          minWidth: 941,
-          maxWidth: 941,
-          minHeight: 1672,
-          maxHeight: 1672,
-          child: Transform.translate(
-            offset: const Offset(-495, -278),
-            child: Image.asset(
-              'assets/digital/question_$number.png',
-              width: 941,
-              height: 1672,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
+  Widget build(BuildContext context) =>
+      Image.asset('assets/digital/question_$number.webp', fit: BoxFit.contain);
 }
 
 class DigitalActionScene extends StatefulWidget {

@@ -20,7 +20,7 @@ class ConversationSceneArtwork extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(-(panel % 2) * 512.0, -(panel ~/ 2) * 512.0),
             child: Image.asset(
-              'assets/conversation/action_scenes.png',
+              'assets/conversation/action_scenes.webp',
               width: 1024,
               height: 1024,
               fit: BoxFit.contain,

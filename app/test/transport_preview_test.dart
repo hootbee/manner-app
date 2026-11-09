@@ -17,18 +17,15 @@ void main() {
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
       await t.runAsync(() async {
-        await (FontLoader('MaterialIcons')..addFont(
-              File(
-                'C:/Users/gjo49/flutter/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
-              ).readAsBytes().then(ByteData.sublistView),
-            ))
-            .load();
-        await (FontLoader('Korean')..addFont(
-              File(
-                'C:/Windows/Fonts/malgun.ttf',
-              ).readAsBytes().then(ByteData.sublistView),
-            ))
-            .load();
+        for (final (family, path) in [
+          ('MaterialIcons', const String.fromEnvironment('PREVIEW_ICONS_FONT')),
+          ('Korean', const String.fromEnvironment('PREVIEW_FONT')),
+        ]) {
+          if (path.isEmpty) continue;
+          await (FontLoader(family)
+                ..addFont(File(path).readAsBytes().then(ByteData.sublistView)))
+              .load();
+        }
       });
       final key = GlobalKey();
       final store = TransportProgress(persist: false);
@@ -66,19 +63,34 @@ void main() {
       await shot('transport_${index + 1}');
       if (index == 4) {
         final bag = find.byIcon(Icons.backpack);
-        await t.ensureVisible(bag); await t.pumpAndSettle();
+        await t.ensureVisible(bag);
+        await t.pumpAndSettle();
         final gesture = await t.startGesture(t.getCenter(bag));
-        await t.pump(const Duration(milliseconds:600));
-        await gesture.moveBy(const Offset(100,-20)); await t.pump();
-        await gesture.up(); await t.pumpAndSettle();
-        await t.runAsync(()=>Future<void>.delayed(const Duration(milliseconds:300))); await t.pumpAndSettle();
+        await t.pump(const Duration(milliseconds: 600));
+        await gesture.moveBy(const Offset(100, -20));
+        await t.pump();
+        await gesture.up();
+        await t.pumpAndSettle();
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 300)),
+        );
+        await t.pumpAndSettle();
         await shot('transport_drag_success');
       }
-      if(index==0||index==7){
-        final scene=find.byKey(const ValueKey('action-scene'));await t.ensureVisible(scene);await t.pumpAndSettle();
-        final rect=t.getRect(scene);await t.tapAt(Offset(rect.left+rect.width*.2,rect.top+rect.height*.75));await t.pumpAndSettle();
-        await t.runAsync(()=>Future<void>.delayed(const Duration(milliseconds:300)));await t.pumpAndSettle();
-        await shot('transport_touch_success_${index+1}');
+      if (index == 0 || index == 7) {
+        final scene = find.byKey(const ValueKey('action-scene'));
+        await t.ensureVisible(scene);
+        await t.pumpAndSettle();
+        final rect = t.getRect(scene);
+        await t.tapAt(
+          Offset(rect.left + rect.width * .2, rect.top + rect.height * .75),
+        );
+        await t.pumpAndSettle();
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 300)),
+        );
+        await t.pumpAndSettle();
+        await shot('transport_touch_success_${index + 1}');
       }
       if (index == 2) {
         await t.tap(find.text('B'));
