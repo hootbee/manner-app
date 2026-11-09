@@ -2,12 +2,9 @@ import 'settings_screen.dart';
 import 'stat_share_screen.dart';
 import '../backend.dart';
 import 'manner_stats_screen.dart';
-import 'partner_artwork.dart';
-
+import 'wardrobe_screen.dart';
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-
 import 'partner_selection_screen.dart';
 
 /// Profile presentation only. Account assets and XP await the backend contract.
@@ -28,6 +25,8 @@ class _MyPageScreenState extends State<MyPageScreen>
   double _angle = 0;
   static const _ink = Color(0xFF191D1A);
   static const _menus = [
+    (Icons.checkroom_outlined, '캐릭터 꾸미기', '나만의 매너 파트너를 꾸며보세요.'),
+    (Icons.shopping_bag_outlined, '꾸미기 상점', '다양한 아이템을 구경해보세요.'),
     (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 분야의 성장 현황을 확인해요.'),
     (Icons.menu_book_outlined, '학습 기록', '지금까지의 학습 내용을 모아보세요.'),
     (Icons.share_outlined, '스탯 공유', '나의 성장을 친구들에게 공유해요.'),
@@ -178,9 +177,8 @@ class _MyPageScreenState extends State<MyPageScreen>
                                     offset: Offset(0, -bounce.abs() * 9),
                                     child: Transform.rotate(
                                       angle: bounce * .06,
-                                      child: PartnerArtwork(
+                                      child: AppliedClothingCharacter(
                                         partner: widget.partner,
-                                        showSparkles: false,
                                       ),
                                     ),
                                   ),
@@ -201,6 +199,38 @@ class _MyPageScreenState extends State<MyPageScreen>
               style: TextStyle(fontSize: 11, color: Colors.black54),
             ),
             const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _panel(
+                    const Row(
+                      children: [
+                        Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
+                        SizedBox(width: 8),
+                        Expanded(child: PreviewCoinLabel()),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _panel(
+                    const Row(
+                      children: [
+                        Icon(Icons.workspace_premium_outlined),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '—\n획득한 배지',
+                            style: TextStyle(fontSize: 12, height: 1.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
             _panel(
               Column(
@@ -232,7 +262,16 @@ class _MyPageScreenState extends State<MyPageScreen>
                       ),
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () {
-                        if (i == 0) {
+                        if (i < 2) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => WardrobeScreen(
+                                partner: widget.partner,
+                                shop: i == 1,
+                              ),
+                            ),
+                          );
+                        } else if (i == 2) {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => MannerStatsScreen(
@@ -242,7 +281,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 2) {
+                        } else if (i == 4) {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => StatShareScreen(
@@ -253,7 +292,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 3) {
+                        } else if (i == 5) {
                           _openSettings();
                         } else {
                           _notice(_menus[i].$2);
