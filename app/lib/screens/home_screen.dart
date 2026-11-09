@@ -1,3 +1,4 @@
+import 'challenges_screen.dart';
 import 'digital_questions.dart';
 import 'school_questions.dart';
 import 'conversation_questions.dart';
@@ -51,6 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openLearning() => Navigator.of(context).push(
     MaterialPageRoute<void>(builder: (_) => const LearningCategoryScreen()),
   );
+  Future<void> _openChallenges() async {
+    final destination = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const ChallengesScreen()));
+    if (mounted && destination == 'learn') _openLearning();
+  }
   void _notice(String text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
@@ -97,6 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     if (i == 1) {
                       _openLearning();
+                    } else if (i == 2) {
+                      _openChallenges();
                     } else if (i != 0) {
                       _notice('다음 화면은 준비 중이에요.');
                     }
@@ -683,6 +690,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(16),
                             onTap: () => i == 0
                                 ? _openLearning()
+                                : i == 1
+                                ? _openChallenges()
                                 : _notice('다음 화면은 준비 중이에요.'),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
