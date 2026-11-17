@@ -101,7 +101,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
             _navigation(
               Icons.person_outline,
               '마이페이지',
-              () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('마이페이지는 준비 중이에요.'))),
+              () => Navigator.of(context).pop('profile'),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'my_page_screen.dart';
 import 'challenges_screen.dart';
 import 'digital_questions.dart';
 import 'school_questions.dart';
@@ -7,8 +8,11 @@ import 'public_questions.dart';
 import 'transport_progress.dart';
 import 'transport_questions.dart';
 import 'transport_lesson_screen.dart';
+
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import 'partner_selection_screen.dart';
 import 'partner_artwork.dart';
 import 'daily_mission_progress.dart';
@@ -22,8 +26,10 @@ class HomeScreen extends StatefulWidget {
       completed: int.fromEnvironment('DEMO_COMPLETED'),
     ),
     this.onLearn,
+    this.preview = false,
   });
   final MannerPartner partner;
+  final bool preview;
   final DailyMissionProgress progress;
   final VoidCallback? onLearn;
   @override
@@ -49,13 +55,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _expanded = false;
   int? _focusedRecord;
-  void _openLearning() => Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const LearningCategoryScreen()),
-  );
-  Future<void> _openChallenges() async {
-    final destination = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const ChallengesScreen()));
-    if (mounted && destination == 'learn') _openLearning();
+  Future<void> _openLearning() async {
+    final destination = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const LearningCategoryScreen()),
+    );
+    if (mounted && destination == 'profile') _openProfile();
   }
+
+  Future<void> _openProfile() async {
+    final destination = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) =>
+            MyPageScreen(partner: widget.partner, preview: widget.preview),
+      ),
+    );
+    if (!mounted) return;
+    if (destination == 'learn') _openLearning();
+    if (destination == 'challenges') _openChallenges();
+  }
+
+  Future<void> _openChallenges() async {
+    final destination = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const ChallengesScreen()));
+    if (mounted && destination == 'learn') _openLearning();
+    if (mounted && destination == 'profile') _openProfile();
+  }
+
   void _notice(String text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
@@ -104,8 +130,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       _openLearning();
                     } else if (i == 2) {
                       _openChallenges();
-                    } else if (i != 0) {
-                      _notice('다음 화면은 준비 중이에요.');
+                    } else if (i == 3) {
+                      _openProfile();
                     }
                   },
                   child: Padding(
@@ -845,9 +871,8 @@ class _GaugePainter extends CustomPainter {
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 11
-            ..color = const Color(
-              0xFF252825,
-            ).withValues(alpha: .08 + .03 * math.sin(t * math.pi * 2))
+            ..color = const Color(0xFF252825)
+                .withValues(alpha: .08 + .03 * math.sin(t * math.pi * 2))
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
         );
       }
