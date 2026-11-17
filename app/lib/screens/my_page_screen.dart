@@ -238,14 +238,14 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 4) {
+                        } else if (i == 2) {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => StatShareScreen(
                                 home: backend.home.value,
                                 stats: List.unmodifiable(backend.stats.value),
                                 partner: widget.partner,
-                                preview: true,
+                                preview: widget.preview,
                               ),
                             ),
                           );

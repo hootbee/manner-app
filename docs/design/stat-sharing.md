@@ -22,3 +22,10 @@ Android API 29 이하 저장에 필요한 WRITE_EXTERNAL_STORAGE 권한을 maxSd
 기존 Android Gradle Plugin 8.11.1과 호환되는 share_plus 11.1.0을 사용한다. 12 이상으로 올릴 때는 빌드 도구 요구사항을 다시 확인한다.
 
 패키지 설정: [share_plus 11.1.0](https://pub.dev/packages/share_plus/versions/11.1.0), [gal](https://pub.dev/packages/gal).
+
+## 리뷰 반영
+
+- 카드에는 선택한 파트너 한 마리만 표시한다.
+- 영역 스탯은 진도율이 아닌 0~100점이다(ADR 0004 §3).
+- 미리보기 표시값은 main_prototype.dart에서 생성자로 전달한다. 기본값은 false다.
+- Android 10(API 29) 저장을 위해 application에 requestLegacyExternalStorage=true를 추가했다.

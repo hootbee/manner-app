@@ -236,44 +236,7 @@ class StatShareCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 158,
-                child: LayoutBuilder(
-                  builder: (context, constraints) => Stack(
-                    fit: StackFit.expand,
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Positioned(
-                        left: 0,
-                        bottom: 0,
-                        width: constraints.maxWidth * .43,
-                        height: 128,
-                        child: const PartnerArtwork(
-                          partner: MannerPartner.cat,
-                          showSparkles: false,
-                        ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        width: constraints.maxWidth * .43,
-                        height: 128,
-                        child: const PartnerArtwork(
-                          partner: MannerPartner.monkey,
-                          showSparkles: false,
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: constraints.maxWidth * .21,
-                        width: constraints.maxWidth * .58,
-                        height: 158,
-                        child: const PartnerArtwork(
-                          partner: MannerPartner.dog,
-                          showSparkles: false,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                child: PartnerArtwork(partner: partner, showSparkles: false),
               ),
             ],
           ),
@@ -351,7 +314,7 @@ class StatShareCard extends StatelessWidget {
                       Text(stat.area, style: const TextStyle(fontSize: 10)),
                       const SizedBox(height: 3),
                       Text(
-                        '${stat.value.clamp(0, 100)}%',
+                        '${stat.value.clamp(0, 100)}점',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
