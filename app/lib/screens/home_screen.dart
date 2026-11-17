@@ -8,8 +8,11 @@ import 'public_questions.dart';
 import 'transport_progress.dart';
 import 'transport_questions.dart';
 import 'transport_lesson_screen.dart';
+
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import 'partner_selection_screen.dart';
 import 'partner_artwork.dart';
 import 'daily_mission_progress.dart';
@@ -23,8 +26,10 @@ class HomeScreen extends StatefulWidget {
       completed: int.fromEnvironment('DEMO_COMPLETED'),
     ),
     this.onLearn,
+    this.preview = false,
   });
   final MannerPartner partner;
+  final bool preview;
   final DailyMissionProgress progress;
   final VoidCallback? onLearn;
   @override
@@ -59,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _openProfile() async {
     final destination = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => MyPageScreen(partner: widget.partner)),
+      MaterialPageRoute(
+        builder: (_) =>
+            MyPageScreen(partner: widget.partner, preview: widget.preview),
+      ),
     );
     if (!mounted) return;
     if (destination == 'learn') _openLearning();
@@ -863,9 +871,8 @@ class _GaugePainter extends CustomPainter {
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 11
-            ..color = const Color(
-              0xFF252825,
-            ).withValues(alpha: .08 + .03 * math.sin(t * math.pi * 2))
+            ..color = const Color(0xFF252825)
+                .withValues(alpha: .08 + .03 * math.sin(t * math.pi * 2))
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
         );
       }
