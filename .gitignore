@@ -21,3 +21,6 @@ supabase/.branches/
 .claude/settings.local.json
 .idea/
 .DS_Store
+
+# 디자인 원본은 팀 공유 저장소에서 관리
+/docs/design/frontend-references/**/*.png
