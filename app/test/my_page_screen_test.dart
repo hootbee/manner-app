@@ -77,4 +77,19 @@ void main() {
     expect(find.text('알림 설정'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('profile settings menu opens frontend settings', (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      const MaterialApp(home: MyPageScreen(partner: MannerPartner.dog)),
+    );
+    await tester.ensureVisible(find.text('설정'));
+    await tester.pump();
+    await tester.tap(find.text('설정'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(SettingsScreen), findsOneWidget);
+  });
 }

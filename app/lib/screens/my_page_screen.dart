@@ -253,7 +253,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 5) {
+                        } else if (i == 3) {
                           _openSettings();
                         } else {
                           _notice(_menus[i].$2);
