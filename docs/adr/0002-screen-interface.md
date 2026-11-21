@@ -38,11 +38,12 @@ abstract interface class Backend {
   ValueListenable<List<AreaStat>> get stats; // 영역 6개, 고정 순서
   ValueListenable<Account?> get account;     // null이면 게스트
   ValueListenable<bool> get online;
+  ValueListenable<Challenges> get challenges; // 도전과제 탭. 타입은 ADR 0010 §7
   Session startDaily();                       // home.value.today!.doneToday면 부르지 않는다
   Future<SignInResult> signIn();
   Future<SignOutResult> signOut({bool discardUnsynced = false});
   Future<DeleteResult> deleteAccount();
-  // 카테고리 연습: 기준이 정해지면 `Session startPractice(String categoryId)` 하나를 더한다.
+  // 카테고리 연습: 넣을 때 `Session startPractice(String categoryId)` 하나를 더한다. 카테고리 기준은 ADR 0010 §3.
 }
 
 class Home { final DayCard? today; final int streak, reviewsDue, xp, level; final double levelProgress; } // today가 null이면 준비된 하루가 없다
@@ -91,12 +92,12 @@ class Evidence { final String summary; final List<Source> sources; }  class Sour
 
 - 위는 필드만 보인 것이다(생성자는 구현할 때 붙인다). `Account`, `Phase`는 Supabase `User`, Material `Step`·`Card`와 이름이 겹치지 않게 골랐다.
 - 화면이 쓰는 콘텐츠 모양은 `Question`, `Explanation`, `Evidence`까지다. JSON 변환 규칙, id, 버전, Storage는 ADR 0003에서 정한다.
-- MVP에서 빼는 것: 원칙 스킬, 칭호, 옷장·옷차림 아이템, 약한 매너(2026-10-25 사용자 결정). 인터페이스에 자리도 만들지 않는다.
+- MVP에서 빼는 것: 원칙 스킬, 칭호, 옷장·옷차림 아이템, 약한 매너(2026-10-25 사용자 결정). 인터페이스에 자리도 만들지 않는다. 도전과제 배지는 칭호가 아니다(ADR 0010 §9).
 
 ### 3. 가짜 구현 (`app/lib/fake/`)
 - `fake_backend.dart`: `FakeBackend implements Backend`. 메모리에만 상태를 둔다. 채점은 `correct`와 비교, XP는 10·5·0, `best`가 아니면(`ok` 포함) 같은 문제를 세트 맨 뒤에 `retry: true`로 다시 내고(맞힐 때까지, ADR 0004 §4), 마지막 `next()`에서 `streak + 1`, `doneToday = true`가 된다. 비동기 메서드는 `delay`(기본 300ms)만큼 기다려 로딩 표시를 볼 수 있게 한다.
 - `samples.dart`: `docs/prototype/content.json`에서 옮긴 고정 데이터. 하루는 `day-01`(3장면), 문제는 `A-sidewalk`(연인·오른쪽), `A-alley`(다시 풀기용), `A-stairs`(할머니·올라감), `A-umbrella-01`, `A-crosswalk-01`. 순서 형식은 견본에 예가 없으므로 가짜 문제 하나를 쓰고 `// 가짜` 주석을 단다.
-- 경계 상태는 생성자 인자로 만든다: `FakeBackend({bool online = true, Account? account, bool doneToday = false, bool noDay = false, SignInResult signIn = ok, int unsynced = 0, DeleteResult delete = ok, Duration delay})`. 테스트에서는 `fake.setOnline(false)`로 바꿀 수 있다.
+- 경계 상태는 생성자 인자로 만든다: `FakeBackend({bool online = true, Account? account, bool doneToday = false, bool noDay = false, SignInResult signIn = ok, int unsynced = 0, DeleteResult delete = ok, Duration delay})`. 테스트에서는 `fake.setOnline(false)`로 바꿀 수 있다. 도전과제 값은 ADR 0010 §8.
 - 실행할 때는 이름 붙은 묶음을 고른다: `flutter run --dart-define=FAKE=<이름>`. 이름은 `guest`(기본, 첫 실행), `signedIn`, `doneToday`, `noDay`, `offline`, `signInFails`, `wouldLose`, `deleteFails`. 팀원이 버튼으로 고를 수 있게 `.vscode/launch.json`에 묶음마다 실행 설정을 둔다.
 
 ```dart
@@ -135,7 +136,7 @@ Future<void> main() async {
   - 같은 요청 두 번: `answer`는 `Asking`이 아니면 무시하고, `next`는 `Finished`에서 무시한다. 기록이 두 번 쓰이지 않는다. 실제 구현은 로컬 기록을 쓴 뒤에 `Answered`를 낸다.
   - 기기 두 대: pull 뒤 실제 구현이 `home`, `stats`를 다시 계산해 내보내면 화면은 저절로 다시 그려진다. 자정을 넘겨 켜 둔 앱도 앞으로 올 때 다시 계산한다.
   - 견본과 다른 점: 견본의 콤보 보너스 XP(+5)와 나가기 시트의 "XP는 하루를 마쳐야 받아요" 문구는 ADR 0001 §4와 어긋나므로 화면에 옮기지 않는다.
-- **다시 볼 조건**: 카테고리 연습, 오류 신고(설정의 "해설 오류 신고"), 알림 설정을 넣을 때 메서드를 더한다. 오류 신고와 알림은 각자 ADR에서 정한다.
+- **다시 볼 조건**: 카테고리 연습, 오류 신고(설정의 "해설 오류 신고"), 알림 설정을 넣을 때 메서드를 더한다. 오류 신고와 알림은 각자 ADR에서 정한다. 도전과제는 값 하나(`challenges`)로 더했다(ADR 0010).
 
 ## 작업 목록 (1이 끝나면 2~6과 7~10을 동시에 한다. 11은 7~10 뒤)
 | # | 담당 | 작업 | 먼저 쓸 실패하는 테스트 |

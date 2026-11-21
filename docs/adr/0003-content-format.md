@@ -38,7 +38,7 @@
 - 형식별 필드: `position`은 `template`, `spots[{id, label}]`, `answer`(spot id)를 쓰고 `vars.other`가 상대 이름이다. `choice`는 `options[{text, grade, note?}]`를 쓰고 `best`가 정확히 하나다. `ox`는 `answer: true|false`를 쓴다. `order`는 `cards`(맞는 순서의 문장 배열)를 쓴다.
 - choice 보기 id와 order 카드 id는 배열 순번(`"0"`, `"1"`…)으로 앱이 붙인다. 기록에 남지 않으므로 고정할 필요가 없다.
 - `evidence`는 선택이다. `sources`가 비어 있으면 앱은 `Evidence`를 null로 넘긴다(ADR 0002). 출처 없는 관례라는 메모는 검토자를 위해 남겨 둔다. 출처의 `locator`(문서 안 위치)는 선택이다. 출처는 근거 색인(`pipeline/sources/sources.json`)과 맞아야 한다(ADR 0009 §6).
-- `tags`: 시나리오에 붙는 선택 배열(`key`와 같은 형식)이다. 카테고리 기준이 정해지면 쓴다. 지금은 뜻을 정하지 않고, 앱도 읽지 않는다.
+- `tags`: 시나리오에 붙는 선택 배열(`key`와 같은 형식)이다. 카테고리 id를 하나 넣는다(ADR 0010 §3). 카테고리가 아닌 값은 앱이 읽지 않는다.
 - 데일리는 `{id, title, scenes[3], retired?}`이고 장면은 `{time, title, short, intro, manner}`이다. 배열 순서가 경로 순서다. 다음 하루는 `day_completions`와 배열 순서로 계산하므로 `locked`가 필요 없다. 장면당 2문제(2026-10-25 결정)는 엔진 상수로 두고 콘텐츠에 적지 않는다.
 
 ### 4. 버전
@@ -87,6 +87,8 @@ cd app && flutter pub get && dart run tool/validate_content.dart assets/content.
 | 은퇴하지 않은 매너의 출제 가능한 펼친 문제가 2개 미만(장면 2문제가 안 됨. 다시 풀기는 같은 문제를 쓴다, ADR 0004) | 오류 |
 | 은퇴하지 않은 매너의 출제 가능한 기본 시나리오가 3개 미만(한 상황의 변형만 나오면 지루하다) | 경고 |
 | choice의 `best` 보기가 가장 김(기획서 콘텐츠 원칙) | 경고 |
+| 기본 시나리오의 `tags`에 카테고리 id가 2개 이상(ADR 0010 §3) | 오류 |
+| 출제 가능한 펼친 문제가 있는 기본 시나리오의 `tags`에 카테고리 id가 없음(ADR 0010 §3) | 경고 |
 
 경고는 출력만 하고 종료 코드는 0이다. 2026-10-25 현재 콘텐츠로 돌리면 경고 두 개가 나온다(매너 3의 기본 시나리오 1개, `A-umbrella-01`의 best 보기가 가장 김). 경고는 콘텐츠가 바뀌면 달라지므로 현재 파일 테스트는 오류가 없는지만 확인하고, 경고 검사는 작은 예시 데이터로 테스트한다. `--previous`는 PR 기준 브랜치의 파일이다(`git show origin/$BASE:app/assets/content.json`). 처음 만드는 PR이라 없으면 비교 검사를 건너뛴다.
 
