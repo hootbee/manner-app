@@ -119,6 +119,9 @@ void main() {
     test('금지 낱말 오류가 없다', () {
       expect(issues.map((i) => '$i'), isNot(has('오류: 금지 낱말')));
     });
+    test('출제 가능한 시나리오마다 카테고리가 있다(ADR 0010 작업 9)', () {
+      expect(issues.map((i) => '$i'), isNot(has('경고: 카테고리 없음')));
+    });
   });
 
   test('CLI는 오류가 없으면 0, 있으면 1로 끝난다', () async {
