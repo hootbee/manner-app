@@ -148,4 +148,37 @@ void main() {
       expect((fake.home.value.xp, fake.home.value.streak, fake.home.value.today!.doneToday), (0, 0, false));
     });
   });
+
+  group('도전과제 (ADR 0010 §8)', () {
+    test('첫 문제에 답하면 daily[0].value가 1이고, 세트를 끝까지 풀면 일일 셋이 모두 달성이다', () {
+      final fake = FakeBackend(delay: Duration.zero);
+      expect(fake.challenges.value.daily.map((m) => m.value), [0, 0, 0]);
+      final s = fake.startDaily();
+      s.answer(right(askNext(s).q));
+      expect(fake.challenges.value.daily[0].value, 1);
+      expect(fake.challenges.value.todayXp, 10);
+      Answered a;
+      do {
+        s.answer(right(askNext(s).q));
+        a = s.phase.value as Answered;
+      } while (!a.last);
+      expect(fake.challenges.value.daily[2].value, 0); // 마지막 next 전
+      s.next();
+      expect(fake.challenges.value.daily.every((m) => m.value == m.goal), isTrue);
+      expect(fake.challenges.value.todayXp, 60);
+    });
+    test('doneToday 프리셋은 일일 셋이 모두 달성인 값으로 시작한다', () {
+      final c = FakeBackend.preset('doneToday').challenges.value;
+      expect(c.daily.every((m) => m.value == m.goal), isTrue);
+    });
+    test('목록은 ADR 0010 §5 순서이고 주간과 업적은 고정 목록이다', () {
+      final c = FakeBackend().challenges.value;
+      expect([...c.daily, ...c.weekly].map((m) => m.id), MissionId.values.take(7));
+      expect(c.achievements.map((m) => m.id).toSet(), MissionId.values.skip(7).toSet());
+      expect(c.achievements, hasLength(14));
+      expect(c.achievements.where((m) => m.id == MissionId.categoryMaster).map((m) => m.category),
+          ['transport', 'public', 'dining', 'conversation', 'school-work', 'digital']);
+      expect([...c.weekly, ...c.achievements].every((m) => m.value <= m.goal), isTrue);
+    });
+  });
 }

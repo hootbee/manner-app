@@ -371,6 +371,31 @@ void main() {
     });
   });
 
+  test('answer() 한 번에 challenges.daily[0].value가 1이 되고 todayXp가 10이다 (ADR 0010 작업 8)', () {
+    final b = guest();
+    expect(b.challenges.value.daily[0].value, 0);
+    final s = b.startDaily();
+    askNext(s);
+    s.answer(right);
+    expect(b.challenges.value.daily[0].id, MissionId.todayStart);
+    expect(b.challenges.value.daily[0].value, 1);
+    expect(b.challenges.value.todayXp, 10);
+  });
+
+  test('기기 두 대: pull로 어제 다른 기기의 day_completions가 들어오면 weekDays가 1 는다', () async {
+    final b = await signedIn((r) async => switch ((r.method, r.url.path)) {
+          ('GET', '/rest/v1/day_completions') => json([
+              {'id': '00000000-0000-4000-8000-000000000003', 'user_id': 'u1', 'day_id': 'day-01', 'completed_on': '2026-10-26', 'created_at': '2026-10-26T00:00:00Z'},
+            ]),
+          ('GET', _) => json([]),
+          _ => status(201),
+        });
+    int weekDays() => b.challenges.value.weekly.firstWhere((m) => m.id == MissionId.weekDays).value;
+    expect(weekDays(), 0);
+    await b.sync();
+    expect(weekDays(), 1);
+  });
+
   test('기기 두 대: pull로 받은 다른 기기 기록으로 home과 stats를 다시 계산해 내보낸다', () async {
     final b = await signedIn((r) async => switch ((r.method, r.url.path)) {
           ('GET', '/rest/v1/attempts') => json([

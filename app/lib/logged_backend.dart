@@ -16,6 +16,8 @@ class LoggedBackend implements Backend {
   get account => _inner.account;
   @override
   get online => _inner.online;
+  @override
+  get challenges => _inner.challenges;
 
   @override
   Session startDaily() =>

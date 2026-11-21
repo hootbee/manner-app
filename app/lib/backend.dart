@@ -9,6 +9,7 @@ abstract interface class Backend {
   ValueListenable<List<AreaStat>> get stats; // 영역 6개, 고정 순서
   ValueListenable<Account?> get account; // null이면 게스트
   ValueListenable<bool> get online;
+  ValueListenable<Challenges> get challenges; // 도전과제 탭(ADR 0010)
   Session startDaily(); // home.value.today!.doneToday면 부르지 않는다
   Future<SignInResult> signIn();
   Future<SignOutResult> signOut({bool discardUnsynced = false});
@@ -56,6 +57,46 @@ class AreaStat {
   const AreaStat(this.area, this.value);
   final String area;
   final int value;
+}
+
+/// 도전과제 탭(ADR 0010). 목록은 ADR 0010 §5 순서.
+class Challenges {
+  const Challenges({
+    required this.daily,
+    required this.weekly,
+    required this.achievements,
+    required this.todayXp,
+    required this.weekXp,
+  });
+  final List<Mission> daily, weekly, achievements;
+  final int todayXp, weekXp;
+}
+
+/// value == goal이면 달성. category는 categoryMaster만(카테고리 id).
+class Mission {
+  const Mission(this.id, this.value, this.goal, {this.category});
+  final MissionId id;
+  final int value, goal;
+  final String? category;
+}
+
+enum MissionId {
+  todayStart,
+  todayHalf,
+  todayDone,
+  weekDays,
+  weekManners,
+  weekCategories,
+  weekReviews,
+  firstStep,
+  collector,
+  steady,
+  explorer,
+  positionBest,
+  orderBest,
+  reviews,
+  categoryMaster,
+  allCategories,
 }
 
 class Account {

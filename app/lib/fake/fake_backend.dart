@@ -20,6 +20,8 @@ class FakeBackend implements Backend {
         _account = ValueNotifier(account),
         _done = doneToday,
         _streak = doneToday ? 1 : 0,
+        _solves = doneToday ? data.samples.length : 0,
+        _todayXp = doneToday ? data.samples.length * 10 : 0,
         _noDay = noDay,
         _signIn = signIn,
         _unsynced = unsynced,
@@ -50,6 +52,9 @@ class FakeBackend implements Backend {
   final Duration _delay;
   bool _done;
   int _streak, _xp = 0;
+  int _solves, _todayXp; // 도전과제 일일: 오늘 풀이 수(다시 풀기 포함), 오늘 XP
+
+  late final _challenges = ValueNotifier(_buildChallenges());
 
   late final _home = ValueNotifier(_build());
   final _stats = ValueNotifier(data.stats);
@@ -62,6 +67,8 @@ class FakeBackend implements Backend {
   ValueListenable<Account?> get account => _account;
   @override
   ValueListenable<bool> get online => _online;
+  @override
+  ValueListenable<Challenges> get challenges => _challenges;
 
   void setOnline(bool v) => _online.value = v;
 
@@ -82,9 +89,24 @@ class FakeBackend implements Backend {
         levelProgress: _xp % 100 / 100,
       );
 
+  Challenges _buildChallenges() => Challenges(
+        daily: [
+          Mission(MissionId.todayStart, min(_solves, 1), 1),
+          Mission(MissionId.todayHalf, min(_solves, 3), 3),
+          Mission(MissionId.todayDone, _done ? 1 : 0, 1),
+        ],
+        weekly: data.weekly,
+        achievements: data.achievements,
+        todayXp: _todayXp,
+        weekXp: data.weekXp + _todayXp,
+      );
+
   void _addXp(int xp) {
     _xp += xp;
+    _solves++;
+    _todayXp += xp;
     _home.value = _build();
+    _challenges.value = _buildChallenges();
   }
 
   /// 실제 구현은 로그아웃·탈퇴 때 로컬 기록을 지운다(ADR 0001 §3·§5-3). 기록이 없으면 처음 상태다.
@@ -93,13 +115,17 @@ class FakeBackend implements Backend {
     _xp = 0;
     _streak = 0;
     _done = false;
+    _solves = 0;
+    _todayXp = 0;
     _home.value = _build();
+    _challenges.value = _buildChallenges();
   }
 
   void _finishDay() {
     _streak++;
     _done = true;
     _home.value = _build();
+    _challenges.value = _buildChallenges();
   }
 
   @override
