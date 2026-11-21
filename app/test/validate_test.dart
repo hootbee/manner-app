@@ -259,6 +259,11 @@ void main() {
       expect(run((c) => scenario(c, 'ox-1').remove('tags')), ['경고: 카테고리 없음: ox-1']);
       expect(run((c) => scenario(c, 'ox-1')['tags'] = ['night']), ['경고: 카테고리 없음: ox-1']);
     });
+    test('축 보기가 모두 은퇴해 출제되지 않는 시나리오는 카테고리가 없어도 경고가 없다', () {
+      expect(run((c) => scenario(c, 'pos-1')
+        ..remove('tags')
+        ..['vary'][0][0]['retired'] = true), isNot(has('경고: 카테고리 없음')));
+    });
     test('은퇴한 시나리오나 은퇴한 매너의 시나리오는 카테고리가 없어도 경고가 없다', () {
       expect(run((c) => scenario(c, 'ox-11-1')
         ..remove('tags')
