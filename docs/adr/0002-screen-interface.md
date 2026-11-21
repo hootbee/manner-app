@@ -97,7 +97,7 @@ class Evidence { final String summary; final List<Source> sources; }  class Sour
 ### 3. 가짜 구현 (`app/lib/fake/`)
 - `fake_backend.dart`: `FakeBackend implements Backend`. 메모리에만 상태를 둔다. 채점은 `correct`와 비교, XP는 10·5·0, `best`가 아니면(`ok` 포함) 같은 문제를 세트 맨 뒤에 `retry: true`로 다시 내고(맞힐 때까지, ADR 0004 §4), 마지막 `next()`에서 `streak + 1`, `doneToday = true`가 된다. 비동기 메서드는 `delay`(기본 300ms)만큼 기다려 로딩 표시를 볼 수 있게 한다.
 - `samples.dart`: `docs/prototype/content.json`에서 옮긴 고정 데이터. 하루는 `day-01`(3장면), 문제는 `A-sidewalk`(연인·오른쪽), `A-alley`(다시 풀기용), `A-stairs`(할머니·올라감), `A-umbrella-01`, `A-crosswalk-01`. 순서 형식은 견본에 예가 없으므로 가짜 문제 하나를 쓰고 `// 가짜` 주석을 단다.
-- 경계 상태는 생성자 인자로 만든다: `FakeBackend({bool online = true, Account? account, bool doneToday = false, bool noDay = false, SignInResult signIn = ok, int unsynced = 0, DeleteResult delete = ok, Duration delay})`. 테스트에서는 `fake.setOnline(false)`로 바꿀 수 있다. 도전과제 값은 일일과 오늘 XP만 세트 진행에 따라 바뀌고 주간·업적은 `samples.dart`의 고정 목록이다. `doneToday`는 일일 셋이 모두 달성인 값으로 시작한다(ADR 0010 §8).
+- 경계 상태는 생성자 인자로 만든다: `FakeBackend({bool online = true, Account? account, bool doneToday = false, bool noDay = false, SignInResult signIn = ok, int unsynced = 0, DeleteResult delete = ok, Duration delay})`. 테스트에서는 `fake.setOnline(false)`로 바꿀 수 있다. 도전과제 값은 ADR 0010 §8.
 - 실행할 때는 이름 붙은 묶음을 고른다: `flutter run --dart-define=FAKE=<이름>`. 이름은 `guest`(기본, 첫 실행), `signedIn`, `doneToday`, `noDay`, `offline`, `signInFails`, `wouldLose`, `deleteFails`. 팀원이 버튼으로 고를 수 있게 `.vscode/launch.json`에 묶음마다 실행 설정을 둔다.
 
 ```dart

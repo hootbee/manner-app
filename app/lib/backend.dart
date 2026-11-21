@@ -14,7 +14,7 @@ abstract interface class Backend {
   Future<SignInResult> signIn();
   Future<SignOutResult> signOut({bool discardUnsynced = false});
   Future<DeleteResult> deleteAccount();
-  // 카테고리 연습: 기준이 정해지면 `Session startPractice(String categoryId)` 하나를 더한다.
+  // 카테고리 연습: 넣을 때 `Session startPractice(String categoryId)` 하나를 더한다. 카테고리 기준은 ADR 0010 §3.
 }
 
 /// today가 null이면 준비된 하루가 없다.
