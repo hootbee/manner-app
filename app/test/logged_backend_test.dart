@@ -87,4 +87,12 @@ void main() {
       expect(l, isNot(contains('@')));
     }
   });
+
+  test('challenges는 안쪽 값을 그대로 넘기고 기록하지 않는다', () {
+    final lines = <String>[];
+    final inner = FakeBackend();
+    final b = LoggedBackend(inner, log: lines.add);
+    expect(b.challenges, same(inner.challenges));
+    expect(lines, isEmpty);
+  });
 }

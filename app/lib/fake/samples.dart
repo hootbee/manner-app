@@ -23,6 +23,31 @@ const stats = [
   AreaStat('메시지', 0),
 ];
 
+/// 도전과제 고정값(ADR 0010 §8): 일부 달성, 일부 진행 중, 하나는 0. 일일은 FakeBackend가 세트 진행으로 바꾼다.
+const weekXp = 120; // 오늘 전까지의 이번 주 XP
+const weekly = [
+  Mission(MissionId.weekDays, 3, 5),
+  Mission(MissionId.weekManners, 10, 10),
+  Mission(MissionId.weekCategories, 2, 3),
+  Mission(MissionId.weekReviews, 0, 5),
+];
+const achievements = [
+  Mission(MissionId.firstStep, 1, 1),
+  Mission(MissionId.collector, 12, 30),
+  Mission(MissionId.steady, 4, 30),
+  Mission(MissionId.explorer, 3, 6),
+  Mission(MissionId.positionBest, 18, 50),
+  Mission(MissionId.orderBest, 20, 20),
+  Mission(MissionId.reviews, 7, 50),
+  Mission(MissionId.categoryMaster, 30, 30, category: 'transport'),
+  Mission(MissionId.categoryMaster, 12, 30, category: 'public'),
+  Mission(MissionId.categoryMaster, 5, 30, category: 'dining'),
+  Mission(MissionId.categoryMaster, 0, 30, category: 'conversation'),
+  Mission(MissionId.categoryMaster, 8, 30, category: 'school-work'),
+  Mission(MissionId.categoryMaster, 2, 30, category: 'digital'),
+  Mission(MissionId.allCategories, 1, 6),
+];
+
 const _walkSafety = Source(
   title: '봄철 어린이 보행자 교통사고 발생 주의 당부',
   publisher: '메디컬데일리 (질병관리본부 보행 안전수칙 인용)',

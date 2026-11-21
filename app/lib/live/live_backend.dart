@@ -16,6 +16,7 @@ import '../auth/offline.dart';
 import '../backend.dart';
 import '../content/content.dart';
 import '../engine/areas.dart' as engine;
+import '../engine/challenges.dart' as engine;
 import '../engine/daily.dart' as engine;
 import '../engine/engine.dart' as engine;
 import '../engine/leitner.dart' as engine;
@@ -86,6 +87,7 @@ class LiveBackend implements Backend {
 
   final _home = ValueNotifier(const Home(today: null, streak: 0, reviewsDue: 0, xp: 0, level: 1, levelProgress: 0));
   final _stats = ValueNotifier(const <AreaStat>[]);
+  final _challenges = ValueNotifier(const Challenges(daily: [], weekly: [], achievements: [], todayXp: 0, weekXp: 0));
   final ValueNotifier<Account?> _account;
   final _online = ValueNotifier(true); // 게스트는 항상 true. 로그인하면 마지막 Supabase 요청이 서버에 닿았는가
   var _deleting = false;
@@ -98,6 +100,8 @@ class LiveBackend implements Backend {
   ValueListenable<Account?> get account => _account;
   @override
   ValueListenable<bool> get online => _online;
+  @override
+  ValueListenable<Challenges> get challenges => _challenges;
 
   void _refresh() {
     final today = _now(), attempts = _store.attempts, done = _store.dayCompletions;
@@ -121,6 +125,16 @@ class LiveBackend implements Backend {
       levelProgress: engine.levelProgress(xp),
     );
     _stats.value = [for (final (area, value) in engine.areaStats(_content, attempts, boxes, today)) AreaStat(area, value)];
+    final c = engine.challenges(_content, attempts, done, today);
+    List<Mission> missions(List<engine.Row> rows) =>
+        [for (final r in rows) Mission(MissionId.values.byName(r.id), r.value, r.goal, category: r.category)];
+    _challenges.value = Challenges(
+      daily: missions(c.daily),
+      weekly: missions(c.weekly),
+      achievements: missions(c.achievements),
+      todayXp: c.todayXp,
+      weekXp: c.weekXp,
+    );
   }
 
   @override
