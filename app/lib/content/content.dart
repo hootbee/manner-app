@@ -3,6 +3,9 @@ import 'dart:convert';
 
 typedef Json = Map<String, Object?>;
 
+/// 카테고리 id (ADR 0010 §3). 기본 시나리오의 `tags`에 하나씩 붙인다. 이 순서가 화면 순서다.
+const categories = ['transport', 'public', 'dining', 'conversation', 'school-work', 'digital'];
+
 class Content {
   Content(this.schema, this.version, this.principles, this.manners, this.scenarios, this.days);
   final int schema, version;

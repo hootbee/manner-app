@@ -55,6 +55,12 @@ List<Issue> validate(Content c) {
   }
   for (final s in c.scenarios) {
     if (!manners.containsKey(s['manner'])) err('없는 매너: 시나리오 ${s['id']} → ${s['manner']}');
+    // 카테고리 (ADR 0010 §3): tags 중 카테고리 id는 하나다. 축 보기는 tags를 덮어쓸 수 없어 기본 시나리오만 본다.
+    final cats = [for (final t in (s['tags'] as List?) ?? const []) if (categories.contains(t)) t];
+    if (cats.length > 1) err('카테고리가 2개 이상: ${s['id']} (${cats.join(', ')})');
+    if (cats.isEmpty && s['retired'] != true && manners[s['manner']]?['retired'] != true) {
+      warn('카테고리 없음: ${s['id']}');
+    }
   }
   for (final d in c.days) {
     final scenes = (d['scenes'] as List).cast<Json>();
