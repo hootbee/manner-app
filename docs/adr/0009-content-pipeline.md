@@ -1,7 +1,7 @@
 # 0009. 문제 생성·검토 파이프라인: 매너 하나 → 기본 시나리오 3개 → `dev` PR
 
 상태: 채택
-날짜: 2026-10-29 (2026-10-30 열린 질문의 사용자 답 반영)
+날짜: 2026-10-29 (2026-10-30 열린 질문의 사용자 답 반영, 2026-11-21 §5 초안 1단계 명령을 `openPipelinePr` 입력 모양에 맞춤)
 
 ## 배경
 `docs/decisions.md` "AI"에서 정한 것은 셋이다. 앱 실행 중에는 AI를 쓰지 않고, Claude는 문제 생성·검토 파이프라인에서만 쓴다. 파이프라인은 GitHub Actions에서 돌고 사람이 PR로 승인하면 Storage에 올라간다. 비용은 Claude Max의 월간 API 크레딧으로 내고, 급하지 않은 일은 Batch API로 돌린다. 기획서 `docs/concept.md` "AI 활용 방식"에는 원안 1~6단계(기획 에이전트, 생성, 코드 검사, 검토 에이전트의 블라인드 풀이·논란 검사·근거 검사(`pgvector`), 사람 승인, 출시 후 정답률로 재검토)가 있다.
@@ -88,7 +88,7 @@ jobs:
         with: { fetch-depth: 0, persist-credentials: false }
       - name: 열린 파이프라인 PR 확인 (1단계)
         env: { GH_TOKEN: "${{ secrets.CONTENT_PR_TOKEN }}" }
-        run: gh pr list --base dev --state open --json headRefName > "$RUNNER_TEMP/open.json"
+        run: gh api "repos/$GITHUB_REPOSITORY/pulls?base=dev&state=open&per_page=100" > "$RUNNER_TEMP/open.json" # REST 모양(head.ref). openPipelinePr 입력
       - uses: subosito/flutter-action@v2 # content.yml과 같은 버전
       - run: cd app && flutter pub get
       - name: 생성·검사·검토 (1~5단계)
