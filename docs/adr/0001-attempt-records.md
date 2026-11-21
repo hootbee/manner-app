@@ -91,7 +91,7 @@ Future<void> sync(String table) async {
 
 - **XP**: 모든 `attempts`의 점수 합이다(`best` 10, `ok` 5, `avoid` 0). 재도전과 중간에 나간 데일리도 포함한다. 견본의 "하루를 마쳐야 XP를 준다" 규칙(1244행)은 버린다. 콤보는 세트 안 연출로만 쓰고, 저장하지 않으며 XP에도 넣지 않는다.
 - **연속 학습일**: `D`는 `day_completions.completed_on`의 집합, `T`는 기기의 오늘 날짜다. `T ∈ D`이면 `T`에서 끝나는 연속 일수, 아니고 `T-1일 ∈ D`이면 `T-1일`에서 끝나는 연속 일수, 둘 다 아니면 0이다. 카테고리 연습은 `day_completions`에 쓰지 않으므로 들어가지 않는다.
-- **진행 위치와 주간 보상**: 견본의 `state.day`와 `daysDone` 대신 `day_completions`에서 계산한다.
+- **진행 위치와 도전과제**: 견본의 `state.day`와 `daysDone` 대신 `day_completions`에서 계산한다. 도전과제 규칙은 ADR 0010.
 - **Leitner**: (매너, 날짜) 단위로 판정한다. 예를 들어 그날 기록이 모두 `best`면 승급하고, 아니면 1단계로 돌린다. 확정은 학습 엔진 ADR에서 한다.
 
 ### 5. 탈퇴
