@@ -22,6 +22,7 @@ class FakeBackend implements Backend {
         _streak = doneToday ? 1 : 0,
         _solves = doneToday ? data.samples.length : 0,
         _todayXp = doneToday ? data.samples.length * 10 : 0,
+        _xp = doneToday ? data.samples.length * 10 : 0,
         _noDay = noDay,
         _signIn = signIn,
         _unsynced = unsynced,
@@ -51,7 +52,7 @@ class FakeBackend implements Backend {
   final DeleteResult _delete;
   final Duration _delay;
   bool _done;
-  int _streak, _xp = 0;
+  int _streak, _xp;
   int _solves, _todayXp; // 도전과제 일일: 오늘 풀이 수(다시 풀기 포함), 오늘 XP
 
   late final _challenges = ValueNotifier(_buildChallenges());

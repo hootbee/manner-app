@@ -357,6 +357,7 @@ void main() {
       expect(seen, 1);
       expect(rows('attempts'), hasLength(1));
       expect(b.home.value.xp, 10);
+      expect((b.challenges.value.daily[0].value, b.challenges.value.todayXp), (1, 10));
     });
 
     test('next는 Finished에서 무시한다. 하루 완료는 한 번만 쓰인다', () {
@@ -435,6 +436,7 @@ void main() {
       expect(file.existsSync(), isFalse);
       expect(b.account.value, isNull);
       expect(b.home.value.xp, 0);
+      expect(b.challenges.value.daily[0].value, 0);
       expect(log.last, 'google.signOut');
     });
 
@@ -471,6 +473,7 @@ void main() {
       expect(b.account.value, isNull);
       expect(file.existsSync(), isFalse);
       expect(b.home.value.xp, 0);
+      expect(b.challenges.value.daily[0].value, 0);
     });
 
     test('서버에 닿지 않으면 offline이고 기록과 로그인이 그대로이며 online이 거짓이 된다', () async {
