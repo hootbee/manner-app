@@ -10,7 +10,7 @@ const _fb = {'title': 't', 'why': 'w'};
 /// 장면용 매너 [m]의 ox 문제 3개(기본 시나리오 3개 경고를 피한다).
 List<Map<String, Object>> _ox(int m) => [
       for (var i = 1; i <= 3; i++)
-        {'id': 'ox-$m-$i', 'manner': m, 'format': 'ox', 'area': '친구', 'prompt': 'p', 'answer': true, 'feedback': _fb},
+        {'id': 'ox-$m-$i', 'manner': m, 'format': 'ox', 'area': '친구', 'tags': ['transport'], 'prompt': 'p', 'answer': true, 'feedback': _fb},
     ];
 
 /// 오류도 경고도 없는 가장 작은 콘텐츠. 매너 1에 기본 시나리오 3개, 펼친 문제 3개.
@@ -32,6 +32,7 @@ final _fixture = {
       'manner': 1,
       'format': 'ox',
       'area': '친구',
+      'tags': ['transport'],
       'prompt': 'p',
       'answer': true,
       'feedback': _fb,
@@ -41,6 +42,7 @@ final _fixture = {
       'manner': 1,
       'format': 'choice',
       'area': '친구',
+      'tags': ['transport'],
       'prompt': 'p',
       'options': [
         {'text': '짧다', 'grade': 'best'},
@@ -52,6 +54,7 @@ final _fixture = {
       'id': 'pos-1',
       'manner': 1,
       'format': 'position',
+      'tags': ['transport'],
       'template': 'stairs',
       'prompt': '{other와} 계단',
       'spots': [
@@ -240,6 +243,39 @@ void main() {
     expect(r.exitCode, 1);
     expect((await cli('assets/content.json')).exitCode, 0);
   }, timeout: const Timeout(Duration(minutes: 2)));
+
+  group('카테고리 (ADR 0010 §3)', () {
+    test('categories는 6개, 이 순서다', () {
+      expect(categories, ['transport', 'public', 'dining', 'conversation', 'school-work', 'digital']);
+    });
+    test('tags에 카테고리 id가 둘이면 오류다', () {
+      expect(run((c) => scenario(c, 'ox-1')['tags'] = ['transport', 'dining']),
+          has('오류: 카테고리가 2개 이상: ox-1 (transport, dining)'));
+    });
+    test('카테고리가 아닌 tags는 세지 않는다', () {
+      expect(run((c) => scenario(c, 'ox-1')['tags'] = ['transport', 'night']), isEmpty);
+    });
+    test('출제 가능한 시나리오에 카테고리 id가 없으면 경고다', () {
+      expect(run((c) => scenario(c, 'ox-1').remove('tags')), ['경고: 카테고리 없음: ox-1']);
+      expect(run((c) => scenario(c, 'ox-1')['tags'] = ['night']), ['경고: 카테고리 없음: ox-1']);
+    });
+    test('축 보기가 모두 은퇴해 출제되지 않는 시나리오는 카테고리가 없어도 경고가 없다', () {
+      expect(run((c) => scenario(c, 'pos-1')
+        ..remove('tags')
+        ..['vary'][0][0]['retired'] = true), isNot(has('경고: 카테고리 없음')));
+    });
+    test('은퇴한 시나리오나 은퇴한 매너의 시나리오는 카테고리가 없어도 경고가 없다', () {
+      expect(run((c) => scenario(c, 'ox-11-1')
+        ..remove('tags')
+        ..['retired'] = true), isNot(has('경고: 카테고리 없음')));
+      expect(
+          run((c) {
+            c['manners'].add({'id': 13, 'principle': 'A', 'retired': true});
+            c['scenarios'].add({..._ox(13).first, 'tags': <String>[]});
+          }),
+          isNot(has('경고: 카테고리 없음')));
+    });
+  });
 
   group('checkSources (ADR 0009 §6)', () {
     const doc = {
