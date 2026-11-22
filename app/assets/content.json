@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": 2,
+  "version": 3,
   "principles": [
     {
       "id": "A",
@@ -39,6 +39,9 @@
       "id": "A-sidewalk",
       "manner": 1,
       "format": "position",
+      "tags": [
+        "public"
+      ],
       "template": "sidewalk",
       "prompt": "{other와} 인도를 걷는다. 차도는 {side}에 있다. 나는 어느 쪽에서 걸을까?",
       "spots": [
@@ -120,6 +123,9 @@
       "id": "A-alley",
       "manner": 1,
       "format": "position",
+      "tags": [
+        "public"
+      ],
       "template": "alley",
       "prompt": "인도가 없는 골목길. 뒤에서 차가 다가온다. {other와} 나란히 비켜설 때 나는 어느 쪽에 설까?",
       "spots": [
@@ -178,6 +184,9 @@
       "id": "A-stairs",
       "manner": 3,
       "format": "position",
+      "tags": [
+        "public"
+      ],
       "template": "stairs",
       "prompt": "{other와} 계단을 {verb}. 나는 어디에 있을까?",
       "spots": [
@@ -267,6 +276,9 @@
       "id": "A-crosswalk-01",
       "manner": 1,
       "format": "ox",
+      "tags": [
+        "public"
+      ],
       "area": "공공장소",
       "prompt": "횡단보도에서 신호를 기다린다. 동행자를 차도와 가장 가까운 맨 앞에 세운다.",
       "answer": false,
@@ -283,6 +295,9 @@
       "id": "A-park-01",
       "manner": 1,
       "format": "ox",
+      "tags": [
+        "public"
+      ],
       "area": "친구",
       "prompt": "자전거가 함께 다니는 공원 산책로. 자전거가 지나가는 쪽에서 내가 걷는다.",
       "answer": true,
@@ -299,6 +314,9 @@
       "id": "A-umbrella-01",
       "manner": 2,
       "format": "choice",
+      "tags": [
+        "public"
+      ],
       "area": "연애",
       "prompt": "비가 오는데 우산이 하나뿐이다. 둘이 같이 쓰고 걷는다. 어떻게 들까?",
       "options": [
@@ -335,6 +353,9 @@
       "id": "A-umbrella-02",
       "manner": 2,
       "format": "choice",
+      "tags": [
+        "public"
+      ],
       "area": "어른·가족",
       "prompt": "장 본 짐을 든 어머니와 비 오는 길을 걷는다. 우산은 하나다. 어떻게 할까?",
       "options": [
@@ -366,6 +387,9 @@
       "id": "A-umbrella-03",
       "manner": 2,
       "format": "choice",
+      "tags": [
+        "public"
+      ],
       "area": "직장",
       "prompt": "버스 정류장까지 우산 하나로 선배와 걷는다. 선배가 나보다 키가 크다. 어떻게 할까?",
       "options": [
