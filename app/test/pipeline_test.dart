@@ -245,10 +245,55 @@ void _a6(Set<Object?> Function(String) enumOf) {
       expect(b, contains('## 사람이 확인할 것\n- [ ] 새 문제를 모두 읽었다'));
       expect('- [ ] '.allMatches(b), hasLength(4));
     });
+
+    test('첫 체크 칸에 "카테고리"가 있다 (§11)', () {
+      final first = body().split('\n').firstWhere((l) => l.startsWith('- [ ] '));
+      expect(first, contains('카테고리'));
+    });
+  });
+
+  group('systemPrompt (§8, 작업 A13)', () {
+    final m1 = <String, Object?>{
+      'publisher': '기관1', 'title': '문서1', 'date': '2026-01-01',
+      'url': 'https://example.test/m1', 'manners': [1], 'summary': '요약1',
+    };
+    final m3 = <String, Object?>{
+      'publisher': '기관3', 'title': '문서3', 'date': '2026-01-03',
+      'url': 'https://example.test/m3', 'manners': [3], 'summary': '요약3',
+    };
+    String prompt(int manner) => systemPrompt(
+          common: 'COMMON', concept: 'CONCEPT', schema: 'SCHEMA', manner: manner, index: [m1, m3]);
+    final spots = jsonEncode({for (final e in templateSpots.entries) e.key: e.value.toList()});
+
+    test('매너 1: 카테고리와 templateSpots JSON이 있고 매너 1 항목으로 끝나며 매너 3 url은 없다', () {
+      final p = prompt(1);
+      expect(p, contains(jsonEncode(categories)));
+      expect(p, contains(spots));
+      expect(p, endsWith(jsonEncode([m1])));
+      expect(p, isNot(contains(m3['url'])));
+    });
+
+    test('순서는 common, concept, schema, templateSpots, categories, 색인이다', () {
+      final p = prompt(1);
+      final at = [
+        for (final s in ['COMMON', 'CONCEPT', 'SCHEMA', spots, jsonEncode(categories), jsonEncode([m1])])
+          p.indexOf(s),
+      ];
+      expect(at, everyElement(greaterThanOrEqualTo(0)));
+      expect(at, orderedEquals([...at]..sort()));
+    });
+
+    test('묶인 항목이 없는 매너 2면 []로 끝난다', () {
+      expect(prompt(2), endsWith('[]'));
+    });
   });
 
   group('프롬프트 검사 (ADR 0009 §4)', () {
-    final forbidden = {...enumOf('format'), ...enumOf('template')}.cast<String>();
+    final forbidden = {...enumOf('format'), ...enumOf('template'), ...categories}.cast<String>();
+
+    test('카테고리 id도 걸린다', () {
+      expect(forbiddenHits({'가짜': 'tags에 transport를 넣는다'}, forbidden), ['가짜: transport']);
+    });
 
     test('금지 값은 스키마에서 읽는다(비어 있지 않다)', () {
       expect(forbidden, containsAll(['choice', 'sidewalk']));

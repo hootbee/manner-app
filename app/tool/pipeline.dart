@@ -1,5 +1,5 @@
 // 콘텐츠 생성·검토 파이프라인의 순수 함수와 Messages API 호출 (ADR 0009 §9). main은 A8에서 더한다.
-// 형식 이름과 장소 이름은 쓰지 않는다. 스키마와 templates.dart에서 읽는다(§4, 테스트가 확인한다).
+// 형식·장소·카테고리 이름은 쓰지 않는다. 스키마, templates.dart, content.dart에서 읽는다(§4, 테스트가 확인한다).
 import 'dart:convert';
 import 'dart:math';
 
@@ -85,7 +85,7 @@ String prBody({
     '- 코드 검사: $validate',
     '- 모델 $model · 커밋 $sha · 호출별 토큰(입력/캐시 쓰기/캐시 읽기/출력) $usage\n',
     '## 사람이 확인할 것',
-    '- [ ] 새 문제를 모두 읽었다(지문, 정답, 해설). 매너 항목이 붙었으면 기획서 표와 같다',
+    '- [ ] 새 문제를 모두 읽었다(지문, 정답, 해설, 카테고리). 매너 항목이 붙었으면 기획서 표와 같다',
     '- [ ] 검토 표시를 하나씩 처리했다(고쳤거나, 괜찮은 이유를 댓글로 남겼다). `형식` 표시는 #26에 옮겼다',
     '- [ ] 첫 줄이 "근거 문서 없음"이고 의전 매너(4·5·6·30)이면, ADR 0009 "근거가 불명확한 매너" 표에 그 매너가 있다',
     '- [ ] content CI가 통과했다',
@@ -161,3 +161,24 @@ Future<({String text, Map<String, int> usage})> callClaude(
     },
   );
 }
+
+/// 세 호출이 같이 쓰는 시스템 프롬프트 (§8, 같은 문자열이라 캐시가 먹는다). 순서: 공통 지시, 기획서, 스키마,
+/// `templateSpots`(`{장소: [자리 id 목록]}`), `categories`, 그 매너에 묶인 색인 항목(칸을 고치지 않는다, 없으면 `[]`, §6).
+String systemPrompt({
+  required String common,
+  required String concept,
+  required String schema,
+  required int manner,
+  required List<Json> index,
+}) =>
+    [
+      common,
+      concept,
+      schema,
+      jsonEncode({for (final e in templateSpots.entries) e.key: e.value.toList()}),
+      jsonEncode(categories),
+      jsonEncode([
+        for (final e in index)
+          if ((e['manners'] as List).contains(manner)) e,
+      ]),
+    ].join('\n\n');
