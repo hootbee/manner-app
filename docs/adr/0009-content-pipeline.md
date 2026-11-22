@@ -1,7 +1,7 @@
 # 0009. 문제 생성·검토 파이프라인: 매너 하나 → 기본 시나리오 3개 → `dev` PR
 
 상태: 채택
-날짜: 2026-10-29 (2026-10-30 열린 질문의 사용자 답 반영, 2026-11-21 §5 초안 1단계 명령을 `openPipelinePr` 입력 모양에 맞춤)
+날짜: 2026-10-29 (2026-10-30 열린 질문의 사용자 답 반영, 2026-11-21 §5 초안 1단계 명령을 `openPipelinePr` 입력 모양에 맞춤, 2026-11-22 원칙 항목·카테고리 `tags`·근거 항목 칸 보정)
 
 ## 배경
 `docs/decisions.md` "AI"에서 정한 것은 셋이다. 앱 실행 중에는 AI를 쓰지 않고, Claude는 문제 생성·검토 파이프라인에서만 쓴다. 파이프라인은 GitHub Actions에서 돌고 사람이 PR로 승인하면 Storage에 올라간다. 비용은 Claude Max의 월간 API 크레딧으로 내고, 급하지 않은 일은 Batch API로 돌린다. 기획서 `docs/concept.md` "AI 활용 방식"에는 원안 1~6단계(기획 에이전트, 생성, 코드 검사, 검토 에이전트의 블라인드 풀이·논란 검사·근거 검사(`pgvector`), 사람 승인, 출시 후 정답률로 재검토)가 있다.
@@ -28,8 +28,9 @@
 - **입력은 매너 id 하나다**(workflow_dispatch 입력 `manner`, number). 다른 입력은 없다.
 - **출력은 `app/assets/content.json` 한 파일을 바꾸는 `dev` PR 하나다.** 새 기본 시나리오 3개를 `scenarios` 끝에 붙이고 `version`을 1 올린다. 3은 `validate.dart`의 "기본 시나리오 3개 미만" 경고와 같은 수다. 새 매너도 한 번 실행으로 출제할 수 있게 된다.
 - 매너가 파일에 없으면 기획서 표에서 같은 번호의 줄을 보고 `manners`에 매너 항목(`id`, `name`, `principle`, `places`)도 붙인다. 매너 id는 기획서 표 번호와 같다(ADR 0003 §1). 사람은 그 줄을 diff로 확인한다.
+- 원칙 항목(`principles`)은 붙이지 않는다. 매너의 `principle`이 파일에 없으면 3단계 검사("없는 원칙")에서 실패한다. 원칙 A~H는 사람이 PR 하나로 먼저 넣는다(작업 A12).
 - 기존 항목은 고치지 않고 붙이기만 한다. 데일리(`days`)는 쓰지 않는다. 고치기와 경로 짜기는 사람이 PR로 한다.
-- `tags`는 스키마에 값 목록(`enum`)이 있을 때만 쓴다. 지금은 목록이 없으므로 쓰지 않는다(#28).
+- 기본 시나리오마다 `tags`에 카테고리 id를 하나만 넣는다(ADR 0010 §3). 목록은 `categories`에서 읽는다(§4). 사람이 PR에서 확인한다(§11).
 - 파일은 `JsonEncoder.withIndent('  ')`에 줄바꿈 하나를 붙여 쓴다. 지금 파일이 `jq .` 출력과 같은 모양이라 diff에는 붙인 줄만 나온다(2026-10-29 확인).
 
 ### 3. 단계: 한 번 실행에 Claude를 세 번 부른다
@@ -51,9 +52,10 @@
 
 | 정의 | 원본 | 파이프라인이 쓰는 방법 |
 | --- | --- | --- |
-| 형식 목록, 형식별 필드, 위치 템플릿(장소) 목록, `tags` 값 | `app/assets/content.schema.json` | 시스템 프롬프트에 파일을 그대로 넣는다 |
+| 형식 목록, 형식별 필드, 위치 템플릿(장소) 목록 | `app/assets/content.schema.json` | 시스템 프롬프트에 파일을 그대로 넣는다 |
 | 형식 설명(모델이 읽는 한두 문장) | 같은 스키마의 형식 분기마다 `description`(작업 A5) | 위와 같다. `description`은 검사에 영향이 없다 |
 | 장소별 자리 id | `app/lib/content/templates.dart`의 `templateSpots` | import해서 JSON으로 시스템 프롬프트에 넣는다 |
+| 카테고리 id | `app/lib/content/content.dart`의 `categories`(ADR 0010 §3) | 위와 같다 |
 | 블라인드 풀이에서 감출 키와 섞을 배열 | 같은 파일에 두 상수를 더한다(아래) | `blind()`가 이 두 상수만 본다 |
 | 예시 | `content.json`의 같은 매너 기존 시나리오 | 생성 호출의 사용자 메시지에 넣는다 |
 
@@ -63,7 +65,7 @@ const blindHidden = {'answer', 'grade', 'note', 'feedback', 'evidence'}; // 어�
 const blindShuffled = {'options', 'cards'}; // 순서가 답이거나 답을 흘리는 배열은 섞는다
 ```
 
-- 프롬프트 파일(`pipeline/prompts/`)과 `app/tool/pipeline.dart`에는 형식 이름과 장소 이름을 쓰지 않는다. 스키마의 `format`·`template` enum 값이 이 파일들에 나오면 테스트가 실패하게 한다(작업 A6).
+- 프롬프트 파일(`pipeline/prompts/`)과 `app/tool/pipeline.dart`에는 형식 이름, 장소 이름, 카테고리 id를 쓰지 않는다. 스키마의 `format`·`template` enum 값이나 `categories` 값이 이 파일들에 나오면 테스트가 실패하게 한다(작업 A6, A13).
 - `형식` 표시 지시문도 이름 없이 쓴다. `judge.md`의 문장은 "이 상황이 쓴 형식과 맞지 않으면, 스키마의 다른 형식이나 아직 없는 형식 가운데 무엇이 맞을지 한두 문장으로 제안한다"이다. 모델은 형식 이름을 스키마에서 읽고 답의 `note`에만 쓴다. 테스트는 프롬프트 파일만 보므로 답에 형식 이름이 나와도 충돌하지 않는다. PR 본문은 `note`를 그대로 옮긴다.
 - 스키마의 `template` enum과 `templateSpots` 키는 지금 두 곳에 같은 목록으로 있다. 하나로 합치지 않고 둘이 같은지 테스트로 확인한다(작업 A5). ajv와 Dart가 같은 파일을 읽게 하려면 생성 단계가 필요하다. 테스트 한 줄이 더 단순하다.
 
@@ -121,7 +123,7 @@ jobs:
   - 지금 세 시나리오의 출처를 먼저 공공기관 문서로 바꾸거나 비운 뒤에 켠다(작업 A4).
 - **앱 "근거 보기"는 기관명(`publisher`), 문서명(`title`), 링크(`url`)만 보여 준다.** 근거 설명은 시나리오의 `evidence.summary`(팀 문장)다. 묶인 항목이 없으면 `sources`는 빈 배열만 될 수 있다. 앱은 이때 `Evidence`를 null로 넘긴다(ADR 0003 §3).
 - **ADR 0003을 고친다(작업 A3).** `source.locator`(문서 안 위치)를 선택 필드로 바꾼다. 요약만 보고는 모델이 원문 안 위치를 정확히 쓸 수 없고, 화면에도 쓰지 않기 때문이다. 첫 출시 전이라 schema 1 안에서 바꾼다(ADR 0003 §4). 파이프라인은 `locator`를 쓰지 않는다. `date`는 색인과 맞춰 보는 데 쓰므로 필수로 둔다. ADR 0002의 `Source.locator`는 null이 될 수 있게 바꾼다.
-- 그 매너에 묶인 항목의 `summary`를 시스템 프롬프트 끝에 넣는다. 없으면 넣지 않고 그대로 돈다.
+- **그 매너에 묶인 색인 항목을 고치지 않고 JSON 배열로 시스템 프롬프트 끝에 넣는다(없으면 `[]`).** 모델은 `evidence.sources[]`의 `publisher`·`title`·`date`·`url`을 이 항목에서 그대로 옮기고, `checkSources`가 대조한다. 칸을 골라내는 코드는 두지 않는다.
 - **규칙: 매너에 묶인 색인 항목이 없으면 PR 본문 첫 줄에 "근거 문서 없음"을 쓰고 실행과 머지를 막지 않는다. 그 매너가 의전 매너(4, 5, 6, 30)이면 머지 전에 아래 "근거가 불명확한 매너" 표에 올린다(2026-10-30 사용자).** 의전이 아닌 매너는 출처 없는 관례 문제로 보고 표에 올리지 않는다.
 **근거가 불명확한 매너** (이 표가 원본이다. 다른 곳에 복사하지 않는다)
 
@@ -145,7 +147,7 @@ jobs:
 
 ### 8. 프롬프트, 버전, 모델
 - 파일: `pipeline/prompts/common.md`, `generate.md`, `blind.md`, `judge.md`. `common.md`에는 역할, 출력은 JSON만, id 규칙은 스키마를 따른다, 기존 항목은 고치지 않는다, `evidence` 규칙을 쓴다.
-- 시스템 프롬프트는 세 호출이 같다: `common.md` + `docs/concept.md` 전문 + `content.schema.json` + `templateSpots` + 그 매너의 근거 요약(`summary`). 기획서의 콘텐츠 원칙(성별 중립, 의견이 갈리는 주제 제외, 조종 기술 제외, 3단계 채점, 정답 보기 길이)은 프롬프트에 옮겨 적지 않고 기획서를 그대로 넣는다. 기획서를 고치면 다음 실행부터 반영된다. 호출마다 다른 지시는 사용자 메시지에 넣는다.
+- 시스템 프롬프트는 세 호출이 같다: `common.md` + `docs/concept.md` 전문 + `content.schema.json` + `templateSpots`(`{장소: [자리 id 목록]}` JSON. Set은 `jsonEncode`가 못 쓰므로 목록으로 바꾼다) + `categories` + 그 매너에 묶인 색인 항목(§6). 이 순서로 잇는 순수 함수 `systemPrompt`를 둔다(작업 A13). 기획서의 콘텐츠 원칙(성별 중립, 의견이 갈리는 주제 제외, 조종 기술 제외, 3단계 채점, 정답 보기 길이)은 프롬프트에 옮겨 적지 않고 기획서를 그대로 넣는다. 기획서를 고치면 다음 실행부터 반영된다. 호출마다 다른 지시는 사용자 메시지에 넣는다.
 - 프롬프트 캐시를 쓴다. 요청 최상위에 `cache_control: {"type": "ephemeral"}` 한 줄을 넣어 자동 캐시를 켠다. 세 호출이 몇 분 안에 같은 시스템 프롬프트로 차례로 가므로 2·3번째 호출이 읽기(입력 가격의 0.05배)로 처리된다. 기본 수명은 5분이라 검사가 길어지면 놓칠 수 있고, 놓쳐도 실행당 약 $0.08이 더 들 뿐이다.
 - 버전은 git으로 관리하고 따로 번호를 두지 않는다. PR 본문에 실행한 커밋 SHA와 모델 id를 적는다. 워크플로가 `dev`에서만 비밀을 쓰므로 실제로 쓰이는 것은 머지된 프롬프트뿐이다. 프롬프트를 바꿔 볼 때는 개인 키로 로컬에서 돌린다.
 - 모델은 `claude-opus-5-5`(2026-10-29 공식 문서의 현재 모델) 상수 하나로 세 호출에 쓴다. 더 싼 `claude-sonnet-5-5`로는 §12의 조건에서 바꾼다. `effort`는 기본값이고 `max_tokens`는 16,000이다. 생각 토큰도 이 안에 들어가고 출력으로 과금된다.
@@ -158,7 +160,7 @@ jobs:
 | **Dart, `app/tool/`(채택)** | `parseContent`, `expand`, `validate`, `templateSpots`를 import한다. 앱·검사기·파이프라인이 같은 id와 같은 검사를 본다. `package:http`가 이미 있고, `package:http/testing.dart`의 `MockClient`로 네트워크 없이 테스트한다. 새 패키지가 없다 | 공식 Dart SDK가 없어 Messages API POST 하나를 직접 짠다(약 30줄). 재시도가 없다 |
 | Python 또는 TypeScript + 공식 SDK | SDK의 재시도, 타입 | 펼치기와 블라인드용 펼친 문제를 다시 짜거나 Dart를 따로 불러야 한다. ADR 0003 대안에서 같은 이유로 뺐다. 언어와 의존성이 하나 늘어난다 |
 
-- 코드는 `app/tool/pipeline.dart` 한 파일에 둔다. `lib/` 밖이라 앱 번들에 들어가지 않는다. 순수 함수(`addScenarios`, `blind`, `prBody`, `openPipelinePr`)는 `app/test/pipeline_test.dart`에서 테스트한다. `checkSources`는 CI도 쓰므로 `validate.dart`에 둔다(§6).
+- 코드는 `app/tool/pipeline.dart` 한 파일에 둔다. `lib/` 밖이라 앱 번들에 들어가지 않는다. 순수 함수(`addScenarios`, `blind`, `prBody`, `openPipelinePr`, `systemPrompt`)는 `app/test/pipeline_test.dart`에서 테스트한다. `checkSources`는 CI도 쓰므로 `validate.dart`에 둔다(§6).
 - 요청: `POST /v1/messages` 하나. 헤더 `x-api-key`, `anthropic-version: 2023-06-01`. 응답의 `text` 블록을 이어 붙여 JSON으로 읽고, `usage`를 PR 본문에 옮긴다.
 - 프롬프트와 근거 요약은 리포 루트 `pipeline/`에 둔다. 콘텐츠 담당이 앱 코드를 건드리지 않고 고친다.
 - API 오류(429, 529, 5xx 포함)가 나면 실행이 실패하고, 사람이 다시 돌린다.
@@ -197,7 +199,7 @@ ADR 0009 파이프라인 실행 <run 링크>
 - 모델 claude-opus-5-5 · 커밋 abc1234 · 호출별 토큰(입력/캐시 쓰기/캐시 읽기/출력)
 
 ## 사람이 확인할 것
-- [ ] 새 문제를 모두 읽었다(지문, 정답, 해설). 매너 항목이 붙었으면 기획서 표와 같다
+- [ ] 새 문제를 모두 읽었다(지문, 정답, 해설, 카테고리). 매너 항목이 붙었으면 기획서 표와 같다
 - [ ] 검토 표시를 하나씩 처리했다(고쳤거나, 괜찮은 이유를 댓글로 남겼다). `형식` 표시는 #26에 옮겼다
 - [ ] 첫 줄이 "근거 문서 없음"이고 의전 매너(4·5·6·30)이면, ADR 0009 "근거가 불명확한 매너" 표에 그 매너가 있다
 - [ ] content CI가 통과했다
@@ -220,15 +222,13 @@ ADR 0009 파이프라인 실행 <run 링크>
 - 매달 쓴 돈이 크레딧의 70%($70)를 넘으면 먼저 모델 상수를 `claude-sonnet-5-5`로 바꾼다(절반). 그래도 넘으면 Batch로 옮긴다("넣지 않은 것").
 - 크레딧은 이월되지 않는다. 콘텐츠 작업을 달마다 나눠 한다는 기획서 문장이 그대로 맞다. GitHub Actions의 `ubuntu-latest` 시간은 공개 리포라 따로 계산하지 않았다.
 
-## 템플릿이 확정되면 바꿀 곳 (#26, #28)
+## 템플릿이 확정되면 바꿀 곳 (#26)
 파이프라인 코드, 워크플로, 프롬프트 파일은 바꾸지 않는다. 바꾸는 곳은 아래뿐이다.
 
 | 바뀌는 것 | 고칠 곳 |
 | --- | --- |
 | 형식을 더하거나 빼거나 필드를 바꿈 | `content.schema.json`의 `format` enum과 형식 분기(`description` 포함). 형식만의 검사가 있으면 `validate.dart`(예: choice의 `best` 하나). 답이 담긴 새 필드가 있으면 `templates.dart`의 `blindHidden`·`blindShuffled` |
 | 위치 장소를 더함(택시, 식당, 엘리베이터 등) | `content.schema.json`의 `template` enum, `templates.dart`의 `templateSpots`(두 곳이 같은지 테스트가 본다) |
-| 카테고리를 영역 6개로 정함(#28 후보 1) | 없음. `area`가 이미 있다 |
-| 카테고리를 다른 기준으로 정함 | `content.schema.json`의 `tags` 항목에 `enum`. 생성이 그때부터 `tags`를 쓴다(§2). 기존 시나리오 태그는 사람이 붙인다 |
 | 근거 문서를 더함 | `pipeline/sources/sources.json`의 항목 하나(팀 요약 + 원문 링크) |
 
 앱 화면(ADR 0002 작업 3)과 기존 콘텐츠의 옮기기는 이 ADR 밖이다. 첫 출시 전에는 schema 1 안에서 자유롭게 바꾼다(ADR 0003 §4). 파이프라인 PR에 쌓인 `형식` 표시는 #26을 정할 때 참고 자료가 된다.
@@ -247,7 +247,7 @@ ADR 0009 파이프라인 실행 <run 링크>
 - **형식별 프롬프트 파일, 형식별 블라인드 함수**: 템플릿이 바뀔 때마다 파이프라인을 고쳐야 한다. 사용자 요구(§4)와 반대다.
 
 ## 결과
-- **쉬워지는 것**: 매너 id 하나를 넣고 버튼을 누르면, 사람 손 없이 검사를 통과하고 CI가 돈 PR이 15분쯤 안에 열린다. 템플릿·카테고리·근거 문서가 정해지면 정의 파일만 고치고 같은 버튼을 다시 누른다. 앱·CI·파이프라인이 같은 검사 함수를 쓴다.
+- **쉬워지는 것**: 매너 id 하나를 넣고 버튼을 누르면, 사람 손 없이 검사를 통과하고 CI가 돈 PR이 15분쯤 안에 열린다. 템플릿·근거 문서가 정해지면 정의 파일만 고치고 같은 버튼을 다시 누른다. 앱·CI·파이프라인이 같은 검사 함수를 쓴다.
 - **어려워지는 것**
   - 사람이 모든 새 문제를 읽어야 한다(PR 하나에 기본 시나리오 3개).
   - 파이프라인 PR은 한 번에 하나만 열린다.
@@ -256,7 +256,7 @@ ADR 0009 파이프라인 실행 <run 링크>
   - 네트워크·API 실패: 실행이 실패하고 아무것도 push하지 않는다. 다시 돌린다. 앱은 영향이 없다(앱 실행 중 AI 없음).
   - 같은 요청 두 번(같은 매너로 두 번 실행): `concurrency`가 차례로 돌린다. 앞 실행이 PR을 열었으면 뒤 실행은 1단계에서 실패한다. 앞 실행이 PR 전에 실패했으면 뒤 실행이 정상으로 돈다.
   - 기기 두 대에 해당하는 것(두 사람이 동시에 실행, 사람 콘텐츠 PR과 겹침): 파이프라인끼리는 위와 같다. 사람 PR과 `version`·id가 겹치면 뒤에 머지하는 PR의 `content.yml`이 `--previous` 비교로 잡는다. 단, CI는 기준 브랜치가 바뀌어도 다시 돌지 않는다. `dev`에 "브랜치 최신 상태 요구" 보호 규칙이 없으면 사람이 머지 직전에 PR을 갱신해야 한다.
-  - 콘텐츠 업데이트: 붙이기만 하고 `version`을 올리므로 ADR 0003의 id·버전 규칙을 지킨다. 지운 id는 기존 검사가 막는다.
+  - 콘텐츠 업데이트: 붙이기만 하고 `version`을 올리므로 ADR 0003의 id·버전 규칙을 지킨다. 지운 id는 기존 검사가 막는다. 생성이 붙인 카테고리를 출시 뒤에 바꾸면 이미 단 카테고리 마스터가 옮겨 간다(ADR 0010 결과). 그래서 머지 전에 사람이 본다(§11).
   - 탈퇴: 사용자 데이터를 다루지 않는다.
 - **넣지 않은 것과 넣을 시점**
   - 사람이 매번 누르지 않는 실행(예약 실행이 아직 콘텐츠에 없는 가장 작은 매너 id를 골라 돌린다): 템플릿(#26)이 확정되고, 파이프라인 PR 다섯 개가 연달아 큰 수정 없이 머지될 때. 입력이 매너 id 하나라 예약 트리거와 고르는 함수 하나만 더하면 된다.
@@ -266,6 +266,7 @@ ADR 0009 파이프라인 실행 <run 링크>
   - 출시 후 재검토 입력(정답률, 오류 신고): 출시 뒤 `answer` 이벤트에 정답률이 극단(예: 95% 오답)인 문제가 보일 때. 오류 신고는 그 기능의 ADR에서 정한다. 출시 뒤 정답률과 오류 신고를 볼 때는 "근거가 불명확한 매너" 표의 매너(지금 4, 6)를 먼저 본다.
   - 실행 입력 늘리기(시나리오 수, 방향 메모): 같은 매너를 원하는 방향으로 다시 돌리는 일이 반복될 때.
   - 데일리 생성: 매너가 데일리를 다 채우지 못할 만큼 늘 때.
+  - 원칙 항목 생성: 원칙이 기획서의 A~H보다 늘 때. 지금은 작업 A12에서 한 번에 넣는다.
   - 근거 검색(`pgvector` 등): §6의 100KB 조건.
 - **다시 볼 조건**: 모델 은퇴(Opus 5.5는 2027-09-22 이전에는 은퇴하지 않는다), 가격·크레딧 정책 변경, 기여자가 늘어 파이프라인 PR이 동시에 여러 개 필요할 때.
 
@@ -276,6 +277,7 @@ ADR 0009 파이프라인 실행 <run 링크>
 4. `README.md`는 `pipeline/`을 "Claude 문제 생성·검토 스크립트"라고 쓴다. 이 ADR에서는 코드가 `app/tool/pipeline.dart`에 있고, `pipeline/`에는 프롬프트와 근거 문서가 있다.
 5. 기획서 "AI 활용 방식"은 원안이다. 이 ADR이 채택되면 §1 표의 차이(기획 에이전트 없음, 블라인드 1번, `pgvector` 없음, `형식` 표시, 사람이 전부 봄)를 기획서에 반영할지 사람이 정한다.
 6. 기획서 "AI 활용 방식"의 "라이선스" 문단(공공누리 1유형만 쓴다)은 §6과 다르다. 기획서를 고칠지는 사람이 정한다.
+7. `app/assets/content.json`의 `principles`에는 A 하나만 있다. 기획서에는 B~H의 이름(47~56행 표)만 있고 원칙 문구(`motto`)는 A뿐이다(72행). 그래서 매너 7~30을 돌리면 3단계 "없는 원칙"에서 실패한다(2026-11-22 확인). 작업 A12, 열린 질문 1.
 
 ## 다른 문서에 미치는 영향 (채택할 때 사람이 고친다)
 - `docs/decisions.md`: 고칠 것 없다. "급하지 않은 일은 Batch API로 돌린다"에서 이 실행은 사람이 결과 PR을 기다리는 작업이라 "급하지 않은 일"로 보지 않고 직접 호출한다. 지금 Batch를 쓰는 곳은 없다. 이 해석을 `decisions.md`에 적을지(예: "파이프라인 실행은 직접 호출, ADR 0009")는 사람이 정한다.
@@ -286,7 +288,7 @@ ADR 0009 파이프라인 실행 <run 링크>
 - ADR 0003 §3과 `app/assets/content.schema.json`: `source.locator`를 선택으로 바꾼다(작업 A3). ADR 0002 §2 `Source.locator`는 null이 될 수 있게 바꾼다.
 
 ## 작업 목록
-**A. 지금 할 것(템플릿·카테고리·근거 문서 없이).** A3 → A4는 순서를 지킨다. 출처 대조를 CI에 켜기 전에 출처를 비운다.
+**A. 지금 할 것(템플릿·근거 문서 없이).** A3 → A4는 순서를 지킨다. 출처 대조를 CI에 켜기 전에 출처를 비운다.
 | # | 담당 | 작업 | 먼저 쓸 실패하는 테스트 | 확인 방법 |
 | --- | --- | --- | --- | --- |
 | A1 | 사용자 | `README.md` `pipeline/` 줄, ADR 0003 금지 표현 줄 고치기 | 문서라 없다 | PR diff |
@@ -296,16 +298,24 @@ ADR 0009 파이프라인 실행 <run 링크>
 | A5 | 사용자 | `templates.dart`에 `blindHidden`·`blindShuffled`, 스키마 형식 분기마다 `description` | `pipeline_test`: 스키마 `template` enum과 `templateSpots` 키가 같다. `description`이 없는 형식 분기가 있으면 실패한다 | `flutter test`. ajv가 지금 파일에 `valid` |
 | A6 | 사용자 | `app/tool/pipeline.dart` 순수 함수 `blind`, `addScenarios`, `openPipelinePr`, `prBody`. 프롬프트 검사 테스트 | `blind`: `A-umbrella-01`을 펼친 문제 어디에도 `grade`·`feedback`이 없고, `options`의 문장 집합은 같다. `addScenarios`: 지금 파일에 시나리오 하나를 붙이면 `version`이 하나 오르고 나머지 바이트는 그대로다. 매너 99가 없으면 매너 항목이 함께 붙는다. `openPipelinePr`: head가 `content/manner-2-1`인 PR이 목록에 있으면 참이다. `prBody`: 묶인 문서가 없으면 첫 줄이 "근거 문서 없음"이고, `kind: "형식"` 표시가 표의 한 줄이 된다. 프롬프트 파일에 스키마 `format`·`template` enum 값이 있으면 실패한다 | `cd app && flutter analyze && flutter test` |
 | A7 | 사용자 | Messages API 호출(`package:http`, `MockClient`) | 요청 본문에 `model: "claude-opus-5-5"`, `max_tokens: 16000`, 최상위 `cache_control`이 있고 헤더에 `anthropic-version`이 있다. `MockClient`가 `stop_reason: "max_tokens"`를 주면 예외가 난다. 429나 529를 주면 다시 보내지 않고 예외가 난다. 본문이 200KB를 넘으면 요청을 보내지 않는다 | 같은 명령 |
-| A8 | 콘텐츠 담당 | `pipeline/prompts/` 네 파일. `judge.md`에는 `정답`·`논란`·`근거`·`형식` 네 표시를 형식 이름 없이 쓴다(§4) | A6의 프롬프트 검사 테스트가 이 파일들로 돈다 | 개인 키로 로컬 실행: `cd app && ANTHROPIC_API_KEY=… dart run tool/pipeline.dart 2 /tmp/open.json /tmp/pr.md`. 키는 셸에만 둔다 |
+| A8 | 콘텐츠 담당 | `pipeline/prompts/` 네 파일. `judge.md`에는 `정답`·`논란`·`근거`·`형식` 네 표시를 형식 이름 없이 쓴다(§4). `common.md`의 자료 목록은 §8 순서(카테고리 id, 근거 색인 항목 포함)를 따르고, `generate.md`는 `tags`에 카테고리 id 하나를 넣게 한다(§2) | A6의 프롬프트 검사 테스트가 이 파일들로 돈다 | 개인 키로 로컬 실행: `cd app && ANTHROPIC_API_KEY=… dart run tool/pipeline.dart 2 /tmp/open.json /tmp/pr.md`. 키는 셸에만 둔다 |
 | A9 | 사용자 | `validate.dart`의 `bannedWords`(§7 목록) | 선택지 문장에 "여자친구"가 있으면 오류다. 같은 낱말이 `evidence.sources[].title`에만 있으면 오류가 아니다. 지금 `content.json`은 오류가 없다 | `flutter test`. `validate_content` 종료 코드 0 |
 | A10 | 사용자 | `.github/workflows/content-pipeline.yml`(§5) | 워크플로라 테스트를 먼저 쓰지 않는다. 판단 로직은 A6·A7에 있다 | `dev` 머지 뒤 매너 2로 수동 실행 → 사람 손 없이 PR이 열리고 §11 본문이 채워지며, `content.yml`이 승인 클릭 없이 돌아 통과한다 |
 | A11 | 사용자(저장소 소유자) | Console 전용 workspace와 키. fine-grained PAT(이 리포만, Contents·Pull requests 쓰기, 만료 1년, 만료일을 팀 캘린더에). environment `content-pipeline`(secret 둘, 배포 브랜치 `dev`) | 설정이라 없다 | `dev`가 아닌 브랜치에서 실행하면 environment 단계에서 거절된다. 저장소 설정 "Actions가 PR을 만들고 승인"은 꺼진 그대로다 |
+| A12 | 콘텐츠 담당 + 사용자 | `content.json` `principles`에 B~H 일곱 항목을 넣고 `version`을 올린다. `name`은 기획서 원칙 표(47~56행)의 이름, `motto`는 열린 질문 1대로 쓴다. B2보다 먼저 한다 | `validate_test`: 실제 `content.json`에 원칙 A~H마다 매너 하나를 붙여 `validate`하면 "없는 원칙" 오류가 없다. 지금은 B~H 일곱 개가 나온다 | `flutter test`. 초안 PR에서 `content.yml` 통과 |
+| A13 | 사용자 | `pipeline.dart`에 `systemPrompt`(§8, 아래 시그니처), `prBody` 체크리스트 첫 칸에 "카테고리"(§11), 프롬프트 검사의 금지 값에 `categories`(§4) | `systemPrompt`: 매너 1과 색인 두 항목(매너 1, 매너 3)을 주면 결과에 `jsonEncode(categories)`와 `{장소: [자리 id 목록]}`로 바꾼 `templateSpots`의 JSON이 있고, 결과가 `jsonEncode([매너 1 항목])`으로 끝나며, 매너 3 항목의 `url`은 없다. 매너 2면 결과가 `[]`로 끝난다. `prBody`: 첫 체크 칸에 "카테고리"가 있다. 프롬프트 검사: `'tags에 transport를 넣는다'`가 걸린다 | `cd app && flutter analyze && flutter test` |
 
-**B. 템플릿(#26)·카테고리(#28)가 정해진 뒤**
+```dart
+// app/tool/pipeline.dart (A13). 세 호출이 같은 문자열을 쓴다(§8 캐시). 형식·장소·카테고리 이름은 import로만 들어온다(§4).
+String systemPrompt({required String common, required String concept, required String schema,
+    required int manner, required List<Json> index}); // index는 sources.json 전체. 묶인 항목만 고르고 칸은 고치지 않는다(§6)
+```
+
+**B. 템플릿(#26)이 정해진 뒤**
 | # | 담당 | 작업 | 먼저 쓸 실패하는 테스트 | 확인 방법 |
 | --- | --- | --- | --- | --- |
 | B1 | 사용자 | 위 "템플릿이 확정되면 바꿀 곳" 표대로 스키마·`templates.dart`(·`validate.dart`)를 고친다. 파이프라인 파일은 고치지 않는다 | 새 장소의 자리 id를 쓴 위치 문제가 `templateSpots`에 없으면 오류다(기존 테스트에 장소 하나를 더한다). A5의 enum 일치 테스트 | 새 장소를 쓰는 매너로 파이프라인 실행 |
-| B2 | 콘텐츠 담당 | 매너 4~30을 하나씩 실행해 PR로 머지한다(한 번에 하나) | 없다(콘텐츠) | PR마다 §11 체크리스트 |
+| B2 | 콘텐츠 담당 | 매너 4~30을 하나씩 실행해 PR로 머지한다(한 번에 하나, A12 뒤) | 없다(콘텐츠) | PR마다 §11 체크리스트 |
 
 **C. 근거 요약을 더할 때**
 | # | 담당 | 작업 | 먼저 쓸 실패하는 테스트 | 확인 방법 |
@@ -313,7 +323,8 @@ ADR 0009 파이프라인 실행 <run 링크>
 | C1 | 콘텐츠 담당 | 조사한 공공기관 문서(매너 5, 30, 10, 3, 9, 7·22)마다 원문을 읽고 `sources.json`에 요약 항목 하나를 더한다. 원문 문장은 옮기지 않는다 | A3 테스트가 실제 색인으로도 돈다(필수 칸, 1,000자) | 묶인 매너로 실행한 PR의 첫 줄에 "근거 문서 없음"이 없고, `evidence.sources`가 색인과 같다. 색인 PR에서 리뷰어가 원문과 요약을 대조해 옮겨 적은 문장이 없는지 본다 |
 
 ## 열린 질문 (사용자 결정 필요)
-없음.
+1. **원칙 B~H의 `motto`(원칙 문구)를 무엇으로 쓰나**(2026-11-22). 문구는 모든 문제 카드에 보인다(`app/lib/live/question.dart` 18행). 기획서에는 A의 문구만 있다(찾은 것 7).
+   - 추천: 콘텐츠 담당이 일곱 개를 써서 A12 PR 하나로 넣는다. 아직 못 정했으면 `motto`에 기획서 표의 이름(예: "상대 먼저")을 넣어도 검사를 통과하고, 나중에 문구만 바꾼다. `motto`는 id가 아니라 문구 수정이므로 바꿔도 기록이 깨지지 않는다(ADR 0003 §4 표).
 
 정해진 것(2026-10-30 사용자):
 1. **Messages API를 직접 호출한다.** Batch는 고려했다가 실행 상태를 지켜보기 어려워 뺐다(2026-10-30 사용자). 한때 Batch로 정했다가(같은 날) 되돌렸다. Batch로 옮길 시점은 "넣지 않은 것"에 적었다.
