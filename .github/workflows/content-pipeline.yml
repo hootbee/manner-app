@@ -1,0 +1,62 @@
+# 문제 생성·검토 파이프라인 (ADR 0009 §5): 매너 하나 → 기본 시나리오 3개 → dev로 가는 PR
+# 비밀은 environment content-pipeline(배포 브랜치 dev만)에 둔다. PR용 토큰은 1·6단계에만, Claude 키는 생성 단계에만 넘긴다.
+name: content-pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      manner:
+        description: 매너 id (기획서 표 번호)
+        required: true
+        type: number
+
+permissions:
+  contents: read
+
+# 두 실행이 같은 version과 같은 시나리오 id를 들고 PR을 열지 않게 하나씩 돈다(§3 1단계와 같은 이유)
+concurrency: content-pipeline
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment: content-pipeline
+    timeout-minutes: 30 # 보통 10~15분
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 열린 파이프라인 PR 확인 (1단계)
+        env:
+          GH_TOKEN: ${{ secrets.CONTENT_PR_TOKEN }}
+        run: gh api "repos/$GITHUB_REPOSITORY/pulls?base=dev&state=open&per_page=100" > "$RUNNER_TEMP/open.json"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.2 # content.yml과 같은 버전
+
+      - run: cd app && flutter pub get
+
+      - name: 생성·검사·검토 (2~5단계)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MANNER: ${{ inputs.manner }}
+        run: cd app && dart run tool/pipeline.dart "$MANNER" "$RUNNER_TEMP/open.json" "$RUNNER_TEMP/pr.md"
+
+      - name: PR (6단계)
+        env:
+          GH_TOKEN: ${{ secrets.CONTENT_PR_TOKEN }}
+          MANNER: ${{ inputs.manner }}
+        run: |
+          branch="content/manner-$MANNER-$GITHUB_RUN_ID"
+          title="feat: 매너 $MANNER 기본 시나리오 추가"
+          gh auth setup-git
+          git config user.name content-pipeline
+          git config user.email content-pipeline@users.noreply.github.com
+          git switch -c "$branch"
+          git add app/assets/content.json
+          git commit -m "$title"
+          git push origin "$branch" # content/ 브랜치에만 push한다(§10)
+          gh pr create --base dev --head "$branch" --title "$title" --body-file "$RUNNER_TEMP/pr.md"

@@ -1,6 +1,8 @@
-// 콘텐츠 생성·검토 파이프라인의 순수 함수와 Messages API 호출 (ADR 0009 §9). main은 A8에서 더한다.
+// 콘텐츠 생성·검토 파이프라인 (ADR 0009 §3, §9). 순수 함수, Messages API 호출, 1~5단계를 잇는 runPipeline과 main.
+// 사용: cd app && ANTHROPIC_API_KEY=… dart run tool/pipeline.dart <매너 id> <열린 PR 목록 JSON> <PR 본문 출력 파일>
 // 형식·장소·카테고리 이름은 쓰지 않는다. 스키마, templates.dart, content.dart에서 읽는다(§4, 테스트가 확인한다).
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
@@ -182,3 +184,128 @@ String systemPrompt({
           if ((e['manners'] as List).contains(manner)) e,
       ]),
     ].join('\n\n');
+
+/// 모델 응답 텍스트에서 JSON 하나를 읽는다 (§8: 첫 `{`·`[`부터 마지막 `}`·`]`까지). 없으면 FormatException.
+Object? modelJson(String text) {
+  final start = text.indexOf(RegExp(r'[{\[]'));
+  final end = text.lastIndexOf(RegExp(r'[}\]]'));
+  if (start < 0 || end < start) throw FormatException('응답에 JSON이 없다: $text');
+  return jsonDecode(text.substring(start, end + 1));
+}
+
+/// 1~5단계 (§3). `root`는 리포 루트. `app/assets/content.json`에 새 시나리오를 쓰고 PR 본문을 돌려준다.
+/// `check(새 파일, 이전 파일)`은 코드 검사(check_content.sh)이고, 실패하면 예외를 낸다. 돌려준 출력은 PR 본문에 옮긴다.
+Future<String> runPipeline({
+  required http.Client client,
+  required String apiKey,
+  required int manner,
+  required List<Json> openPulls,
+  required String root,
+  required String runUrl,
+  required String sha,
+  required Random random,
+  required Future<String> Function(String content, String previous) check,
+}) async {
+  if (openPipelinePr(openPulls)) throw Exception('열린 파이프라인 PR(content/ 브랜치)이 있다. 머지하거나 닫고 다시 돌린다');
+  String read(String path) => File('$root/$path').readAsStringSync();
+  final contentPath = '$root/app/assets/content.json';
+  final source = File(contentPath).readAsStringSync();
+  final content = parseContent(source);
+  final index = (jsonDecode(read('pipeline/sources/sources.json')) as List).cast<Json>();
+  final system = systemPrompt(
+    common: read('pipeline/prompts/common.md'),
+    concept: read('docs/concept.md'),
+    schema: read('app/assets/content.schema.json'),
+    manner: manner,
+    index: index,
+  );
+  final usage = <String>[];
+  Future<String> call(String step, String user) async {
+    final r = await callClaude(client, apiKey: apiKey, system: system, user: user);
+    usage.add('$step ${r.usage.values.join('/')}');
+    return r.text;
+  }
+
+  // 2단계: 생성
+  final existing = content.manners.where((m) => m['id'] == manner).firstOrNull;
+  final genText = await call('생성', [
+    read('pipeline/prompts/generate.md'),
+    '매너 id: $manner',
+    existing == null ? '매너 항목 없음' : jsonEncode(existing),
+    jsonEncode([for (final s in content.scenarios) if (s['manner'] == manner) s]),
+  ].join('\n\n'));
+  final gen = modelJson(genText) as Json;
+  final scenarios = (gen['scenarios'] as List).cast<Json>();
+  final newManner = existing == null ? gen['manner'] as Json? : null;
+
+  // 3단계: 코드 검사. 실패하면 모델 응답을 로그에 남긴다.
+  final prev = File('${Directory.systemTemp.createTempSync('pipeline').path}/prev.json')..writeAsStringSync(source);
+  File(contentPath).writeAsStringSync(addScenarios(source, scenarios, manner: newManner));
+  final String checked;
+  try {
+    checked = await check(contentPath, prev.path);
+  } catch (_) {
+    stderr.writeln('생성 응답:\n$genText');
+    rethrow;
+  }
+
+  // 4단계: 블라인드 풀이, 5단계: 판정
+  final questions = [for (final s in scenarios) ...expand(s)];
+  final blindText = await call('블라인드', [
+    read('pipeline/prompts/blind.md'),
+    jsonEncode([for (final q in questions) blind(q, random)]),
+  ].join('\n\n'));
+  final flags = (modelJson(await call('판정', [
+    read('pipeline/prompts/judge.md'),
+    '원래 문제:\n${jsonEncode(questions)}',
+    '블라인드 답:\n$blindText',
+  ].join('\n\n'))) as List)
+      .cast<Json>();
+
+  return prBody(
+    hasSources: index.any((e) => (e['manners'] as List).contains(manner)),
+    manner: manner,
+    mannerName: ((existing ?? newManner)?['name'] ?? '') as String,
+    scenarioCount: scenarios.length,
+    questionCount: questions.length,
+    fromVersion: content.version,
+    newManner: newManner != null,
+    runUrl: runUrl,
+    flags: flags,
+    questions: questions,
+    model: claudeModel,
+    sha: sha,
+    usage: usage.join(' · '),
+    validate: checked.trim().split('\n').join(' / '),
+  );
+}
+
+Future<void> main(List<String> args) async {
+  if (args.length != 3) {
+    stderr.writeln('사용: dart run tool/pipeline.dart <매너 id> <열린 PR 목록 JSON> <PR 본문 출력 파일>');
+    exit(64);
+  }
+  final env = Platform.environment;
+  final root = Directory.current.parent.path; // app/에서 돈다
+  final client = http.Client();
+  try {
+    final body = await runPipeline(
+      client: client,
+      apiKey: env['ANTHROPIC_API_KEY'] ?? '',
+      manner: int.parse(args[0]),
+      openPulls: (jsonDecode(File(args[1]).readAsStringSync()) as List).cast<Json>(),
+      root: root,
+      runUrl: '${env['GITHUB_SERVER_URL']}/${env['GITHUB_REPOSITORY']}/actions/runs/${env['GITHUB_RUN_ID']}',
+      sha: (await Process.run('git', ['rev-parse', '--short', 'HEAD'])).stdout.toString().trim(),
+      random: Random(),
+      check: (content, previous) async {
+        final r = await Process.run('bash', ['$root/.github/scripts/check_content.sh', content, previous]);
+        if (r.exitCode != 0) throw Exception('코드 검사 실패:\n${r.stdout}${r.stderr}');
+        return '${r.stdout}';
+      },
+    );
+    File(args[2]).writeAsStringSync(body);
+  } finally {
+    client.close();
+  }
+}
