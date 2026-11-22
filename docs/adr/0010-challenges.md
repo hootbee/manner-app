@@ -1,7 +1,7 @@
 # 0010. 도전과제: 일일·주간·업적을 기록에서 계산한다
 
 상태: 채택
-날짜: 2026-11-18 (같은 날 열린 질문의 사용자 답 반영)
+날짜: 2026-11-18 (같은 날 열린 질문의 사용자 답 반영, 2026-11-22 작업 9를 ADR 0009 §2에 맞춤)
 
 ## 배경
 2026-11-18 사용자 결정: 도전과제 탭(일일·주간·업적)을 MVP에 넣는다. 화면은 PR #67의 `app/lib/screens/challenges_screen.dart`에 있고, 고정 문구만 그리며 데이터 연결은 없다. "보상 받기" 버튼은 없다.
@@ -164,7 +164,7 @@ enum MissionId { todayStart, todayHalf, todayDone, weekDays, weekManners, weekCa
 | 6 | 사용자 | `challenges()` 목록과 목표 | 기록이 없으면 목록 길이가 3·4·14이고 모든 `value`가 0이다. 풀이 수가 5여도 `todayHalf`의 `value`는 3이다. 카테고리 마스터 6개가 모두 달성이면 `allCategories`가 6/6이다 |
 | 7 | 사용자 | `backend.dart` 타입, `fake/`, `LoggedBackend` 전달 | `FakeBackend()`로 첫 문제에 답하면 `challenges.value.daily[0].value`가 1이고, 세트를 끝까지 풀면 일일 셋이 모두 `value == goal`이다 |
 | 8 | 사용자 | `live/` `_refresh()` 연결 | `answer()` 한 번에 `challenges.value.daily[0].value`가 1이 된다. pull로 어제 다른 기기의 `day_completions`가 들어오면 `weekDays` 값이 1 는다 |
-| 9 | 콘텐츠 담당 | 출제 가능한 모든 시나리오에 카테고리 붙이기 | 1번 검사의 경고가 0개다 |
+| 9 | 콘텐츠 담당 | 출제 가능한 기존 시나리오에 카테고리 붙이기. 파이프라인이 만드는 시나리오는 생성이 붙인다(ADR 0009 §2) | 1번 검사의 경고가 0개다 |
 | 10 | 팀원 | PR #67 화면을 `backend.challenges`에 연결 | `FakeBackend(doneToday: true)`에서 일일 탭에 "3 / 3 달성"이 보이고 "보상 받기"는 없다 |
 
 ## 열린 질문 (사용자 결정 필요)
