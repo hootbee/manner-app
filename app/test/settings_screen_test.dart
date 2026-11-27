@@ -3,6 +3,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mannerfit/screens/settings_screen.dart';
 
 void main() {
+  testWidgets('wardrobe preview alone includes coin deletion wording', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      const MaterialApp(home: SettingsScreen(includeWardrobeCoins: true)),
+    );
+    await tester.ensureVisible(find.text('회원 탈퇴'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('회원 탈퇴'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('보유한 코인과 배지'), findsOneWidget);
+  });
+
   testWidgets(
     'notification switch and time picker are local; deletion is preview only',
     (tester) async {

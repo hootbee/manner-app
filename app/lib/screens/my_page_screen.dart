@@ -3,8 +3,11 @@ import 'stat_share_screen.dart';
 import '../backend.dart';
 import 'manner_stats_screen.dart';
 import 'wardrobe_screen.dart';
+
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import 'partner_selection_screen.dart';
 
 /// Profile presentation only. Account assets and XP await the backend contract.
@@ -41,9 +44,13 @@ class _MyPageScreenState extends State<MyPageScreen>
   void _notice(String label) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text('$label는 준비 중이에요.')));
-  void _openSettings() => Navigator.of(
-    context,
-  ).push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
+  void _openSettings() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => SettingsScreen(
+        includeWardrobeCoins: WardrobeBinding.maybeOf(context) != null,
+      ),
+    ),
+  );
   void _react() {
     _laugh.forward(from: 0);
   }
@@ -199,44 +206,27 @@ class _MyPageScreenState extends State<MyPageScreen>
               style: TextStyle(fontSize: 11, color: Colors.black54),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _panel(
-                    const Row(
-                      children: [
-                        Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
-                        SizedBox(width: 8),
-                        Expanded(child: PreviewCoinLabel()),
-                      ],
-                    ),
-                  ),
+            if (WardrobeBinding.maybeOf(context) != null) ...[
+              _panel(
+                const Row(
+                  children: [
+                    Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
+                    SizedBox(width: 8),
+                    Expanded(child: PreviewCoinLabel()),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _panel(
-                    const Row(
-                      children: [
-                        Icon(Icons.workspace_premium_outlined),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '—\n획득한 배지',
-                            style: TextStyle(fontSize: 12, height: 1.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+              ),
+              const SizedBox(height: 12),
+            ],
             _panel(
               Column(
                 children: [
-                  for (var i = 0; i < _menus.length; i++) ...[
-                    if (i > 0)
+                  for (
+                    var i = WardrobeBinding.maybeOf(context) == null ? 2 : 0;
+                    i < _menus.length;
+                    i++
+                  ) ...[
+                    if (i > (WardrobeBinding.maybeOf(context) == null ? 2 : 0))
                       const Divider(height: 1, color: Color(0xFFEEEEEE)),
                     ListTile(
                       contentPadding: EdgeInsets.zero,

@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 /// Settings layout preview. Values live only while this route is open.
 /// No notification scheduling, account mutations, or persistence occurs here.
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key, this.accountEmail});
+  const SettingsScreen({
+    super.key,
+    this.accountEmail,
+    this.includeWardrobeCoins = false,
+  });
   final String? accountEmail;
+  final bool includeWardrobeCoins;
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
@@ -70,7 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
@@ -80,7 +85,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              '지금까지의 학습 기록, 보유한 배지가\n모두 삭제되며 복구할 수 없습니다.',
+              widget.includeWardrobeCoins
+                  ? '지금까지의 학습 기록, 보유한 코인과 배지가\n모두 삭제되며 복구할 수 없습니다.'
+                  : '지금까지의 학습 기록, 보유한 배지가\n모두 삭제되며 복구할 수 없습니다.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
