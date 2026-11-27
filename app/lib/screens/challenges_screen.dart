@@ -12,8 +12,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   int _tab = 0;
   static const _green = Color(0xFF476B5B);
   static const _titles = [
-    ['오늘의 첫걸음', '배려를 쌓는 하루', '다시 한번!', '오늘의 매너 완주'],
-    ['꾸준한 매너 습관', '다양한 매너 배우기', '매너 탐험가', '행동으로 실천하기', '순서의 달인', '복습하는 습관'],
+    ['오늘의 첫걸음', '배려를 쌓는 하루', '오늘의 매너 완주'],
+    ['꾸준한 매너 습관', '다양한 매너 배우기', '매너 탐험가', '복습하는 습관'],
     [
       '첫걸음',
       '매너 수집가',
@@ -23,8 +23,8 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
       '순서 고수',
       '복습 습관',
       '대중교통 마스터',
-      '식사 마스터',
       '공공장소 마스터',
+      '식사 마스터',
       '대화 마스터',
       '학교·직장 마스터',
       '디지털 마스터',
@@ -34,13 +34,10 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   static const _icons = <String, IconData>{
     '오늘의 첫걸음': Icons.directions_walk,
     '배려를 쌓는 하루': Icons.favorite_outline,
-    '다시 한번!': Icons.replay,
     '오늘의 매너 완주': Icons.flag_outlined,
     '꾸준한 매너 습관': Icons.calendar_month_outlined,
     '다양한 매너 배우기': Icons.auto_stories_outlined,
     '매너 탐험가': Icons.explore_outlined,
-    '행동으로 실천하기': Icons.touch_app_outlined,
-    '순서의 달인': Icons.format_list_numbered,
     '복습하는 습관': Icons.history,
     '첫걸음': Icons.directions_walk,
     '매너 수집가': Icons.collections_bookmark_outlined,
@@ -58,14 +55,28 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     '매너스 마스터': Icons.emoji_events_outlined,
   };
   static const _descriptions = [
-    ['오늘의 학습 시작하기', '오늘의 학습 절반 진행하기', '복습할 매너 다시 살펴보기', '오늘의 데일리 학습 마치기'],
+    ['오늘 문제 1개 풀기', '오늘 문제 3개 풀기', '오늘의 데일리 학습 마치기'],
     [
-      '서로 다른 날에도 꾸준히 학습해요.',
-      '다양한 주제를 살펴봐요.',
-      '여러 카테고리의 매너를 배워요.',
-      '행동형 문제로 직접 실천해요.',
-      '올바른 행동 순서를 익혀요.',
-      '배운 매너를 다시 떠올려요.',
+      '이번 주 데일리 5일 마치기',
+      '서로 다른 매너 10개 풀기',
+      '서로 다른 카테고리 3개 학습하기',
+      '배운 매너를 다른 날에 5번 다시 풀기',
+    ],
+    [
+      '문제 1개 풀기',
+      '서로 다른 매너 30개 풀기',
+      '데일리 30일 마치기',
+      '서로 다른 카테고리 6개 학습하기',
+      '위치형 문제에서 최선 50회 달성하기',
+      '순서형 문제에서 최선 20회 달성하기',
+      '배운 매너를 다른 날에 50번 다시 풀기',
+      '대중교통에서 최선 30회 달성하기',
+      '공공장소에서 최선 30회 달성하기',
+      '식사에서 최선 30회 달성하기',
+      '대화에서 최선 30회 달성하기',
+      '학교·직장에서 최선 30회 달성하기',
+      '디지털에서 최선 30회 달성하기',
+      '카테고리 마스터 6개 달성하기',
     ],
   ];
   Widget _panel(Widget child) => Container(
@@ -253,9 +264,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          _tab == 2
-                              ? '차곡차곡 쌓은 배움을 확인해요.'
-                              : _descriptions[_tab][i],
+                          _descriptions[_tab][i],
                           style: const TextStyle(
                             fontSize: 11,
                             color: Colors.black54,
