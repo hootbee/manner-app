@@ -24,12 +24,7 @@ class _MannerStatsScreenState extends State<MannerStatsScreen> {
   String? _selected;
   static const _green = Color(0xFF476B5B);
   static const _icons = <String, IconData>{
-    '대화': Icons.forum_outlined,
-    '식사': Icons.restaurant,
     '공공장소': Icons.park_outlined,
-    '대중교통': Icons.directions_bus_outlined,
-    '학교·직장': Icons.business_center_outlined,
-    '디지털': Icons.devices_outlined,
     '연애': Icons.favorite_outline,
     '친구': Icons.people_outline,
     '어른·가족': Icons.family_restroom,
@@ -123,7 +118,7 @@ class _MannerStatsScreenState extends State<MannerStatsScreen> {
                     else
                       const Padding(
                         padding: EdgeInsets.all(24),
-                        child: Text('6개 분야의 스탯이 준비되면 그래프를 표시해요.'),
+                        child: Text('6개 영역의 스탯이 준비되면 그래프를 표시해요.'),
                       ),
                     const SizedBox(height: 8),
                     const Text(
@@ -135,7 +130,7 @@ class _MannerStatsScreenState extends State<MannerStatsScreen> {
               ),
             const SizedBox(height: 20),
             Text(
-              selected == null ? '분야별 상세 수치' : '$selected 분야',
+              selected == null ? '영역별 상세 수치' : '$selected 영역',
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
