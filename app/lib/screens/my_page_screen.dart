@@ -12,6 +12,7 @@ import 'partner_selection_screen.dart';
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key, required this.partner, this.preview = false});
   final MannerPartner partner;
+  // Passed through to stats and sharing screens; not used to calculate profile data.
   final bool preview;
   @override
   State<MyPageScreen> createState() => _MyPageScreenState();
@@ -77,7 +78,7 @@ class _MyPageScreenState extends State<MyPageScreen>
   static const _menus = [
     (Icons.checkroom_outlined, '캐릭터 꾸미기', '나만의 매너 파트너를 꾸며보세요.'),
     (Icons.shopping_bag_outlined, '꾸미기 상점', '다양한 아이템을 구경해보세요.'),
-    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 분야의 성장 현황을 확인해요.'),
+    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 영역의 성장 현황을 확인해요.'),
     (Icons.menu_book_outlined, '학습 기록', '지금까지의 학습 내용을 모아보세요.'),
     (Icons.share_outlined, '스탯 공유', '나의 성장을 친구들에게 공유해요.'),
     (Icons.settings_outlined, '설정', '계정 및 앱 설정을 관리해보세요.'),
@@ -95,6 +96,7 @@ class _MyPageScreenState extends State<MyPageScreen>
     MaterialPageRoute<void>(
       builder: (_) => SettingsScreen(
         includeWardrobeCoins: WardrobeBinding.maybeOf(context) != null,
+        preview: widget.preview,
       ),
     ),
   );
