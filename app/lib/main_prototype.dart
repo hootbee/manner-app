@@ -31,6 +31,9 @@ Future<void> main() async {
     ),
   );
   await TransportProgress.instance.load();
+  backend = FakeBackend.preset(
+    const String.fromEnvironment('FAKE', defaultValue: 'guest'),
+  );
   runApp(
     ResultPopupAudioScope(
       play: playBundledResultSound,
@@ -52,9 +55,6 @@ class _MannersPrototypeState extends State<MannersPrototype> {
   @override
   void initState() {
     super.initState();
-    backend = FakeBackend.preset(
-      const String.fromEnvironment('FAKE', defaultValue: 'guest'),
-    );
     final preview = backend as FakeBackend;
     _topicRewards = PreviewTopicCompletion(
       userId: 'prototype:${preview.account.value?.email ?? 'guest'}',
