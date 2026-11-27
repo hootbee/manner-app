@@ -243,3 +243,61 @@ class Source {
   final String title, publisher, date, url;
   final String? locator; // 선택(ADR 0009 §6)
 }
+
+// Optional topic-completion contract. Existing daily Backend/Session APIs remain unchanged.
+enum LearningEnd { directCorrect, answerRevealed }
+
+enum TopicCompletionKind { firstDirect, firstReveal, review }
+
+class TopicSetOutcome {
+  const TopicSetOutcome({
+    required this.topicId,
+    required this.basic,
+    required this.application,
+  });
+  final String topicId;
+  final LearningEnd? basic, application;
+  bool get finished => basic != null && application != null;
+  bool get direct =>
+      basic == LearningEnd.directCorrect &&
+      application == LearningEnd.directCorrect;
+}
+
+class TopicRewardConfig {
+  TopicRewardConfig.fromJson(Map<String, dynamic> j)
+    : direct = j['rewards']['FIRST_DIRECT'] as int,
+      reveal = j['rewards']['FIRST_ANSWER_REVEAL'] as int;
+  final int direct, reveal;
+}
+
+class CompletionProfile {
+  const CompletionProfile({
+    required this.totalXp,
+    required this.level,
+    required this.levelXp,
+    required this.levelMax,
+  });
+  final int totalXp, level, levelXp, levelMax;
+  double get fraction => levelMax <= 0 ? 0 : (levelXp / levelMax).clamp(0, 1);
+}
+
+class TopicCompletionReceipt {
+  const TopicCompletionReceipt({
+    required this.kind,
+    required this.awarded,
+    required this.before,
+    required this.after,
+  });
+  final TopicCompletionKind kind;
+  final int awarded;
+  final CompletionProfile before, after;
+}
+
+/// Live implementations must atomically commit a unique user/topic grant and
+/// return authoritative before/after level snapshots. Screens do not calculate levels.
+abstract interface class TopicCompletionGateway {
+  Future<TopicCompletionReceipt> complete(
+    TopicSetOutcome outcome,
+    TopicRewardConfig config,
+  );
+}
