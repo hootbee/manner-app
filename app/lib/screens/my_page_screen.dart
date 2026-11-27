@@ -297,7 +297,10 @@ class _MyPageScreenState extends State<MyPageScreen>
               _panel(
                 const Row(
                   children: [
-                    Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
+                    CustomPaint(
+                      size: Size(29, 29),
+                      painter: _RewardEmblem(coin: true),
+                    ),
                     SizedBox(width: 8),
                     Expanded(child: PreviewCoinLabel()),
                   ],
