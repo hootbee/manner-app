@@ -237,7 +237,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 2) {
+                        } else if (_menus[i].$2 == '스탯 공유') {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => StatShareScreen(
