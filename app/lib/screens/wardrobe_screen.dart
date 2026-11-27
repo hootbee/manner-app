@@ -42,7 +42,7 @@ class AppliedClothingCharacter extends StatelessWidget {
   Widget build(BuildContext context) {
     final binding = WardrobeBinding.maybeOf(context);
     if (binding == null) {
-      return PartnerArtwork(partner: partner, showSparkles: false);
+      return PartnerArtwork(partner: partner);
     }
     return ValueListenableBuilder<WardrobeView>(
       valueListenable: binding.state,
