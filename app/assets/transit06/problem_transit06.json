@@ -1,0 +1,49 @@
+{
+  "problem_id": "transit_06_basic",
+  "category": "대중교통",
+  "number": "06/20",
+  "type": "action_touch_then_drag",
+  "title": "기차에서 등받이를 젖히고 싶다면 어떻게 해야 할까요?",
+  "description_template": "{character_name}는 장거리 기차에서 등받이를 조금 젖히고 싶어요. 하지만 뒷승객이 노트북으로 작업하고 있어요.\n뒷승객을 배려하며 등받이를 조절해 보세요.",
+  "instruction": "그림 속 요소를 터치하거나 드래그해 보세요.",
+  "selected_character_default": "mongmong",
+  "character_names": {
+    "mongmong": "몽몽이",
+    "dangdang": "댕댕이",
+    "nyangnyang": "냥냥이"
+  },
+  "dialogue": {
+    "protagonist": "등받이를 조금만 젖혀도 괜찮을까요?",
+    "rear_passenger": "네, 조금만 젖혀 주세요."
+  },
+  "hints": [
+    {
+      "id": "hint_1",
+      "text": "등받이를 움직일 때 뒤에서 작업하는 승객에게 어떤 일이 생길까요?",
+      "button": "다음 힌트 보기"
+    },
+    {
+      "id": "hint_2",
+      "text": "등받이를 조절하기 전과 움직이는 동안, 뒷승객의 상황을 어떻게 배려하면 좋을까요?",
+      "button": "힌트 닫기"
+    }
+  ],
+  "feedback": {
+    "correct": "좋아요! 뒷사람의 상황을 배려하며 등받이를 조금 조절했어요.",
+    "wrong_no_consent": "갑자기 등받이를 움직이면 뒷사람이 놀라거나 불편할 수 있어요.",
+    "wrong_excessive": "양해를 구했더라도 뒷사람의 공간을 너무 많이 차지하지 않도록 조절해요.",
+    "final_failure": "시도 가능한 횟수를 모두 사용했어요. 정답을 확인해 볼까요?",
+    "answer_reveal": "먼저 양해를 구한 뒤, 뒷승객의 작업 공간을 살피며 조금만 조절해요. (학습용 시범: 성공·XP 지급 없음)"
+  },
+  "attempts": {
+    "initial": 1,
+    "retries": 3,
+    "total_valid": 4,
+    "hint_counts_as_attempt": false,
+    "cancel_counts_as_attempt": false,
+    "reward_on_answer_reveal": false
+  },
+  "grading": "on_drag_end_only",
+  "next_problem_enabled": false,
+  "legal_note": "양해 구하기는 이 상황에서 권장되는 매너이며, 모든 열차의 법적 의무가 아님."
+}
