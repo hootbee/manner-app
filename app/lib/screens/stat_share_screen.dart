@@ -40,7 +40,7 @@ class _StatShareScreenState extends State<StatShareScreen> {
     try {
       var imageFailed = false;
       await precacheImage(
-        const AssetImage('assets/welcome/growth_stages.webp'),
+        const AssetImage('assets/welcome/partner_design_v2.png'),
         context,
         onError: (error, stack) => imageFailed = true,
       );
@@ -342,12 +342,7 @@ class StatShareCard extends StatelessWidget {
     ),
   );
   static const _icons = <String, IconData>{
-    '대화': Icons.forum_outlined,
-    '식사': Icons.restaurant,
     '공공장소': Icons.park_outlined,
-    '대중교통': Icons.directions_bus_outlined,
-    '학교·직장': Icons.business_center_outlined,
-    '디지털': Icons.devices_outlined,
     '연애': Icons.favorite_outline,
     '친구': Icons.people_outline,
     '어른·가족': Icons.family_restroom,

@@ -1,131 +1,139 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../backend.dart';
+import 'welcome_screen.dart';
+import 'partner_selection_screen.dart';
 
-/// Settings layout preview. Values live only while this route is open.
-/// No notification scheduling, account mutations, or persistence occurs here.
+/// Account operations go through Backend; notification scheduling awaits its contract.
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key, this.accountEmail});
-  final String? accountEmail;
+  const SettingsScreen({
+    super.key,
+    this.preview = false,
+  });
+  final bool preview;
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notifications = true;
-  TimeOfDay _time = const TimeOfDay(hour: 20, minute: 0);
   static const _ink = Color(0xFF191D1A);
-  String get _timeLabel {
-    final period = _time.hour < 12 ? '오전' : '오후';
-    final hour = _time.hourOfPeriod == 0 ? 12 : _time.hourOfPeriod;
-    return '$period $hour:${_time.minute.toString().padLeft(2, '0')}';
-  }
+  static const privacyUrl =
+      'https://github.com/hootbee/manner-app/blob/dev/docs/privacy/index.html';
+  bool _busy = false;
+  void _notice(String text) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
-  Future<void> _selectTime() async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: _time,
-      helpText: '알림 시간',
-      cancelText: '취소',
-      confirmText: '확인',
-      hourLabelText: '시',
-      minuteLabelText: '분',
-      builder: (context, child) => Theme(
-        data: Theme.of(
-          context,
-        ).copyWith(colorScheme: ColorScheme.fromSeed(seedColor: _ink)),
-        child: child!,
+  Future<bool> _confirm(String title, String message, String action) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('취소'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(action),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+
+  void _guestHome() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(
+        builder: (context) => WelcomeScreen(
+          onStart: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => PartnerSelectionScreen(preview: widget.preview),
+            ),
+          ),
+        ),
       ),
+      (_) => false,
     );
-    if (mounted && selected != null) setState(() => _time = selected);
   }
 
-  Future<void> _info(String title, String message) => showDialog<void>(
+  Future<void> _delete() async {
+    if (_busy || backend.account.value == null || !backend.online.value) return;
+    setState(() => _busy = true);
+    try {
+      final confirmed = await _confirm(
+        '회원 탈퇴',
+        '계정과 학습 기록이 모두 삭제되며 복구할 수 없습니다.',
+        '탈퇴하기',
+      );
+      if (!mounted || !confirmed) return;
+      if (backend.account.value == null) return;
+      if (!backend.online.value) {
+        _notice('연결된 뒤 다시 눌러 주세요');
+        return;
+      }
+      final result = await backend.deleteAccount();
+      if (!mounted) return;
+      switch (result) {
+        case DeleteResult.ok:
+          _guestHome();
+        case DeleteResult.offline:
+          _notice('연결된 뒤 다시 눌러 주세요');
+        case DeleteResult.failed:
+          _notice('다시 로그인한 뒤 탈퇴해 주세요');
+      }
+    } catch (_) {
+      if (mounted) _notice('다시 로그인한 뒤 탈퇴해 주세요');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _signOut() async {
+    if (_busy || backend.account.value == null) return;
+    setState(() => _busy = true);
+    try {
+      var result = await backend.signOut();
+      if (!mounted) return;
+      if (result is WouldLose) {
+        final confirmed = await _confirm(
+          '로그아웃',
+          '기기에만 있는 기록 ${result.count}개가 사라져요',
+          '로그아웃하기',
+        );
+        if (!mounted || !confirmed) return;
+        result = await backend.signOut(discardUnsynced: true);
+        if (!mounted) return;
+      }
+      if (result is SignedOut) _guestHome();
+    } catch (_) {
+      if (mounted) _notice('로그아웃하지 못했어요. 다시 시도해 주세요.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _privacy() => showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-      ),
-      content: Text(message, style: const TextStyle(fontSize: 14, height: 1.6)),
+      title: const Text('개인정보 처리방침'),
+      content: const SelectableText(privacyUrl),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('확인'),
+          onPressed: () async {
+            await Clipboard.setData(const ClipboardData(text: privacyUrl));
+            if (context.mounted) Navigator.pop(context);
+          },
+          child: const Text('주소 복사'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('닫기'),
         ),
       ],
     ),
   );
-  Future<void> _deletePreview() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 20),
-            SizedBox(width: 7),
-            Text(
-              '회원 탈퇴',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-            ),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '정말로 탈퇴하시겠습니까?',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-            ),
-            SizedBox(height: 10),
-            Text(
-              '지금까지의 학습 기록, 보유한 배지가\n모두 삭제되며 복구할 수 없습니다.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black54,
-                height: 1.6,
-              ),
-            ),
-          ],
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        actions: [
-          Row(
-            children: [
-              Expanded(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color(0xFFEEEEEE),
-                    foregroundColor: _ink,
-                    minimumSize: const Size.fromHeight(44),
-                  ),
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('취소'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _ink,
-                    minimumSize: const Size.fromHeight(44),
-                  ),
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('탈퇴하기'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-    if (!mounted || confirmed != true) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('회원 탈퇴는 계정 연결 후 사용할 수 있어요.')));
-  }
 
   Widget _section(IconData icon, String title, List<Widget> children) =>
       Padding(
@@ -200,114 +208,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
     trailing: trailing ?? const Icon(Icons.chevron_right, size: 21),
     onTap: onTap,
   );
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: const Color(0xFFF9F9F9),
-    appBar: AppBar(
-      backgroundColor: const Color(0xFFF9F9F9),
-      title: const Text(
-        '설정',
-        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-      ),
-    ),
+    appBar: AppBar(title: const Text('설정')),
     body: SafeArea(
       top: false,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
-          _section(Icons.notifications_none_outlined, '알림 설정', [
-            _row(
-              title: '학습 알림 받기',
-              trailing: Switch(
-                value: _notifications,
-                activeTrackColor: _ink,
-                activeThumbColor: Colors.white,
-                onChanged: (enabled) =>
-                    setState(() => _notifications = enabled),
-              ),
-            ),
-            _row(
-              key: const Key('notification-time'),
-              title: '알림 시간',
-              onTap: _notifications ? _selectTime : null,
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _timeLabel,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: _notifications ? _ink : Colors.black38,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 21,
-                    color: _notifications ? _ink : Colors.black26,
-                  ),
-                ],
-              ),
-            ),
-          ]),
-          _section(Icons.person_outline, '계정 정보', [
-            _row(
-              title: '로그인 계정',
-              trailing: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 155),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        widget.accountEmail ?? '게스트',
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 21),
-                  ],
+      child: ValueListenableBuilder<Account?>(
+        valueListenable: backend.account,
+        builder: (context, account, _) => ValueListenableBuilder<bool>(
+          valueListenable: backend.online,
+          builder: (context, online, _) => ListView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            children: [
+              _section(Icons.notifications_none_outlined, '알림 설정', [
+                _row(
+                  title: '학습 알림 받기',
+                  subtitle: '준비 중',
+                  trailing: const Switch(value: false, onChanged: null),
                 ),
-              ),
-              onTap: () => _info('로그인 계정', '로그인 계정 정보는 추후 연결할 예정이에요.'),
-            ),
-            _row(
-              icon: Icons.pets_outlined,
-              title: '캐릭터 변경',
-              subtitle: '다른 매너 파트너로 변경해요.',
-              onTap: () => _info('캐릭터 변경', '파트너 변경 기능은 추후 연결할 예정이에요.'),
-            ),
-          ]),
-          _section(Icons.info_outline, '앱 정보', [
-            _row(
-              icon: Icons.bug_report_outlined,
-              title: '오류 제보',
-              subtitle: '앱 사용 중 불편한 점을 알려주세요.',
-              onTap: () => _info('오류 제보', '오류 제보 기능은 추후 연결할 예정이에요.'),
-            ),
-            _row(
-              icon: Icons.privacy_tip_outlined,
-              title: '개인정보 처리방침',
-              onTap: () => _info('개인정보 처리방침', '정식 개인정보 처리방침은 추후 연결할 예정이에요.'),
-            ),
-            _row(
-              icon: Icons.description_outlined,
-              title: '오픈소스 라이선스',
-              onTap: () =>
-                  showLicensePage(context: context, applicationName: '매너스'),
-            ),
-          ]),
-          Center(
-            child: TextButton(
-              onPressed: _deletePreview,
-              style: TextButton.styleFrom(foregroundColor: Colors.black54),
-              child: const Text('회원 탈퇴', style: TextStyle(fontSize: 12)),
-            ),
+                _row(
+                  key: const Key('notification-time'),
+                  title: '알림 시간',
+                  subtitle: '준비 중',
+                  trailing: const Icon(Icons.lock_outline),
+                ),
+              ]),
+              _section(Icons.person_outline, '계정 정보', [
+                _row(
+                  title: account?.email ?? '게스트',
+                  trailing: const SizedBox.shrink(),
+                ),
+                if (account != null)
+                  _row(
+                    key: const Key('sign-out'),
+                    title: '로그아웃',
+                    onTap: _busy ? null : _signOut,
+                  ),
+              ]),
+              _section(Icons.info_outline, '앱 정보', [
+                _row(
+                  title: '개인정보 처리방침',
+                  icon: Icons.privacy_tip_outlined,
+                  onTap: _privacy,
+                ),
+                _row(
+                  title: '오픈소스 라이선스',
+                  icon: Icons.description_outlined,
+                  onTap: () =>
+                      showLicensePage(context: context, applicationName: '매너스'),
+                ),
+              ]),
+              if (_busy) const Center(child: Text('처리 중…')),
+              if (account != null)
+                Center(
+                  child: TextButton(
+                    key: const Key('delete-account'),
+                    onPressed: _busy || !online ? null : _delete,
+                    child: Text(online ? '회원 탈퇴' : '회원 탈퇴 (연결 필요)'),
+                  ),
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     ),
   );
