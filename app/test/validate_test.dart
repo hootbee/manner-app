@@ -98,6 +98,14 @@ dynamic scenario(dynamic c, String id) =>
 
 Matcher has(String prefix) => anyElement(startsWith(prefix));
 
+// Keep the real CLI exit-code assertions; use an explicit SDK when supplied.
+Future<ProcessResult> runDart(List<String> arguments) {
+  final executable = Platform.environment['DART_EXECUTABLE'] ?? 'dart';
+  return Process.run(executable, arguments,
+    runInShell: Platform.isWindows && !executable.endsWith('.exe'),
+    stdoutEncoding: utf8, stderrEncoding: utf8);
+}
+
 void main() {
   test('견본은 오류도 경고도 없다', () {
     expect(run(), isEmpty);
@@ -120,7 +128,7 @@ void main() {
 
   test('CLI는 오류가 없으면 0, 있으면 1로 끝난다', () async {
     Future<int> cli(String file) async =>
-        (await Process.run('dart', ['run', 'tool/validate_content.dart', file])).exitCode;
+        (await runDart( ['run', 'tool/validate_content.dart', file])).exitCode;
     expect(await cli('assets/content.json'), 0);
 
     final dir = Directory.systemTemp.createTempSync('validate_content');
@@ -233,8 +241,8 @@ void main() {
     (scenario(c, 'A-alley')['vary'][0] as List).removeWhere((o) => o['key'] == 'child');
     final next = File('${dir.path}/next.json')..writeAsStringSync(jsonEncode(c));
 
-    Future<ProcessResult> cli(String file) => Process.run(
-        'dart', ['run', 'tool/validate_content.dart', file, '--previous=assets/content.json']);
+    Future<ProcessResult> cli(String file) => runDart(
+        ['run', 'tool/validate_content.dart', file, '--previous=assets/content.json']);
     final r = await cli(next.path);
     expect(r.stdout, contains('오류: 사라진 id: 펼친 문제 A-alley~child'));
     expect(r.exitCode, 1);
@@ -325,10 +333,10 @@ void main() {
     final bad = File('${dir.path}/bad.json')..writeAsStringSync(jsonEncode(c));
 
     Future<ProcessResult> cli(String file) =>
-        Process.run('dart', ['run', 'tool/validate_content.dart', file, '--sources=${index.path}']);
+        runDart( ['run', 'tool/validate_content.dart', file, '--sources=${index.path}']);
     expect((await cli(ok.path)).exitCode, 0);
     // 모르는 플래그(오타)는 조용히 무시하지 않는다.
-    final typo = await Process.run('dart', ['run', 'tool/validate_content.dart', ok.path, '--source=${index.path}']);
+    final typo = await runDart( ['run', 'tool/validate_content.dart', ok.path, '--source=${index.path}']);
     expect(typo.stderr, contains('--source='));
     expect(typo.exitCode, 1);
     final r = await cli(bad.path);

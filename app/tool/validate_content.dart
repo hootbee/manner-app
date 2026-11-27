@@ -9,6 +9,9 @@ import 'package:mannerfit/content/content.dart';
 import 'package:mannerfit/content/validate.dart';
 
 void main(List<String> args) {
+  // Stable UTF-8 output for pipes and Windows terminals alike.
+  stdout.encoding = utf8;
+  stderr.encoding = utf8;
   Content load(String path) => parseContent(File(path).readAsStringSync());
   const flag = '--previous=', sources = '--sources=';
   // 오타 플래그를 조용히 무시하면 대조 없이 0으로 끝난다.

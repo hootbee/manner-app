@@ -12,7 +12,11 @@ void main() {
   final bundle = parseContent(bundleJson); // schema 1
 
   /// 번들을 고친 콘텐츠 JSON.
-  String variant({int? schema, int? version, void Function(Map<String, dynamic>)? edit}) {
+  String variant({
+    int? schema,
+    int? version,
+    void Function(Map<String, dynamic>)? edit,
+  }) {
     final j = jsonDecode(bundleJson) as Map<String, dynamic>;
     if (schema != null) j['schema'] = schema;
     if (version != null) j['version'] = version;
@@ -21,8 +25,11 @@ void main() {
   }
 
   const url = 'https://example.test';
-  final manifestUri = Uri.parse('$url/storage/v1/object/public/content/s1/manifest.json');
-  Uri bodyUri(int v) => Uri.parse('$url/storage/v1/object/public/content/s1/$v.json');
+  final manifestUri = Uri.parse(
+    '$url/storage/v1/object/public/content/s1/manifest.json',
+  );
+  Uri bodyUri(int v) =>
+      Uri.parse('$url/storage/v1/object/public/content/s1/$v.json');
 
   late Directory dir;
   late File saved;
@@ -30,7 +37,7 @@ void main() {
   void report(Object e, StackTrace _) => reported.add(e);
   setUp(() {
     dir = Directory.systemTemp.createTempSync('content_update_test');
-    saved = File('${dir.path}/content.json');
+    saved = File.fromUri(dir.uri.resolve('content.json'));
     reported = [];
   });
   tearDown(() => dir.deleteSync(recursive: true));
@@ -74,7 +81,10 @@ void main() {
 
     test('schema가 같고 version이 번들보다 크면 저장된 파일을 쓴다', () {
       saved.writeAsStringSync(variant(version: bundle.version + 1));
-      expect(pickContent(dir, bundle, report: report).version, bundle.version + 1);
+      expect(
+        pickContent(dir, bundle, report: report).version,
+        bundle.version + 1,
+      );
       expect(saved.existsSync(), isTrue);
     });
   });
@@ -97,13 +107,20 @@ void main() {
       'schema가 2': variant(schema: 2, version: 3),
       'validate 오류(장면이 없는 매너 99)': variant(
         version: 3,
-        edit: (j) => ((j['days'] as List).first['scenes'] as List).first['manner'] = 99,
+        edit: (j) =>
+            ((j['days'] as List).first['scenes'] as List).first['manner'] = 99,
       ),
     };
     for (final MapEntry(key: why, value: body) in rejected.entries) {
       test('본문이 $why이면 저장된 파일이 그대로다', () async {
         final get = fake({manifestUri: '{"version": 3}', bodyUri(3): body});
-        await fetchContent(url, dir, parseContent(current), get: get, report: report);
+        await fetchContent(
+          url,
+          dir,
+          parseContent(current),
+          get: get,
+          report: report,
+        );
         expect(requested, [manifestUri, bodyUri(3)]);
         expectUnchanged();
         expect(reported, hasLength(1));
@@ -112,21 +129,39 @@ void main() {
 
     test('manifest version이 지금 것과 같으면 본문을 요청하지 않는다', () async {
       final get = fake({manifestUri: '{"version": 2}', bodyUri(2): current});
-      await fetchContent(url, dir, parseContent(current), get: get, report: report);
+      await fetchContent(
+        url,
+        dir,
+        parseContent(current),
+        get: get,
+        report: report,
+      );
       expect(requested, [manifestUri]);
       expectUnchanged();
     });
 
     test('manifest version이 지금 것보다 작으면 본문을 요청하지 않는다', () async {
       final get = fake({manifestUri: '{"version": 1}', bodyUri(1): bundleJson});
-      await fetchContent(url, dir, parseContent(current), get: get, report: report);
+      await fetchContent(
+        url,
+        dir,
+        parseContent(current),
+        get: get,
+        report: report,
+      );
       expect(requested, [manifestUri]);
       expectUnchanged();
     });
 
     test('네트워크가 없으면 예외 없이 끝나고 아무것도 바뀌지 않는다', () async {
       final get = fake({});
-      await fetchContent(url, dir, parseContent(current), get: get, report: report);
+      await fetchContent(
+        url,
+        dir,
+        parseContent(current),
+        get: get,
+        report: report,
+      );
       expect(requested, [manifestUri]);
       expectUnchanged();
       expect(reported, isEmpty); // SocketException
@@ -137,7 +172,13 @@ void main() {
       ('HttpException(응답 도중 끊김)', const HttpException('connection closed')),
     ]) {
       test('get이 $name이면 보내지 않는다', () async {
-        await fetchContent(url, dir, parseContent(current), get: (_) async => throw e, report: report);
+        await fetchContent(
+          url,
+          dir,
+          parseContent(current),
+          get: (_) async => throw e,
+          report: report,
+        );
         expectUnchanged();
         expect(reported, isEmpty);
       });
@@ -147,14 +188,25 @@ void main() {
       final v = bundle.version + 1; // 번들(2 이상)보다 크므로 지금 것(2)보다도 크다
       final next = variant(version: v);
       final get = fake({manifestUri: '{"version": $v}', bodyUri(v): next});
-      await fetchContent(url, dir, parseContent(current), get: get, report: report);
+      await fetchContent(
+        url,
+        dir,
+        parseContent(current),
+        get: get,
+        report: report,
+      );
       expect(saved.readAsStringSync(), next);
-      expect(dir.listSync().map((e) => e.path), [saved.path]); // 임시 파일은 rename되어 남지 않는다
+      expect(dir.listSync().map((e) => e.path), [
+        saved.path,
+      ]); // 임시 파일은 rename되어 남지 않는다
       expect(pickContent(dir, bundle, report: report).version, v);
     });
 
     test('동시에 두 번 불러도 요청은 한 번이다', () async {
-      final get = fake({manifestUri: '{"version": 3}', bodyUri(3): variant(version: 3)});
+      final get = fake({
+        manifestUri: '{"version": 3}',
+        bodyUri(3): variant(version: 3),
+      });
       await Future.wait([
         fetchContent(url, dir, parseContent(current), get: get, report: report),
         fetchContent(url, dir, parseContent(current), get: get, report: report),
@@ -186,15 +238,25 @@ void main() {
     // ADR 0007 §2: HttpException은 전송 오류라 비-200에는 쓰지 않는다.
     test('200이 아니면 HttpException이 아닌 Exception(HTTP 404 …)을 던진다', () async {
       await expectLater(
-          httpGet(at('/missing')),
-          throwsA(isA<Exception>()
+        httpGet(at('/missing')),
+        throwsA(
+          isA<Exception>()
               .having((e) => e is HttpException, 'is HttpException', isFalse)
-              .having((e) => '$e', 'message', contains('HTTP 404'))));
+              .having((e) => '$e', 'message', contains('HTTP 404')),
+        ),
+      );
     });
 
     test('fetchContent가 404를 받으면 하나를 보낸다', () async {
-      await fetchContent('http://127.0.0.1:${server.port}', dir, bundle, report: report);
-      expect(reported, [isA<Exception>().having((e) => '$e', 'message', contains('HTTP 404'))]);
+      await fetchContent(
+        'http://127.0.0.1:${server.port}',
+        dir,
+        bundle,
+        report: report,
+      );
+      expect(reported, [
+        isA<Exception>().having((e) => '$e', 'message', contains('HTTP 404')),
+      ]);
     });
   });
 }

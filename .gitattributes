@@ -1,0 +1,3 @@
+
+# Canonical pipeline input must retain LF on Windows as well.
+app/assets/content.json text eol=lf
