@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mannerfit/fake/wardrobe_preview.dart';
+import 'package:mannerfit/screens/wardrobe_preview.dart';
 import 'package:mannerfit/screens/wardrobe_screen.dart';
 import 'package:mannerfit/screens/partner_selection_screen.dart';
+import 'package:mannerfit/screens/wardrobe_catalog.dart';
 
 void main() {
   Future<void> mount(
@@ -63,16 +64,16 @@ void main() {
     expect(store.state.value.coins, 50);
     expect(store.state.value.owned.contains('hoodie'), isTrue);
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('outfit-bear')),
+      find.byKey(const ValueKey('outfit-black-suit')),
       150,
     );
-    await tester.tap(find.byKey(const ValueKey('outfit-bear')));
+    await tester.tap(find.byKey(const ValueKey('outfit-black-suit')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('구매하기'));
     await tester.pumpAndSettle();
     expect(find.text('코인이 부족해요.'), findsOneWidget);
     expect(store.state.value.coins, 50);
-    expect(store.state.value.owned.contains('bear'), isFalse);
+    expect(store.state.value.owned.contains('black-suit'), isFalse);
     expect(tester.takeException(), isNull);
   });
   testWidgets('preview is discarded on back; apply commits owned outfit', (
@@ -112,6 +113,50 @@ void main() {
       tester.widget<ClothingCharacter>(find.byType(ClothingCharacter)).outfit,
       'trench',
     );
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('several slots preview together and only apply commits them', (
+    tester,
+  ) async {
+    final store = WardrobePreview();
+    addTearDown(store.dispose);
+    await mount(tester, store);
+    await tester.tap(find.text('모자'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('outfit-hat-beanie')),
+      100,
+    );
+    await tester.tap(find.byKey(const ValueKey('outfit-hat-beanie')));
+    await tester.pumpAndSettle();
+    expect(store.state.value.equipped, isEmpty);
+    await tester.ensureVisible(find.text('액세서리'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('액세서리'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('outfit-acc-watch')),
+      100,
+    );
+    await tester.tap(find.byKey(const ValueKey('outfit-acc-watch')));
+    await tester.pumpAndSettle();
+    expect(store.state.value.equipped, isEmpty);
+    await tester.tap(find.text('적용하기'));
+    await tester.pumpAndSettle();
+    expect(
+      store.state.value.equipped[equipmentKey(MannerPartner.dog.name, 0)],
+      'hat-beanie',
+    );
+    expect(
+      store.state.value.equipped[equipmentKey(MannerPartner.dog.name, 2)],
+      'acc-watch',
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('배경'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('outfit-bg-room')), findsOneWidget);
+    expect(find.byKey(const ValueKey('outfit-hoodie')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

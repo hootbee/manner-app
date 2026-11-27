@@ -1,24 +1,30 @@
+import 'wardrobe_catalog.dart';
+import 'wardrobe_samples.dart';
 import 'package:flutter/foundation.dart';
 
 /// Disposable shop simulation for main_prototype.dart only. Never writes records.
 class WardrobePreview {
-  static const catalog = <({String id, String name, int price, bool locked})>[
-    (id: 'suit', name: '기본 정장', price: 0, locked: false),
-    (id: 'black-suit', name: '블랙 수트', price: 100, locked: false),
-    (id: 'hoodie', name: '화이트 후드', price: 100, locked: false),
-    (id: 'varsity', name: '야구 점퍼', price: 50, locked: false),
-    (id: 'trench', name: '탐정 코트', price: 50, locked: false),
-    (id: 'bear', name: '곰돌이 잠옷', price: 100, locked: false),
-    (id: 'stripe', name: '스트라이프 티', price: 50, locked: false),
-    (id: 'leather', name: '가죽 재킷', price: 150, locked: true),
-    (id: 'cardigan', name: '니트 카디건', price: 100, locked: false),
-  ];
+  static const catalog = wardrobeCatalog;
   final state =
       ValueNotifier<
         ({int coins, Set<String> owned, Map<String, String> equipped})
       >((
         coins: 150,
-        owned: Set.unmodifiable({'suit', 'trench'}),
+        owned: Set.unmodifiable({
+          'suit',
+          'trench',
+          'school',
+          'bear',
+          'hat-none',
+          'hat-beanie',
+          'acc-none',
+          'acc-watch',
+          'furniture-none',
+          'furniture-rug',
+          'prop-none',
+          'prop-umbrella',
+          'bg-room',
+        }),
         equipped: const {},
       ));
   String purchase(String id) {
@@ -40,6 +46,8 @@ class WardrobePreview {
   void equip(String partner, String id) {
     final current = state.value;
     if (!current.owned.contains(id)) return;
+    final slot = int.tryParse(partner.split(':').last) ?? 1;
+    if (slot != wardrobeCategory(id)) return;
     state.value = (
       coins: current.coins,
       owned: current.owned,
