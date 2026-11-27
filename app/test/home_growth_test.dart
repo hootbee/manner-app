@@ -157,6 +157,18 @@ void main() {
     );
     await tester.ensureVisible(find.text('시작하기'));
     await tester.tap(find.text('시작하기'));
+    // The dedicated lesson loads JSON and decodes assets outside the fake clock.
+    for (
+      var i = 0;
+      i < 400 && find.byKey(const Key('subway01-ready')).evaluate().isEmpty;
+      i++
+    ) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 25)),
+      );
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    expect(find.byKey(const Key('subway01-ready')), findsOneWidget);
     await tester.pumpAndSettle();
     expect(find.byType(TransportLessonScreen), findsOneWidget);
     expect(tester.takeException(), isNull);

@@ -1,4 +1,4 @@
-import 'package:mannerfit/fake/wardrobe_preview.dart';
+import 'package:mannerfit/screens/wardrobe_preview.dart';
 import 'package:mannerfit/screens/wardrobe_screen.dart';
 import 'package:mannerfit/screens/partner_artwork.dart';
 import 'package:mannerfit/screens/settings_screen.dart';

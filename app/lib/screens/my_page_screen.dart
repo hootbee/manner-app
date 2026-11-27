@@ -1,23 +1,70 @@
+import 'activity_screen.dart';
 import 'settings_screen.dart';
 import 'stat_share_screen.dart';
 import '../backend.dart';
 import 'manner_stats_screen.dart';
 import 'wardrobe_screen.dart';
-
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-
 import 'partner_selection_screen.dart';
 
 /// Profile presentation only. Account assets and XP await the backend contract.
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key, required this.partner, this.preview = false});
   final MannerPartner partner;
-  // Passed through to stats and sharing screens.
+  // Passed through to stats and sharing screens; not used to calculate profile data.
   final bool preview;
   @override
   State<MyPageScreen> createState() => _MyPageScreenState();
+}
+
+class _RewardEmblem extends CustomPainter {
+  const _RewardEmblem({required this.coin});
+  final bool coin;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.width / 2);
+    final radius = size.width / 2 - 1;
+    final fill = Paint();
+    if (!coin) {
+      final ribbon = Path()
+        ..moveTo(size.width * .22, size.width * .65)
+        ..lineTo(size.width * .17, size.height)
+        ..lineTo(size.width * .5, size.height * .86)
+        ..lineTo(size.width * .83, size.height)
+        ..lineTo(size.width * .78, size.width * .65)
+        ..close();
+      canvas.drawPath(ribbon, fill..color = const Color(0xFF252A27));
+    }
+    canvas.drawCircle(
+      center,
+      radius,
+      fill..color = coin ? const Color(0xFFE3A234) : const Color(0xFF252A27),
+    );
+    canvas.drawCircle(
+      center,
+      radius - 2.7,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.3
+        ..color = coin ? const Color(0xFFFFEAC2) : const Color(0xFFE9EDE9),
+    );
+    final star = Path();
+    for (var i = 0; i < 10; i++) {
+      final angle = -math.pi / 2 + i * math.pi / 5;
+      final r = radius * (i.isEven ? .57 : .27);
+      final p = center + Offset(math.cos(angle) * r, math.sin(angle) * r);
+      if (i == 0) {
+        star.moveTo(p.dx, p.dy);
+      } else {
+        star.lineTo(p.dx, p.dy);
+      }
+    }
+    canvas.drawPath(star..close(), fill..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(_RewardEmblem oldDelegate) => oldDelegate.coin != coin;
 }
 
 class _MyPageScreenState extends State<MyPageScreen>
@@ -32,6 +79,7 @@ class _MyPageScreenState extends State<MyPageScreen>
     (Icons.checkroom_outlined, '캐릭터 꾸미기', '나만의 매너 파트너를 꾸며보세요.'),
     (Icons.shopping_bag_outlined, '꾸미기 상점', '다양한 아이템을 구경해보세요.'),
     (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 영역의 성장 현황을 확인해요.'),
+    (Icons.menu_book_outlined, '학습 기록', '지금까지의 학습 내용을 모아보세요.'),
     (Icons.share_outlined, '스탯 공유', '나의 성장을 친구들에게 공유해요.'),
     (Icons.settings_outlined, '설정', '계정 및 앱 설정을 관리해보세요.'),
   ];
@@ -110,94 +158,134 @@ class _MyPageScreenState extends State<MyPageScreen>
                     ? 0.0
                     : math.sin(_laugh.value * math.pi * 6) *
                           math.sin(_laugh.value * math.pi);
-                return Column(
-                  children: [
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 10,
+                return SizedBox(
+                  width: double.infinity,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        top: 82,
+                        bottom: 0,
+                        left: -20,
+                        right: -20,
+                        child: IgnorePointer(
+                          child: ShaderMask(
+                            blendMode: BlendMode.dstIn,
+                            shaderCallback: (bounds) => const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.white,
+                                Colors.white,
+                              ],
+                              stops: [0, .16, 1],
+                            ).createShader(bounds),
+                            child: AppliedWardrobeRoom(partner: widget.partner),
+                          ),
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: const Color(0xFFE7E8EA)),
-                      ),
-                      child: Text(
-                        laughing ? '꺄르르! 함께하니 즐거워요!' : '오늘도 함께\n작은 배려를 배워요.',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12, height: 1.5),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.partner.name,
-                      style: const TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      '레벨 · XP 연결 대기',
-                      style: TextStyle(fontSize: 11, color: Colors.black54),
-                    ),
-                    SizedBox(
-                      height: 238,
-                      child: Stack(
-                        alignment: Alignment.center,
+                      Column(
                         children: [
-                          Positioned(
-                            bottom: 12,
-                            child: Container(
-                              width: 224,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE9EBE9),
-                                borderRadius: BorderRadius.circular(100),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: const Color(0xFFE7E8EA),
                               ),
                             ),
+                            child: Text(
+                              laughing
+                                  ? '꺄르르! 함께하니 즐거워요!'
+                                  : '오늘도 함께\n작은 배려를 배워요.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 12, height: 1.5),
+                            ),
                           ),
-                          Semantics(
-                            label:
-                                '${widget.partner.name}, 터치하면 웃고 좌우로 드래그하면 회전해요.',
-                            button: true,
-                            onTap: _react,
-                            child: GestureDetector(
-                              key: const Key('profile-character'),
-                              behavior: HitTestBehavior.opaque,
-                              onTap: _react,
-                              onHorizontalDragUpdate: (details) => setState(
-                                () => _angle =
-                                    (_angle + details.delta.dx * .012) %
-                                    (math.pi * 2),
-                              ),
-                              child: SizedBox(
-                                width: 236,
-                                height: 236,
-                                child: Transform(
-                                  key: const Key('character-turn'),
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.identity()
-                                    ..setEntry(3, 2, .001)
-                                    ..rotateY(_angle),
-                                  child: Transform.translate(
-                                    offset: Offset(0, -bounce.abs() * 9),
-                                    child: Transform.rotate(
-                                      angle: bounce * .06,
-                                      child: AppliedClothingCharacter(
-                                        partner: widget.partner,
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.partner.name,
+                            style: const TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            '레벨 · XP 연결 대기',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 238,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Positioned(
+                                  bottom: 12,
+                                  child: Container(
+                                    width: 224,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF6F3EB),
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                  ),
+                                ),
+                                Semantics(
+                                  label:
+                                      '${widget.partner.name}, 터치하면 웃고 좌우로 드래그하면 회전해요.',
+                                  button: true,
+                                  onTap: _react,
+                                  child: GestureDetector(
+                                    key: const Key('profile-character'),
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: _react,
+                                    onHorizontalDragUpdate: (details) =>
+                                        setState(
+                                          () => _angle =
+                                              (_angle +
+                                                  details.delta.dx * .012) %
+                                              (math.pi * 2),
+                                        ),
+                                    child: SizedBox(
+                                      width: 204,
+                                      height: 204,
+                                      child: Transform(
+                                        key: const Key('character-turn'),
+                                        alignment: Alignment.center,
+                                        transform: Matrix4.identity()
+                                          ..setEntry(3, 2, .001)
+                                          ..rotateY(_angle),
+                                        child: Transform.translate(
+                                          offset: Offset(0, -bounce.abs() * 9),
+                                          child: Transform.rotate(
+                                            angle: bounce * .06,
+                                            child: AppliedClothingCharacter(
+                                              partner: widget.partner,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
@@ -211,7 +299,10 @@ class _MyPageScreenState extends State<MyPageScreen>
               _panel(
                 const Row(
                   children: [
-                    Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
+                    CustomPaint(
+                      size: Size(29, 29),
+                      painter: _RewardEmblem(coin: true),
+                    ),
                     SizedBox(width: 8),
                     Expanded(child: PreviewCoinLabel()),
                   ],
@@ -262,7 +353,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (_menus[i].$2 == '나의 매너 스탯') {
+                        } else if (i == 2) {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => MannerStatsScreen(
@@ -272,7 +363,14 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (_menus[i].$2 == '스탯 공유') {
+                        } else if (i == 3) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  ActivityScreen(partner: widget.partner),
+                            ),
+                          );
+                        } else if (i == 4) {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => StatShareScreen(
@@ -283,7 +381,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (_menus[i].$2 == '설정') {
+                        } else if (i == 5) {
                           _openSettings();
                         } else {
                           _notice(_menus[i].$2);
