@@ -42,14 +42,19 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
-      const MaterialApp(home: HomeScreen(partner: MannerPartner.monkey, preview: true)),
+      const MaterialApp(
+        home: HomeScreen(partner: MannerPartner.monkey, preview: true),
+      ),
     );
     await tester.tap(find.text('마이페이지'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byType(MyPageScreen), findsOneWidget);
-    expect(tester.widget<MyPageScreen>(find.byType(MyPageScreen)).preview, isTrue);
+    expect(
+      tester.widget<MyPageScreen>(find.byType(MyPageScreen)).preview,
+      isTrue,
+    );
     expect(find.text('캐릭터 꾸미기'), findsNothing);
     expect(find.text('꾸미기 상점'), findsNothing);
     expect(find.text('몽몽이'), findsOneWidget);
@@ -60,5 +65,4 @@ void main() {
     expect(find.byType(MyPageScreen), findsNothing);
     expect(tester.takeException(), isNull);
   });
-
 }
