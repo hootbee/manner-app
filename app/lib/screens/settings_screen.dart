@@ -8,8 +8,10 @@ import 'partner_selection_screen.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     super.key,
+    this.includeWardrobeCoins = false,
     this.preview = false,
   });
+  final bool includeWardrobeCoins;
   final bool preview;
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -64,7 +66,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final confirmed = await _confirm(
         '회원 탈퇴',
-        '계정과 학습 기록이 모두 삭제되며 복구할 수 없습니다.',
+        widget.includeWardrobeCoins
+            ? '계정과 학습 기록, 보유한 코인이 모두 삭제되며 복구할 수 없습니다.'
+            : '계정과 학습 기록이 모두 삭제되며 복구할 수 없습니다.',
         '탈퇴하기',
       );
       if (!mounted || !confirmed) return;

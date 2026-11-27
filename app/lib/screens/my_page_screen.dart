@@ -2,7 +2,7 @@ import 'settings_screen.dart';
 import 'stat_share_screen.dart';
 import '../backend.dart';
 import 'manner_stats_screen.dart';
-import 'partner_artwork.dart';
+import 'wardrobe_screen.dart';
 
 import 'dart:math' as math;
 
@@ -29,6 +29,8 @@ class _MyPageScreenState extends State<MyPageScreen>
   double _angle = 0;
   static const _ink = Color(0xFF191D1A);
   static const _menus = [
+    (Icons.checkroom_outlined, '캐릭터 꾸미기', '나만의 매너 파트너를 꾸며보세요.'),
+    (Icons.shopping_bag_outlined, '꾸미기 상점', '다양한 아이템을 구경해보세요.'),
     (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 영역의 성장 현황을 확인해요.'),
     (Icons.share_outlined, '스탯 공유', '나의 성장을 친구들에게 공유해요.'),
     (Icons.settings_outlined, '설정', '계정 및 앱 설정을 관리해보세요.'),
@@ -42,9 +44,14 @@ class _MyPageScreenState extends State<MyPageScreen>
   void _notice(String label) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text('$label는 준비 중이에요.')));
-  void _openSettings() => Navigator.of(
-    context,
-  ).push(MaterialPageRoute<void>(builder: (_) => SettingsScreen(preview: widget.preview)));
+  void _openSettings() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => SettingsScreen(
+        includeWardrobeCoins: WardrobeBinding.maybeOf(context) != null,
+        preview: widget.preview,
+      ),
+    ),
+  );
   void _react() {
     _laugh.forward(from: 0);
   }
@@ -178,9 +185,8 @@ class _MyPageScreenState extends State<MyPageScreen>
                                     offset: Offset(0, -bounce.abs() * 9),
                                     child: Transform.rotate(
                                       angle: bounce * .06,
-                                      child: PartnerArtwork(
+                                      child: AppliedClothingCharacter(
                                         partner: widget.partner,
-                                        showSparkles: false,
                                       ),
                                     ),
                                   ),
@@ -201,11 +207,27 @@ class _MyPageScreenState extends State<MyPageScreen>
               style: TextStyle(fontSize: 11, color: Colors.black54),
             ),
             const SizedBox(height: 16),
+            if (WardrobeBinding.maybeOf(context) != null) ...[
+              _panel(
+                const Row(
+                  children: [
+                    Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
+                    SizedBox(width: 8),
+                    Expanded(child: PreviewCoinLabel()),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             _panel(
               Column(
                 children: [
-                  for (var i = 0; i < _menus.length; i++) ...[
-                    if (i > 0)
+                  for (
+                    var i = WardrobeBinding.maybeOf(context) == null ? 2 : 0;
+                    i < _menus.length;
+                    i++
+                  ) ...[
+                    if (i > (WardrobeBinding.maybeOf(context) == null ? 2 : 0))
                       const Divider(height: 1, color: Color(0xFFEEEEEE)),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -231,7 +253,16 @@ class _MyPageScreenState extends State<MyPageScreen>
                       ),
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       onTap: () {
-                        if (i == 0) {
+                        if (i < 2) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => WardrobeScreen(
+                                partner: widget.partner,
+                                shop: i == 1,
+                              ),
+                            ),
+                          );
+                        } else if (_menus[i].$2 == '나의 매너 스탯') {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => MannerStatsScreen(

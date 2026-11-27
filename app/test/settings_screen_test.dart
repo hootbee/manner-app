@@ -29,7 +29,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
-      MaterialApp(home: SettingsScreen()),
+      MaterialApp(home: SettingsScreen(includeWardrobeCoins: coins)),
     );
   }
 
@@ -163,5 +163,14 @@ void main() {
     await tester.tap(find.text('주소 복사'));
     await tester.pumpAndSettle();
     expect(copied, contains('/docs/privacy/index.html'));
+  });
+  testWidgets('coin deletion wording is restricted to wardrobe preview', (
+    tester,
+  ) async {
+    await mount(tester, coins: true);
+    await tester.ensureVisible(find.byKey(const Key('delete-account')));
+    await tester.tap(find.byKey(const Key('delete-account')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('보유한 코인'), findsOneWidget);
   });
 }
