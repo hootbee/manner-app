@@ -1,3 +1,4 @@
+import 'stat_share_screen.dart';
 import '../backend.dart';
 import 'manner_stats_screen.dart';
 import 'partner_artwork.dart';
@@ -231,6 +232,17 @@ class _MyPageScreenState extends State<MyPageScreen>
                             MaterialPageRoute<void>(
                               builder: (_) => MannerStatsScreen(
                                 stats: backend.stats,
+                                partner: widget.partner,
+                                preview: widget.preview,
+                              ),
+                            ),
+                          );
+                        } else if (_menus[i].$2 == '스탯 공유') {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => StatShareScreen(
+                                home: backend.home.value,
+                                stats: List.unmodifiable(backend.stats.value),
                                 partner: widget.partner,
                                 preview: widget.preview,
                               ),
