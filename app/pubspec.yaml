@@ -39,10 +39,12 @@ dependencies:
   path_provider: ^2.1.6
   share_plus: ^11.1.0
   gal: ^2.3.3
+  url_launcher: ^6.3.3
   firebase_core: ^5.1.0
   firebase_crashlytics: ^6.0.1
   http: ^1.6.0
   firebase_analytics: ^13.0.1
+  audioplayers: 6.7.1
 
 dev_dependencies:
   flutter_test:
@@ -66,7 +68,81 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/pretendard/Pretendard-Regular.otf
+          weight: 400
+        - asset: assets/fonts/pretendard/Pretendard-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/pretendard/Pretendard-Bold.otf
+          weight: 700
+
   assets:
+    - assets/application06/assets/scenes/
+    - assets/application06/spec/
+    - assets/application06/content/
+    - assets/application05/assets/scenes/
+    - assets/application05/spec/
+    - assets/application05/content/
+    - assets/application04/assets/cards/
+    - assets/application04/assets/scenes/
+    - assets/application04/spec/
+    - assets/application04/content/
+    - assets/application03/
+    - assets/application03/assets/background/
+    - assets/application03/assets/characters/
+    - assets/application03/assets/effects/
+    - assets/application03/assets/passengers/
+    - assets/application03/content/
+    - assets/application03/spec/
+    - assets/application02/
+    - assets/application02/runtime/background/
+    - assets/application02/runtime/characters/
+    - assets/application02/runtime/passengers/exit/
+    - assets/application02/runtime/passengers/remain/
+    - assets/application02/spec/
+    - assets/application01/
+    - assets/application01/runtime/
+    - assets/application01/runtime/characters/
+    - assets/application01/runtime/completion/
+    - assets/application01/runtime/explanation/
+    - assets/application01/runtime/luggage/
+    - assets/application01/runtime/characters/dangdang/
+    - assets/application01/runtime/characters/mongmong/
+    - assets/application01/runtime/characters/nyangnyang/
+    - assets/application01/runtime/completion/characters/
+    - assets/application01/runtime/completion/decor/
+    - assets/application01/runtime/explanation/profiles/
+    - assets/result_popup/characters/
+    - assets/result_popup/audio/
+    - assets/result_popup/audio_manifest.json
+    - assets/transit06/
+    - assets/transit06/hit/
+    - assets/transit06/assets/runtime/background/
+    - assets/transit06/assets/runtime/characters/
+    - assets/transit06/assets/runtime/effects/
+    - assets/transit06/assets/runtime/furniture/
+    - assets/transit06/assets/runtime/masks/
+    - assets/transit06/assets/runtime/overlays/
+    - assets/transit06/assets/runtime/passenger/
+    - assets/transit05/
+    - assets/transit05/assets/background/
+    - assets/transit05/assets/characters/
+    - assets/fonts/pretendard/LICENSE.txt
+    - assets/subway01/
+    - assets/subway02/
+    - assets/subway02/assets/background/
+    - assets/subway02/assets/characters/
+    - assets/subway02/assets/effects/
+    - assets/subway02/assets/masks/
+    - assets/subway02/assets/passengers/
+    - assets/subway03/
+    - assets/subway03/characters/
+    - assets/subway03/avatars/
+    - assets/transit04/
+    - assets/transit04/assets/cards/
+    - assets/transit04/assets/scene/
     - assets/welcome/
     - assets/transport/
     - assets/public/

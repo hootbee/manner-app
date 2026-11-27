@@ -5,13 +5,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'learning_catalog.dart';
 import 'partner_artwork.dart';
+import 'partner_selection_screen.dart';
 
 const _ink = Color(0xFF202522);
 const _green = Color(0xFF385C4D);
 const _border = Color(0xFFE6E8E8);
 
 class LearningCategoryScreen extends StatefulWidget {
-  const LearningCategoryScreen({super.key});
+  final MannerPartner partner;
+  const LearningCategoryScreen({super.key, this.partner = MannerPartner.dog});
   @override
   State<LearningCategoryScreen> createState() => _LearningCategoryScreenState();
 }
@@ -130,6 +132,7 @@ class _LearningCategoryScreenState extends State<LearningCategoryScreen> {
                           MaterialPageRoute<void>(
                             builder: (_) => LearningLessonScreen(
                               category: category,
+                              partner: widget.partner,
                               initialQuery: categoryTitleMatches ? '' : _query,
                             ),
                           ),
@@ -153,8 +156,10 @@ class LearningLessonScreen extends StatefulWidget {
     required this.category,
     this.initialQuery = '',
     this.onLessonSelected,
+    this.partner = MannerPartner.dog,
   });
   final LearningCategory category;
+  final MannerPartner partner;
   final String initialQuery;
   final ValueChanged<LearningLesson>? onLessonSelected;
   @override
@@ -194,6 +199,7 @@ class _LearningLessonScreenState extends State<LearningLessonScreen> {
         MaterialPageRoute<void>(
           builder: (_) => TransportLessonScreen(
             categoryId: widget.category.id,
+            partner: widget.partner,
             index: widget.category.lessons.indexOf(lesson),
           ),
         ),

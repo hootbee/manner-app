@@ -1,3 +1,9 @@
+import 'subway01_screen.dart';
+import 'subway02_screen.dart';
+import 'subway03_screen.dart';
+import 'transit04_screen.dart';
+import 'transit05_screen.dart';
+import 'transit06_screen.dart';
 import 'digital_questions.dart';
 import 'digital_action_scene.dart';
 import 'school_questions.dart';
@@ -25,8 +31,10 @@ class TransportLessonScreen extends StatefulWidget {
     required this.index,
     this.store,
     this.categoryId = 'transport',
+    this.partner = MannerPartner.dog,
   });
   final String categoryId;
+  final MannerPartner partner;
   final int index;
   final TransportProgress? store;
   @override
@@ -41,7 +49,7 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
   bool get isConversation => widget.categoryId == 'conversation';
   bool get isDigital => widget.categoryId == 'digital';
   bool get isSchool => widget.categoryId == 'school-work';
-  static const _categories = {
+  static final _categories = {
     'transport': ('대중교통 매너', transportQuestions),
     'public': ('공공장소 매너', publicQuestions),
     'dining': ('식사 매너', diningQuestions),
@@ -67,11 +75,14 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
     super.initState();
     _prepare();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) store.changed();
+      if (mounted && !(widget.categoryId == 'transport' && index < 6)) {
+        store.changed();
+      }
     });
   }
 
   void _prepare() {
+    if (widget.categoryId == 'transport' && index < 6) return;
     if (s.phase == 'complete') store.restart(q.id);
     _wrong = s.lastCorrect == false;
     if (s.order.isEmpty && q.kind == QuestionKind.sequence) {
@@ -146,6 +157,40 @@ class _TransportLessonScreenState extends State<TransportLessonScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.categoryId == 'transport' && index == 0) {
+      return Subway01Screen(
+        key: const ValueKey('transport-1'),
+        partner: widget.partner,
+        onNextProblem: () => setState(() => index = 1),
+      );
+    }
+    if (widget.categoryId == 'transport' && index == 1) {
+      return Subway02Screen(
+        partner: widget.partner,
+        onNextProblem: () => setState(() => index = 2),
+      );
+    }
+    if (widget.categoryId == 'transport' && index == 2) {
+      return Subway03Screen(
+        partner: widget.partner,
+        onNextProblem: () => setState(() => index = 3),
+      );
+    }
+    if (widget.categoryId == 'transport' && index == 3) {
+      return Transit04Screen(
+        partner: widget.partner,
+        onNextProblem: () => setState(() => index = 4),
+      );
+    }
+    if (widget.categoryId == 'transport' && index == 4) {
+      return Transit05Screen(
+        partner: widget.partner,
+        onNextProblem: () => setState(() => index = 5),
+      );
+    }
+    if (widget.categoryId == 'transport' && index == 5) {
+      return Transit06Screen(partner: widget.partner);
+    }
     if (s.phase == 'complete') return _completion();
     final explanation = s.phase == 'explanation' || s.phase == 'review';
     final color = _wrong ? _red : _green;

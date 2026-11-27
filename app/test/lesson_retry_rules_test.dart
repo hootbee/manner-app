@@ -21,7 +21,12 @@ void main() {
     digitalQuestions,
   ]) {
     for (final kind in [QuestionKind.sequence, QuestionKind.drag]) {
-      final index = questions.indexWhere((q) => q.kind == kind);
+      final index = questions.indexWhere(
+        (q) => q.kind == kind && (q.categoryId != 'transport' || q.number >= 7),
+      );
+      // Dedicated 01/02 drag lessons have their own retry tests; there may be
+      // no remaining legacy drag question in this category after replacing 05.
+      if (index < 0) continue;
       final q = questions[index];
       testWidgets(
         '${q.categoryId} $kind visibly marks incorrect input after resume',
@@ -129,14 +134,14 @@ void main() {
     'review button restarts, success only offers completion, failed history remains visible',
     (t) async {
       final store = TransportProgress(persist: false);
-      final q = transportQuestions[2];
+      final q = transportQuestions[6];
       await t.pumpWidget(
         MaterialApp(
           builder: (c, child) => MediaQuery(
             data: MediaQuery.of(c).copyWith(disableAnimations: true),
             child: child!,
           ),
-          home: TransportLessonScreen(index: 2, store: store),
+          home: TransportLessonScreen(index: 6, store: store),
         ),
       );
       for (var i = 0; i < 3; i++) {
