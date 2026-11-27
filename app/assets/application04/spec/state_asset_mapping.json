@@ -1,0 +1,87 @@
+{
+  "common_card_art": {
+    "A": "assets/cards/action_hold_handle.png",
+    "B": "assets/cards/action_check_next_stop.png",
+    "C": "assets/cards/action_exit_after_stop.png",
+    "D": "assets/cards/action_press_stop_button.png"
+  },
+  "initial": {
+    "cards": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "submit_enabled": false,
+    "hint_open": false,
+    "feedback": null,
+    "scene": "selected_character_scene"
+  },
+  "reordered": {
+    "cards": "client reorder state",
+    "submit_enabled": true,
+    "evaluate_on": "submit only",
+    "scene": "selected_character_scene"
+  },
+  "submitted_correct": {
+    "when": "accepted order after approval",
+    "ui": "existing common O popup",
+    "scene_assets_changed": false,
+    "blocked_until_grading_approved": false
+  },
+  "submitted_wrong": {
+    "when": "submitted order rejected",
+    "ui": "existing common X popup",
+    "scene_assets_changed": false,
+    "blocked_until_grading_approved": false
+  },
+  "retry": {
+    "max_valid_submissions": 4,
+    "card_reorder_enabled": true,
+    "scene_assets_changed": false
+  },
+  "final_failure": {
+    "when": "valid_submissions == 4 and none accepted",
+    "ui": "existing answer reveal, no earned success or XP",
+    "scene_assets_changed": false,
+    "blocked_until_grading_approved": false
+  },
+  "hint_1": {
+    "ui": "existing hint popup with selected character profile",
+    "button": "다음 힌트 보기",
+    "attempt_delta": 0,
+    "scene": "selected_character_scene"
+  },
+  "hint_2": {
+    "ui": "existing hint popup with selected character profile",
+    "button": "close",
+    "attempt_delta": 0,
+    "scene": "selected_character_scene"
+  },
+  "explanation": {
+    "ui": "reuse application explanation UI",
+    "source": "content/explanation.json",
+    "scene_assets_changed": false,
+    "content_status": "APPROVED"
+  },
+  "completion": {
+    "next": "rewards screen only when learning flow completed, reward determined by existing reward system",
+    "scene_assets_changed": false
+  },
+  "notes": "User-approved grading and education; reuse original B artwork and common sequence UI.",
+  "schema_version": "2.0-B",
+  "scene_mode": "replace_whole_completed_scene_on_selected_character_change",
+  "scene_by_character": {
+    "nyangnyang": "assets/scenes/scene_nyangnyang.png",
+    "dangdang": "assets/scenes/scene_dangdang.png",
+    "mongmong": "assets/scenes/scene_mongmong.png"
+  },
+  "scene_selection": {
+    "source": "app.selected_character_id",
+    "fallback": "nyangnyang",
+    "require_matching_name_binding": true,
+    "initial_and_all_result_states": "reuse same selected scene without modifying raster",
+    "separate_character_or_emotion_layers": false
+  },
+  "instruction_text": "올바른 행동 순서대로 카드를 드래그해 주세요."
+}

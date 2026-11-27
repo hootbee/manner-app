@@ -1,0 +1,115 @@
+{
+  "schema_version": "2.0-B",
+  "problem_id": "transit04_application",
+  "runtime_art_mode": "character_specific_completed_scene_png",
+  "approved_design_policy": "Do not edit the three approved bus-scene PNGs or four approved card thumbnails; reuse Flutter native UI.",
+  "scene": {
+    "source_screenshot_canvas_px": [
+      1024,
+      1536
+    ],
+    "approved_crop_box_xyxy_px": [
+      24,
+      425,
+      1000,
+      822
+    ],
+    "runtime_scene_canvas_px": [
+      976,
+      397
+    ],
+    "coordinate_origin": "top-left",
+    "positive_x": "right",
+    "positive_y": "down",
+    "display_fit": "contain",
+    "display_aspect_ratio": 2.458438287,
+    "layout": "Render selected scene as a single image. Keep aspect ratio and do not overlay a separately reconstructed seat, window, character, or emotion line. Black rounded frame is part of approved raster; do not double-draw it.",
+    "source_integrity": "Pixel-identical crop of three final user-approved screenshots. No redrawing, recoloring, scaling or inpainting.",
+    "scene_images_embed": [
+      "bus interior",
+      "main character",
+      "two passenger groups",
+      "emotion lines",
+      "rail",
+      "next stop display",
+      "closed doors"
+    ]
+  },
+  "characters": {
+    "nyangnyang": {
+      "display_name": "냥냥이",
+      "scene_path": "assets/scenes/scene_nyangnyang.png"
+    },
+    "dangdang": {
+      "display_name": "댕댕이",
+      "scene_path": "assets/scenes/scene_dangdang.png"
+    },
+    "mongmong": {
+      "display_name": "몽몽이",
+      "scene_path": "assets/scenes/scene_mongmong.png"
+    }
+  },
+  "default_selected_character": "nyangnyang",
+  "cards": {
+    "A": {
+      "path": "assets/cards/action_hold_handle.png",
+      "native_C_sequence_card": true,
+      "size_px": [
+        247,
+        86
+      ],
+      "initial_slot": 1
+    },
+    "B": {
+      "path": "assets/cards/action_check_next_stop.png",
+      "native_C_sequence_card": true,
+      "size_px": [
+        247,
+        86
+      ],
+      "initial_slot": 2
+    },
+    "C": {
+      "path": "assets/cards/action_exit_after_stop.png",
+      "native_C_sequence_card": true,
+      "size_px": [
+        247,
+        86
+      ],
+      "initial_slot": 3
+    },
+    "D": {
+      "path": "assets/cards/action_press_stop_button.png",
+      "native_C_sequence_card": true,
+      "size_px": [
+        247,
+        85
+      ],
+      "initial_slot": 4
+    }
+  },
+  "layers_in_flutter": [
+    "selected_completed_scene",
+    "native_instruction_capsule",
+    "native_draggable_card_list_C",
+    "native_hint_and_submit_buttons",
+    "native_O_X_feedback"
+  ],
+  "legacy_A_separate_layers_included": false,
+  "reuse_native_UI": {
+    "logo_and_header": true,
+    "progress_capsule": true,
+    "title_description": true,
+    "drag_instruction_icon_and_capsule": true,
+    "sequence_C_cards_border_text_and_six_dot_handles": true,
+    "hint_and_submit_buttons": true,
+    "O_X_popup_haptics_and_sounds": true,
+    "no_raster_text_overlays_from_full_screenshots": true,
+    "initial_submit_enabled": false
+  },
+  "qa_status": {
+    "approved_scene_crop": "pixel_verified",
+    "cards_v4": "byte_identical",
+    "flutter_real_runtime": "NOT_TESTED"
+  }
+}

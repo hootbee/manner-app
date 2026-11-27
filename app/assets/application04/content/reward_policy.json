@@ -1,0 +1,8 @@
+{
+  "topic_id": "transit_04",
+  "rewards": {"FIRST_DIRECT": 20, "FIRST_ANSWER_REVEAL": 0, "REVIEW": 0},
+  "direct_amount_source": "Reuse existing prototype common first-direct topic reward; adjustable configuration",
+  "approval_source": "User final learning-function request: final answer reveal must grant no XP",
+  "completion_requires": "Both basic and application explanations acknowledged",
+  "idempotency": "existing TopicCompletionGateway per-user/topic first-completion key"
+}

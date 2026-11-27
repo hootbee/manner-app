@@ -1,0 +1,99 @@
+{
+  "problemId": "transit_04_basic",
+  "category": "public_transport",
+  "sequenceNumber": "04/20",
+  "type": "sequence",
+  "locale": "ko-KR",
+  "title": "버스에서 다른 승객을 배려하며 내리려면 어떻게 해야 할까요?",
+  "scenario": "버스가 곧 정류장에 도착해요. 몽몽이 앞에는 천천히 내리려는 어르신이 있고, 뒤에도 하차할 승객들이 있어요.\n모두가 편안하게 내리려면 어떤 순서로 행동해야 할까요?",
+  "instruction": "행동 카드를 드래그해 올바른 순서로 정렬해 보세요.",
+  "cards": [
+    {
+      "id": "hold",
+      "label": "손잡이를 잡고 정차를 기다린다.",
+      "thumbnail": "assets/cards/hold_square_final.webp",
+      "thumbnailAspectRatio": 1
+    },
+    {
+      "id": "observe",
+      "label": "열린 하차문과 앞 승객을 살핀다.",
+      "thumbnail": "assets/cards/observe_square_final.webp",
+      "thumbnailAspectRatio": 1
+    },
+    {
+      "id": "wait",
+      "label": "어르신과 거리를 두고 기다린다.",
+      "thumbnail": "assets/cards/wait_square_final.webp",
+      "thumbnailAspectRatio": 1
+    },
+    {
+      "id": "exit",
+      "label": "내 차례에 내려 통로를 비운다.",
+      "thumbnail": "assets/cards/exit_square_final.webp",
+      "thumbnailAspectRatio": 1
+    }
+  ],
+  "correctOrder": [
+    "hold",
+    "observe",
+    "wait",
+    "exit"
+  ],
+  "initialOrderExample": [
+    "wait",
+    "exit",
+    "hold",
+    "observe"
+  ],
+  "shuffle": {
+    "excludeCorrectOrder": true,
+    "onSessionStart": true
+  },
+  "gradeTrigger": "submit_button_only",
+  "submitEnabledAfterReorder": true,
+  "maxValidSubmissions": 4,
+  "hintCount": 2,
+  "hintConsumesAttempt": false,
+  "hints": [
+    "버스가 움직일 때 해야 할 행동과 문이 열린 뒤 해야 할 행동을 구분해 보세요.",
+    "어르신의 움직임을 확인했다면, 어르신이 내리는 동안 어떤 배려가 필요할까요?"
+  ],
+  "feedback": {
+    "correct": "잘했어요! 먼저 내리는 승객을 재촉하지 않고 배려하며 차례대로 하차했어요.",
+    "wrong": "아직 행동 순서가 자연스럽지 않아요. 버스가 움직일 때와 문이 열린 뒤의 상황을 다시 생각해 보세요.",
+    "finalFailure": "4번째 오답 후 자동 정답 공개 금지. 정답 확인 버튼을 누른 경우에만 정답 배열 시범."
+  },
+  "reward": {
+    "correctSubmit": {
+      "success": true,
+      "xpPolicy": "existing shared component"
+    },
+    "solutionRevealed": {
+      "success": false,
+      "xp": 0,
+      "grantFirstCompletionReward": false
+    }
+  },
+  "explanation": {
+    "coreEtiquette": "먼저 내리는 승객을 밀거나 재촉하지 않고, 충분한 거리를 두며 차례대로 하차해요.",
+    "learningPoint": "내가 빨리 내리는 것보다 다른 사람의 속도와 상황을 존중하는 것이 중요해요.",
+    "characterSays": "조금 천천히 가더라도, 서로 기다려 주면 모두 편안하게 내릴 수 있어요!",
+    "contentFile": "education_content_transit04.md"
+  },
+  "layout": {
+    "referenceDeviceWidthPx": 1024,
+    "previewViewportHeightPx": 1536,
+    "isScrollAllowedForHintsAndFeedback": true,
+    "cardHeightDpRange": [
+      80,
+      96
+    ],
+    "cardGapDp": 12,
+    "cardThumbnailDpRange": [
+      56,
+      64
+    ],
+    "reorderKey": "id"
+  },
+  "sourceAssetQuality": "Approved flatten scene reused. No editable passenger/monkey separation from original flat mockup."
+}
