@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -28,37 +27,17 @@ void main() {
       Uint8List? saved, shared;
       var saveCalls = 0;
       final pendingSave = Completer<StatImageResult>();
-      const output = String.fromEnvironment('CAPTURE_DIR');
-      if (output.isNotEmpty) {
-        await tester.runAsync(() async {
-          for (final (family, path) in [
-            ('PreviewKorean', const String.fromEnvironment('PREVIEW_FONT')),
-            (
-              'MaterialIcons',
-              const String.fromEnvironment('PREVIEW_ICONS_FONT'),
-            ),
-          ]) {
-            if (path.isNotEmpty) {
-              await (FontLoader(family)..addFont(
-                    File(path).readAsBytes().then(ByteData.sublistView),
-                  ))
-                  .load();
-            }
-          }
-        });
-      }
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(fontFamily: 'PreviewKorean'),
           home: StatShareScreen(
             home: home,
             stats: const [
-              AreaStat('대화', 80),
-              AreaStat('식사', 60),
+              AreaStat('연애', 80),
+              AreaStat('친구', 60),
               AreaStat('공공장소', 70),
-              AreaStat('대중교통', 90),
-              AreaStat('학교·직장', 65),
-              AreaStat('디지털', 75),
+              AreaStat('직장', 90),
+              AreaStat('어른·가족', 65),
+              AreaStat('메시지', 75),
             ],
             partner: MannerPartner.dog,
             preview: true,
@@ -108,13 +87,7 @@ void main() {
       expect(saveCalls, 1);
       pendingSave.complete(StatImageResult.denied);
       await tester.pumpAndSettle();
-      if (output.isNotEmpty) {
-        await tester.runAsync(
-          () => File(
-            '$output${Platform.pathSeparator}stat-share.png',
-          ).writeAsBytes(saved!),
-        );
-      }
+
       expect(find.text('사진 저장 권한이 필요해요. 기기 설정에서 권한을 허용해주세요.'), findsOneWidget);
       expect(saved!.take(8), [137, 80, 78, 71, 13, 10, 26, 10]);
       await tester.runAsync(() async {
