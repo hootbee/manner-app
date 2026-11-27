@@ -276,7 +276,7 @@ void _a6(Set<Object?> Function(String) enumOf) {
       File('${tmp.path}/sub/deeper/bad.md').writeAsStringSync('이 상황은 stairs 로 낸다');
       File('${tmp.path}/sub/note.txt').writeAsStringSync('stairs');
       final files = promptFiles(tmp);
-      expect(files.map((f) => f.path.split('/').last).toSet(), {'ok.md', 'bad.md'});
+      expect(files.map((f) => f.uri.pathSegments.last).toSet(), {'ok.md', 'bad.md'});
       final hits = forbiddenHits({for (final f in files) f.path: f.readAsStringSync()}, forbidden);
       expect(hits, hasLength(1));
       expect(hits.single, endsWith('bad.md: stairs'));
