@@ -1,3 +1,6 @@
+import 'package:mannerfit/fake/wardrobe_preview.dart';
+import 'package:mannerfit/screens/wardrobe_screen.dart';
+import 'package:mannerfit/screens/partner_artwork.dart';
 import 'package:mannerfit/screens/settings_screen.dart';
 import 'package:mannerfit/backend.dart';
 import 'package:mannerfit/fake/fake_backend.dart';
@@ -10,6 +13,72 @@ import 'package:mannerfit/screens/partner_selection_screen.dart';
 
 void main() {
   setUp(() => backend = FakeBackend());
+
+  testWidgets(
+    'live profile hides wardrobe and badge preview; home keeps sparkles',
+    (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: MyPageScreen(partner: MannerPartner.dog)),
+      );
+      expect(find.text('캐릭터 꾸미기'), findsNothing);
+      expect(find.text('꾸미기 상점'), findsNothing);
+      expect(find.textContaining('획득한 배지'), findsNothing);
+      await tester.pumpWidget(
+        const MaterialApp(home: HomeScreen(partner: MannerPartner.dog)),
+      );
+      final artwork = tester.widget<PartnerArtwork>(
+        find
+            .descendant(
+              of: find.byType(AppliedClothingCharacter),
+              matching: find.byType(PartnerArtwork),
+            )
+            .first,
+      );
+      expect(artwork.showSparkles, isTrue);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  for (final shop in [false, true]) {
+    testWidgets(
+      'profile opens wardrobe with shop=$shop and keeps selected partner',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 780);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final store = WardrobePreview();
+        addTearDown(store.dispose);
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) => WardrobeBinding(
+              state: store.state,
+              catalog: WardrobePreview.catalog,
+              purchase: store.purchase,
+              equip: store.equip,
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              ),
+            ),
+            home: const MyPageScreen(partner: MannerPartner.cat),
+          ),
+        );
+        final menu = find.text(shop ? '꾸미기 상점' : '캐릭터 꾸미기');
+        await tester.ensureVisible(menu);
+        await tester.pump();
+        await tester.tap(menu);
+        await tester.pumpAndSettle();
+        final screen = tester.widget<WardrobeScreen>(
+          find.byType(WardrobeScreen),
+        );
+        expect(screen.partner, MannerPartner.cat);
+        expect(screen.shop, shop);
+        expect(find.textContaining('획득한 배지'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   testWidgets(
     'selected partner reacts to tap and drag; menu remains reachable',
     (tester) async {

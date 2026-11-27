@@ -3,14 +3,18 @@ import 'stat_share_screen.dart';
 import '../backend.dart';
 import 'manner_stats_screen.dart';
 import 'wardrobe_screen.dart';
+
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import 'partner_selection_screen.dart';
 
 /// Profile presentation only. Account assets and XP await the backend contract.
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key, required this.partner, this.preview = false});
   final MannerPartner partner;
+  // Passed through to stats and sharing screens.
   final bool preview;
   @override
   State<MyPageScreen> createState() => _MyPageScreenState();
@@ -27,8 +31,7 @@ class _MyPageScreenState extends State<MyPageScreen>
   static const _menus = [
     (Icons.checkroom_outlined, '캐릭터 꾸미기', '나만의 매너 파트너를 꾸며보세요.'),
     (Icons.shopping_bag_outlined, '꾸미기 상점', '다양한 아이템을 구경해보세요.'),
-    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 분야의 성장 현황을 확인해요.'),
-    (Icons.menu_book_outlined, '학습 기록', '지금까지의 학습 내용을 모아보세요.'),
+    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 영역의 성장 현황을 확인해요.'),
     (Icons.share_outlined, '스탯 공유', '나의 성장을 친구들에게 공유해요.'),
     (Icons.settings_outlined, '설정', '계정 및 앱 설정을 관리해보세요.'),
   ];
@@ -41,9 +44,14 @@ class _MyPageScreenState extends State<MyPageScreen>
   void _notice(String label) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text('$label는 준비 중이에요.')));
-  void _openSettings() => Navigator.of(
-    context,
-  ).push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
+  void _openSettings() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => SettingsScreen(
+        includeWardrobeCoins: WardrobeBinding.maybeOf(context) != null,
+        preview: widget.preview,
+      ),
+    ),
+  );
   void _react() {
     _laugh.forward(from: 0);
   }
@@ -199,44 +207,27 @@ class _MyPageScreenState extends State<MyPageScreen>
               style: TextStyle(fontSize: 11, color: Colors.black54),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _panel(
-                    const Row(
-                      children: [
-                        Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
-                        SizedBox(width: 8),
-                        Expanded(child: PreviewCoinLabel()),
-                      ],
-                    ),
-                  ),
+            if (WardrobeBinding.maybeOf(context) != null) ...[
+              _panel(
+                const Row(
+                  children: [
+                    Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
+                    SizedBox(width: 8),
+                    Expanded(child: PreviewCoinLabel()),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _panel(
-                    const Row(
-                      children: [
-                        Icon(Icons.workspace_premium_outlined),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '—\n획득한 배지',
-                            style: TextStyle(fontSize: 12, height: 1.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+              ),
+              const SizedBox(height: 12),
+            ],
             _panel(
               Column(
                 children: [
-                  for (var i = 0; i < _menus.length; i++) ...[
-                    if (i > 0)
+                  for (
+                    var i = WardrobeBinding.maybeOf(context) == null ? 2 : 0;
+                    i < _menus.length;
+                    i++
+                  ) ...[
+                    if (i > (WardrobeBinding.maybeOf(context) == null ? 2 : 0))
                       const Divider(height: 1, color: Color(0xFFEEEEEE)),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -271,7 +262,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 2) {
+                        } else if (_menus[i].$2 == '나의 매너 스탯') {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => MannerStatsScreen(
@@ -281,7 +272,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 4) {
+                        } else if (_menus[i].$2 == '스탯 공유') {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => StatShareScreen(
@@ -292,7 +283,7 @@ class _MyPageScreenState extends State<MyPageScreen>
                               ),
                             ),
                           );
-                        } else if (i == 5) {
+                        } else if (_menus[i].$2 == '설정') {
                           _openSettings();
                         } else {
                           _notice(_menus[i].$2);

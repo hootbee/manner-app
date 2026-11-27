@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'partner_artwork.dart';
 import 'partner_selection_screen.dart';
 
@@ -38,7 +39,7 @@ class AppliedClothingCharacter extends StatelessWidget {
   Widget build(BuildContext context) {
     final binding = WardrobeBinding.maybeOf(context);
     if (binding == null) {
-      return PartnerArtwork(partner: partner, showSparkles: false);
+      return PartnerArtwork(partner: partner);
     }
     return ValueListenableBuilder<WardrobeView>(
       valueListenable: binding.state,
@@ -479,7 +480,7 @@ class ClothingCharacter extends StatelessWidget {
     builder: (context, t) => Stack(
       fit: StackFit.expand,
       children: [
-        PartnerArtwork(partner: partner, showSparkles: false),
+        PartnerArtwork(partner: partner),
         if (outfit != 'suit')
           IgnorePointer(
             child: Center(
