@@ -1,0 +1,294 @@
+{
+  "model": "action_touch_then_drag",
+  "scene_canvas_px": [
+    1536,
+    1024
+  ],
+  "ui_developed_with_flutter": true,
+  "shared_runtime": [
+    "assets/runtime/overlays/conversation.webp",
+    "assets/runtime/effects/effect_correct_o.webp",
+    "assets/runtime/effects/effect_wrong_x.webp"
+  ],
+  "animation_layer_candidate": null,
+  "clean_background_candidate": null,
+  "states": {
+    "initial": {
+      "consent_received": false,
+      "recline_progress": 0,
+      "primary_button": null,
+      "hint_button": "힌트 보기",
+      "grade": null
+    },
+    "asking": {
+      "trigger": "dialogue_icon_tap",
+      "consent_received": false,
+      "dialogue_step": 1,
+      "grade": null
+    },
+    "consent_received": {
+      "trigger": "rear_reply_finished",
+      "consent_received": true,
+      "dialogue_step": 2,
+      "grade": null
+    },
+    "dragging": {
+      "trigger": "backrest_pan_update",
+      "recline_progress": "dynamic",
+      "grade": null
+    },
+    "correct_just_judged": {
+      "effect": "assets/runtime/effects/effect_correct_o.webp",
+      "grade": "correct",
+      "button_after_animation": "해설 보기"
+    },
+    "correct_complete": {
+      "grade": "correct",
+      "button": "해설 보기",
+      "hints_available": false
+    },
+    "wrong_no_consent": {
+      "effect": "assets/runtime/effects/effect_wrong_x.webp",
+      "grade": "wrong",
+      "button": "다시 시도하기",
+      "hint_available": true
+    },
+    "wrong_excessive": {
+      "effect": "assets/runtime/effects/effect_wrong_x.webp",
+      "grade": "wrong",
+      "button": "다시 시도하기",
+      "consent_received": true,
+      "hint_available": true
+    },
+    "hint_1": {
+      "grade": null,
+      "button": "다음 힌트 보기",
+      "bubble_fixed": true
+    },
+    "hint_2": {
+      "grade": null,
+      "button": "힌트 닫기",
+      "bubble_fixed": true
+    },
+    "invalid_reset": {
+      "grade": null,
+      "valid_attempt_delta": 0
+    },
+    "retry_reset": {
+      "grade": null,
+      "preserve_consent_if_already_received": true,
+      "valid_attempt_delta": 0
+    },
+    "final_failure": {
+      "grade": "failure",
+      "button": "정답 확인",
+      "auto_reveal": false,
+      "reward": 0
+    },
+    "answer_reveal": {
+      "grade": "failure",
+      "button": "해설 보기",
+      "auto_play_demo": [
+        "dialogue_icon_tap",
+        "consent_received",
+        "0.25_recline"
+      ],
+      "reward": 0,
+      "hints_available": false
+    },
+    "basic_explanation": {
+      "details_expanded": false,
+      "next_problem_enabled": false
+    },
+    "detailed_explanation": {
+      "details_expanded": true,
+      "next_problem_enabled": false
+    }
+  },
+  "character_variant_assets": {
+    "mongmong": {
+      "initial": "assets/runtime/characters/mongmong_initial.webp",
+      "asking": "assets/runtime/characters/mongmong_asking.webp",
+      "positive": "assets/runtime/characters/mongmong_positive.webp"
+    },
+    "dangdang": {
+      "initial": "assets/runtime/characters/dangdang_initial.webp",
+      "asking": "assets/runtime/characters/dangdang_asking.webp",
+      "positive": "assets/runtime/characters/dangdang_positive.webp"
+    },
+    "nyangnyang": {
+      "initial": "assets/runtime/characters/nyangnyang_initial.webp",
+      "asking": "assets/runtime/characters/nyangnyang_asking.webp",
+      "positive": "assets/runtime/characters/nyangnyang_positive.webp"
+    }
+  },
+  "rendering_z_order": [
+    {
+      "z": 0,
+      "asset": "assets/runtime/background/train_cabin_empty.webp"
+    },
+    {
+      "z": 1,
+      "asset": "assets/runtime/furniture/rear_fixed_seat.webp"
+    },
+    {
+      "z": 2,
+      "asset": "assets/runtime/furniture/front_fixed_seat_base.webp"
+    },
+    {
+      "z": 3,
+      "asset": "assets/runtime/furniture/front_backrest_rotating.webp",
+      "transform": "rotate at pivot"
+    },
+    {
+      "z": 4
+    },
+    {
+      "z": 5
+    },
+    {
+      "z": 6,
+      "asset": "assets/runtime/furniture/rear_fixed_table_laptop.webp"
+    },
+    {
+      "z": 7,
+      "asset": "assets/runtime/furniture/front_fixed_armrest_support.webp"
+    },
+    {
+      "z": 8,
+      "optional": true
+    },
+    {
+      "z": 9,
+      "optional": true
+    },
+    {
+      "z": 10,
+      "asset": "Flutter UI widgets, not an image"
+    }
+  ],
+  "runtime_asset_base": "assets/runtime",
+  "actual_png_composites": {
+    "initial": {
+      "character_state": "initial",
+      "rear_passenger_state": "working",
+      "recline_progress": 0.0,
+      "consent_received": false,
+      "effect": null,
+      "actual_png_composite": true
+    },
+    "asking_permission": {
+      "character_state": "asking",
+      "rear_passenger_state": "agree",
+      "recline_progress": 0.0,
+      "consent_received": true,
+      "effect": null,
+      "actual_png_composite": true
+    },
+    "mid_recline": {
+      "character_state": "asking",
+      "rear_passenger_state": "agree",
+      "recline_progress": 0.32,
+      "consent_received": true,
+      "effect": null,
+      "actual_png_composite": true
+    },
+    "correct": {
+      "character_state": "positive",
+      "rear_passenger_state": "comfortable",
+      "recline_progress": 0.36,
+      "consent_received": true,
+      "effect": "assets/runtime/effects/effect_correct_o.webp",
+      "actual_png_composite": true
+    },
+    "wrong_no_permission": {
+      "character_state": "initial",
+      "rear_passenger_state": "surprised",
+      "recline_progress": 0.36,
+      "consent_received": false,
+      "effect": "assets/runtime/effects/effect_wrong_x.webp",
+      "actual_png_composite": true
+    },
+    "wrong_excessive": {
+      "character_state": "initial",
+      "rear_passenger_state": "uncomfortable",
+      "recline_progress": 0.78,
+      "consent_received": true,
+      "effect": "assets/runtime/effects/effect_wrong_x.webp",
+      "actual_png_composite": true
+    }
+  },
+  "rear_passenger_reaction_assets": {
+    "working": "assets/runtime/passenger/rear_working.webp",
+    "agree": "assets/runtime/passenger/rear_agree.webp",
+    "surprised": "assets/runtime/passenger/rear_surprised.webp",
+    "uncomfortable": "assets/runtime/passenger/rear_uncomfortable.webp",
+    "comfortable": "assets/runtime/passenger/rear_comfortable.webp"
+  },
+  "furniture": {
+    "train_background": "assets/runtime/background/train_cabin_empty.webp",
+    "front_seatback_rotating": "assets/runtime/furniture/front_backrest_rotating.webp",
+    "front_seat_base_fixed": "assets/runtime/furniture/front_fixed_seat_base.webp",
+    "front_armrest_support_fixed": "assets/runtime/furniture/front_fixed_armrest_support.webp",
+    "rear_seat_fixed": "assets/runtime/furniture/rear_fixed_seat.webp",
+    "rear_table_laptop_fixed": "assets/runtime/furniture/rear_fixed_table_laptop.webp"
+  },
+  "scenes_rendered_from_actual_layers": true,
+  "state_asset_use_examples": {
+    "initial": {
+      "character": "initial",
+      "rear": "working",
+      "angle_progress": 0,
+      "consent_received": false
+    },
+    "asking": {
+      "character": "asking",
+      "rear": "agree",
+      "angle_progress": 0,
+      "consent_received": true
+    },
+    "correct_complete": {
+      "character": "positive",
+      "rear": "comfortable",
+      "angle_progress": 0.36,
+      "consent_received": true
+    },
+    "wrong_no_consent": {
+      "character": "initial",
+      "rear": "surprised",
+      "angle_progress": 0.36,
+      "consent_received": false
+    },
+    "wrong_excessive": {
+      "character": "initial",
+      "rear": "uncomfortable",
+      "angle_progress": 0.78,
+      "consent_received": true
+    },
+    "hint_1": {
+      "character": "initial",
+      "rear": "working",
+      "angle_progress": 0,
+      "consent_received": false
+    },
+    "hint_2": {
+      "character": "initial",
+      "rear": "working",
+      "angle_progress": 0,
+      "consent_received": false
+    },
+    "final_failure": {
+      "character": "initial",
+      "rear": "uncomfortable",
+      "angle_progress": 0,
+      "consent_received": false
+    },
+    "answer_reveal": {
+      "character": "positive",
+      "rear": "comfortable",
+      "angle_progress": 0.25,
+      "consent_received": true,
+      "award_xp": false
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "problem_id": "MANNERS_TRANSIT_06_APPLICATION",
+  "category": {
+    "id": "transit",
+    "label": "대중교통"
+  },
+  "lesson_progress": {
+    "number": 6,
+    "total": 20,
+    "stage": "application",
+    "part_index": 2,
+    "part_total": 2,
+    "display_label": "응용 06/20 · 2/2"
+  },
+  "problem_type": "choice",
+  "title": "앞좌석 등받이 때문에 불편하다면 어떻게 해야 할까요?",
+  "scenario": {
+    "template": "{characterName}는 장거리 기차에서 노트북으로 과제를 하고 있어요.\n그런데 앞 승객이 등받이를 갑자기 젖히면서 작업 공간이 좁아졌어요.\n이럴 때 어떻게 행동하는 것이 가장 적절할까요?",
+    "character_name_map": {
+      "mongmong": "몽몽이",
+      "nyangnyang": "냥냥이",
+      "dangdang": "댕댕이"
+    },
+    "per_character_lines": {
+      "mongmong": [
+        "몽몽이는 장거리 기차에서 노트북으로 과제를 하고 있어요.",
+        "그런데 앞 승객이 등받이를 갑자기 젖히면서 작업 공간이 좁아졌어요.",
+        "이럴 때 어떻게 행동하는 것이 가장 적절할까요?"
+      ],
+      "nyangnyang": [
+        "냥냥이는 장거리 기차에서 노트북으로 과제를 하고 있어요.",
+        "그런데 앞 승객이 등받이를 갑자기 젖히면서 작업 공간이 좁아졌어요.",
+        "이럴 때 어떻게 행동하는 것이 가장 적절할까요?"
+      ],
+      "dangdang": [
+        "댕댕이는 장거리 기차에서 노트북으로 과제를 하고 있어요.",
+        "그런데 앞 승객이 등받이를 갑자기 젖히면서 작업 공간이 좁아졌어요.",
+        "이럴 때 어떻게 행동하는 것이 가장 적절할까요?"
+      ]
+    }
+  },
+  "instruction": "가장 권장되는 행동을 선택해 주세요.",
+  "choices": [
+    {
+      "id": "A",
+      "text": "앞좌석 등받이를 손으로 밀어 원래 위치로 올린다."
+    },
+    {
+      "id": "B",
+      "text": "앞 승객에게 작업 공간이 좁아졌다고 정중히 설명하고, 등받이를 조금 조절해 줄 수 있는지 부탁한다."
+    },
+    {
+      "id": "C",
+      "text": "앞 승객에게 아무 말 없이 승무원에게 등받이를 당장 올리게 해 달라고 요구한다."
+    }
+  ],
+  "correct_choice_id": "B",
+  "initial_selection": null,
+  "grading": {
+    "trigger": "submit_button_only",
+    "selection_changes_do_not_grade": true,
+    "submit_button_enabled_if": "one_choice_selected",
+    "initial_attempts": 1,
+    "max_retries": 3,
+    "max_valid_submissions": 4,
+    "hint_does_not_count_attempt": true,
+    "on_correct": "reuse_common_correct_popup_then_application_explanation",
+    "on_wrong_with_attempts_left": "reuse_common_wrong_popup_then_retry",
+    "on_fourth_wrong": "show_learning_answer_reveal",
+    "answer_reveal_is_success": false,
+    "award_xp_on_answer_reveal": false,
+    "common_effects": "reuse_existing_O_X_sound_haptics_animation"
+  },
+  "hint": {
+    "sequence": [
+      "hint_1",
+      "hint_2"
+    ],
+    "content_status": "APPROVED",
+    "content_pointer": "content/education_content_transit06.md",
+    "do_not_publish_unapproved_copy": false,
+    "messages": [
+      "앞 승객도 좌석을 편안하게 사용할 수 있어요. 하지만 내가 불편하다면 어떻게 마음을 전달하는 것이 좋을까요?",
+      "등받이를 직접 밀어 올리기보다는, 작업 공간이 좁아졌다는 상황을 정중히 설명하고 조절을 부탁해 보세요."
+    ]
+  },
+  "explanation": {
+    "content_status": "APPROVED",
+    "content_pointer": "content/education_content_transit06.md",
+    "reuse_common_application_explanation_ui": true
+  },
+  "rewards": {
+    "granting_logic": "reuse existing MANNERS per-topic completion and XP policy"
+  },
+  "scene_file_map": {
+    "mongmong": "assets/scenes/scene_mongmong.png",
+    "nyangnyang": "assets/scenes/scene_nyangnyang.png",
+    "dangdang": "assets/scenes/scene_dangdang.png"
+  },
+  "ui": "reuse approved Flutter Choice components",
+  "feedback": {
+    "A": "다른 사람의 등받이를 직접 밀면 위험하거나 갈등이 생길 수 있어요.",
+    "C": "승무원의 도움을 받을 수도 있지만, 일방적으로 조치를 요구하기보다 정중한 해결 방법을 먼저 생각해 보세요.",
+    "B": "좋아요! 상대를 존중하면서 자신의 불편함을 정중하게 전달했어요!"
+  },
+  "answer_reveal": "가장 권장되는 행동은 B예요. 불편하더라도 상대방의 등받이를 직접 움직이지 말고, 자신의 상황을 정중하게 설명하며 조절을 부탁하는 것이 좋아요."
+}

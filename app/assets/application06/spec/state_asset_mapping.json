@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "problem_id": "MANNERS_TRANSIT_06_APPLICATION",
+  "scene_mode": "character_specific_completed_scene_png",
+  "selected_character_scene_map": {
+    "mongmong": "assets/scenes/scene_mongmong.png",
+    "nyangnyang": "assets/scenes/scene_nyangnyang.png",
+    "dangdang": "assets/scenes/scene_dangdang.png"
+  },
+  "selected_character_name_map": {
+    "mongmong": "몽몽이",
+    "nyangnyang": "냥냥이",
+    "dangdang": "댕댕이"
+  },
+  "scene_selection_rule": "Use mapped key (mongmong/nyangnyang/dangdang); never infer identity from image order.",
+  "scene_reuse_for_all_choice_states": true,
+  "states": {
+    "initial": {
+      "selected_choice": null,
+      "submit_enabled": false,
+      "hint_visible": false,
+      "scene": "selected_character_scene_map"
+    },
+    "selected": {
+      "selected_choice": "A|B|C",
+      "submit_enabled": true,
+      "scene": "same"
+    },
+    "submitted": {
+      "trigger": "tap_submit",
+      "judge_choice": true,
+      "scene": "same"
+    },
+    "correct": {
+      "condition": "submitted_choice == B",
+      "feedback": "reuse_common_O",
+      "scene": "same",
+      "next": "application_explanation"
+    },
+    "wrong": {
+      "condition": "submitted_choice in [A,C] AND valid_submissions < 4",
+      "feedback": "reuse_common_X",
+      "scene": "same",
+      "next": "retry"
+    },
+    "retry": {
+      "allow_change_choice": true,
+      "scene": "same",
+      "hint_attempt_delta": 0
+    },
+    "final_failure": {
+      "condition": "4 valid incorrect submissions",
+      "feedback": "show_answer_for_learning",
+      "count_as_direct_success": false,
+      "award_xp": false,
+      "scene": "same"
+    },
+    "hint_1": {
+      "source": "content/education_content_transit06.md",
+      "content_status": "APPROVED",
+      "attempt_delta": 0,
+      "scene": "same"
+    },
+    "hint_2": {
+      "source": "content/education_content_transit06.md",
+      "content_status": "APPROVED",
+      "attempt_delta": 0,
+      "scene": "same"
+    },
+    "application_explanation": {
+      "source": "content/education_content_transit06.md",
+      "content_status": "APPROVED",
+      "reuse_shared_flutter_ui": true
+    }
+  },
+  "do_not_render_separate_character_sprite": true,
+  "on_character_changed": "Change scene PNG and characterName within shared scenario; do not change other visual assets."
+}

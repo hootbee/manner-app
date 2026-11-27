@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "problem_id": "MANNERS_TRANSIT_06_APPLICATION",
+  "rendering_approach": "B_COMPLETE_SCENE_PER_CHARACTER",
+  "art_status": "USER_APPROVED",
+  "scene_canvas_px": {
+    "width": 935,
+    "height": 410,
+    "aspect_ratio": "187:82",
+    "origin": "top_left",
+    "axes": {
+      "x": "right",
+      "y": "down"
+    }
+  },
+  "source_screenshot_canvas_px": [
+    1024,
+    1536
+  ],
+  "source_crop_box_xyxy_px": [
+    45,
+    425,
+    980,
+    835
+  ],
+  "scene_includes": [
+    "train_interior",
+    "front_reclining_seat_and_passenger",
+    "selected_protagonist",
+    "laptop_and_foldable_table",
+    "other_passengers",
+    "approved_rounded_black_frame"
+  ],
+  "scene_excludes": [
+    "MANNERS logo/header",
+    "progress pill",
+    "question title and scenario",
+    "instruction capsule",
+    "Choice A/B/C card components",
+    "hint and submit buttons",
+    "O/X feedback and effect sounds"
+  ],
+  "scene_images": {
+    "mongmong": {
+      "path": "assets/scenes/scene_mongmong.png",
+      "character_name": "몽몽이"
+    },
+    "nyangnyang": {
+      "path": "assets/scenes/scene_nyangnyang.png",
+      "character_name": "냥냥이"
+    },
+    "dangdang": {
+      "path": "assets/scenes/scene_dangdang.png",
+      "character_name": "댕댕이"
+    }
+  },
+  "flutter_display": {
+    "widget": "Image.asset",
+    "box_fit": "contain",
+    "aspect_ratio": 2.2804878048780486,
+    "border_already_in_png": true,
+    "do_not_add_duplicate_border": true,
+    "no_background_character_layer_compositing": true,
+    "responsive": "Use an AspectRatio or fitted image; do not use BoxFit.cover/crop."
+  },
+  "original_approved_art_preservation": "Scene is a pixel-identical, unscaled crop of each approved full UI image; no repainting, inpainting or image generation.",
+  "ui_external": "Reuse Flutter approved Choice UI. Display the selected scene file only.",
+  "qa": "qa/approved_vs_runtime.png"
+}

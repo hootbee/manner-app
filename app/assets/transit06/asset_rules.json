@@ -1,0 +1,117 @@
+{
+  "design_canvas_px": [
+    1536,
+    1024
+  ],
+  "image_source": "assets/runtime/background/train_cabin_empty.webp",
+  "source_crop_original_px": [
+    32,
+    773,
+    991,
+    1369
+  ],
+  "mapping": {
+    "method": "contain_letterbox",
+    "scale_x": 1.6016684,
+    "scale_y": 1.602349,
+    "offset_px": [
+      0,
+      35
+    ],
+    "coordinates": "reference image original 1024x1535 -> 1536x1024 train stage"
+  },
+  "pivot_px": [
+    711,
+    836
+  ],
+  "pivot_is_approximate": false,
+  "drag_start_hitbox_px": [
+    316,
+    225,
+    874,
+    902
+  ],
+  "dialogue_touch_hitbox_px": [
+    150,
+    215,
+    328,
+    390
+  ],
+  "drag_bounds_px": [
+    0,
+    0,
+    1536,
+    1024
+  ],
+  "position_reference": "seatback final normalized recline progress; do not classify using drop XY rectangles",
+  "gameplay_max_rotation_degrees": 20,
+  "gameplay_max_rotation_not_train_spec": true,
+  "movement_direction": "visual top of seatback rotates toward screen-right for greater recline; base/armrest remain fixed",
+  "recline_progress_bounds": [
+    0.0,
+    1.0
+  ],
+  "grading_rules_ordered": [
+    {
+      "when": "gesture_cancelled_or_outside_surface",
+      "result": "invalid",
+      "valid_attempt_delta": 0,
+      "reset": "original upright state"
+    },
+    {
+      "when": "progress < 0.10",
+      "result": "invalid",
+      "valid_attempt_delta": 0,
+      "reset": "original upright state"
+    },
+    {
+      "when": "progress >= 0.10 and consent_received == false",
+      "result": "wrong_no_consent",
+      "valid_attempt_delta": 1
+    },
+    {
+      "when": "0.10 <= progress <= 0.45 and consent_received == true",
+      "result": "correct",
+      "valid_attempt_delta": 1
+    },
+    {
+      "when": "progress > 0.45 and consent_received == true",
+      "result": "wrong_excessive",
+      "valid_attempt_delta": 1
+    }
+  ],
+  "boundaries": {
+    "correct_min_inclusive": 0.1,
+    "correct_max_inclusive": 0.45,
+    "without_consent_priority": "wrong_no_consent"
+  },
+  "response_motion": {
+    "correct_max_rotation_deg": 9.0,
+    "wrong_excessive_max_rotation_deg": 20.0
+  },
+  "gesture_enabled_in": [
+    "initial",
+    "consent_received",
+    "hint_1",
+    "hint_2",
+    "wrong_complete_after_retry"
+  ],
+  "consent_received_persists_after_wrong_excessive": true,
+  "do_not_grade_while_dragging": true,
+  "duplicate_input_lock_during_result_animation": true,
+  "asset_limitation": "New independent layers and PNG composites verified technically; pixel-for-pixel similarity to previous approved flat illustration is not guaranteed; professional art parity review required before final visual signoff.",
+  "asset_version": "runtime_v2_2026-11-22",
+  "scene_origin_px": [
+    0,
+    0
+  ],
+  "scene_canvas_px": [
+    1536,
+    1024
+  ],
+  "pivot_definition": "Chosen fixed art hinge anchor in current aligned independent seatback/base layer",
+  "drag_start_alpha_mask": "assets/runtime/masks/backrest_drag_start_mask.webp",
+  "rotation_implementation": "Rotate only assets/runtime/furniture/front_backrest_rotating.webp about (711,836) in full stage; forward progress * 20 degrees clockwise in stage coordinates; image renderer uses cv2 -angle; DO NOT rotate base, characters, laptop",
+  "original_grading_unchanged": true,
+  "coordinate_note": "These coordinates are based on ACTUAL newly produced independently composed scene, not previous original flattened reference. Original pivot (706,903) is obsolete for this new asset geometry."
+}
