@@ -1,4 +1,5 @@
 import 'wardrobe_screen.dart';
+import 'activity_screen.dart';
 import 'my_page_screen.dart';
 import 'challenges_screen.dart';
 import 'digital_questions.dart';
@@ -54,11 +55,33 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  bool _attendanceChecked = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_attendanceChecked) return;
+    final activity = ActivityBinding.maybeOf(context);
+    if (activity == null) return;
+    _attendanceChecked = true;
+    if (activity.claimAutomaticPopup()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) showAttendance(context, widget.partner);
+      });
+    }
+  }
+
+  void _openActivity() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => ActivityScreen(partner: widget.partner),
+    ),
+  );
   bool _expanded = false;
   int? _focusedRecord;
   Future<void> _openLearning() async {
     final destination = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const LearningCategoryScreen()),
+      MaterialPageRoute(
+        builder: (_) => LearningCategoryScreen(partner: widget.partner),
+      ),
     );
     if (mounted && destination == 'profile') _openProfile();
   }
@@ -239,34 +262,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         Positioned(
                           left: 10,
                           top: _expanded ? 93 : 119,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: _expanded ? 0 : 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Row(
-                              children: [
-                                SizedBox(
-                                  width: 20,
-                                  height: _expanded ? 20 : 25,
-                                  child: AmbientMotion(
-                                    builder: (_, t) =>
-                                        CustomPaint(painter: _Flame(t)),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _openActivity,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: _expanded ? 0 : 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                    height: _expanded ? 20 : 25,
+                                    child: AmbientMotion(
+                                      builder: (_, t) =>
+                                          CustomPaint(painter: _Flame(t)),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 5),
-                                const Text(
-                                  '7일 연속 학습',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
+                                  const SizedBox(width: 5),
+                                  const Text(
+                                    '7일 연속 학습',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -494,6 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             builder: (_) =>
                                                 TransportLessonScreen(
                                                   index: next < 0 ? 0 : next,
+                                                  partner: widget.partner,
                                                 ),
                                           ),
                                         );
@@ -721,6 +749,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? _openLearning()
                                 : i == 1
                                 ? _openChallenges()
+                                : i == 2
+                                ? showAttendance(context, widget.partner)
                                 : _notice('다음 화면은 준비 중이에요.'),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),

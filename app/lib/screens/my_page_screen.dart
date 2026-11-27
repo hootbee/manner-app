@@ -1,3 +1,4 @@
+import 'activity_screen.dart';
 import 'settings_screen.dart';
 import 'stat_share_screen.dart';
 import '../backend.dart';
@@ -14,6 +15,55 @@ class MyPageScreen extends StatefulWidget {
   final bool preview;
   @override
   State<MyPageScreen> createState() => _MyPageScreenState();
+}
+
+class _RewardEmblem extends CustomPainter {
+  const _RewardEmblem({required this.coin});
+  final bool coin;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.width / 2);
+    final radius = size.width / 2 - 1;
+    final fill = Paint();
+    if (!coin) {
+      final ribbon = Path()
+        ..moveTo(size.width * .22, size.width * .65)
+        ..lineTo(size.width * .17, size.height)
+        ..lineTo(size.width * .5, size.height * .86)
+        ..lineTo(size.width * .83, size.height)
+        ..lineTo(size.width * .78, size.width * .65)
+        ..close();
+      canvas.drawPath(ribbon, fill..color = const Color(0xFF252A27));
+    }
+    canvas.drawCircle(
+      center,
+      radius,
+      fill..color = coin ? const Color(0xFFE3A234) : const Color(0xFF252A27),
+    );
+    canvas.drawCircle(
+      center,
+      radius - 2.7,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.3
+        ..color = coin ? const Color(0xFFFFEAC2) : const Color(0xFFE9EDE9),
+    );
+    final star = Path();
+    for (var i = 0; i < 10; i++) {
+      final angle = -math.pi / 2 + i * math.pi / 5;
+      final r = radius * (i.isEven ? .57 : .27);
+      final p = center + Offset(math.cos(angle) * r, math.sin(angle) * r);
+      if (i == 0) {
+        star.moveTo(p.dx, p.dy);
+      } else {
+        star.lineTo(p.dx, p.dy);
+      }
+    }
+    canvas.drawPath(star..close(), fill..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(_RewardEmblem oldDelegate) => oldDelegate.coin != coin;
 }
 
 class _MyPageScreenState extends State<MyPageScreen>
@@ -102,94 +152,134 @@ class _MyPageScreenState extends State<MyPageScreen>
                     ? 0.0
                     : math.sin(_laugh.value * math.pi * 6) *
                           math.sin(_laugh.value * math.pi);
-                return Column(
-                  children: [
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 10,
+                return SizedBox(
+                  width: double.infinity,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        top: 82,
+                        bottom: 0,
+                        left: -20,
+                        right: -20,
+                        child: IgnorePointer(
+                          child: ShaderMask(
+                            blendMode: BlendMode.dstIn,
+                            shaderCallback: (bounds) => const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.white,
+                                Colors.white,
+                              ],
+                              stops: [0, .16, 1],
+                            ).createShader(bounds),
+                            child: AppliedWardrobeRoom(partner: widget.partner),
+                          ),
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: const Color(0xFFE7E8EA)),
-                      ),
-                      child: Text(
-                        laughing ? '꺄르르! 함께하니 즐거워요!' : '오늘도 함께\n작은 배려를 배워요.',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12, height: 1.5),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.partner.name,
-                      style: const TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      '레벨 · XP 연결 대기',
-                      style: TextStyle(fontSize: 11, color: Colors.black54),
-                    ),
-                    SizedBox(
-                      height: 238,
-                      child: Stack(
-                        alignment: Alignment.center,
+                      Column(
                         children: [
-                          Positioned(
-                            bottom: 12,
-                            child: Container(
-                              width: 224,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE9EBE9),
-                                borderRadius: BorderRadius.circular(100),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: const Color(0xFFE7E8EA),
                               ),
                             ),
+                            child: Text(
+                              laughing
+                                  ? '꺄르르! 함께하니 즐거워요!'
+                                  : '오늘도 함께\n작은 배려를 배워요.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 12, height: 1.5),
+                            ),
                           ),
-                          Semantics(
-                            label:
-                                '${widget.partner.name}, 터치하면 웃고 좌우로 드래그하면 회전해요.',
-                            button: true,
-                            onTap: _react,
-                            child: GestureDetector(
-                              key: const Key('profile-character'),
-                              behavior: HitTestBehavior.opaque,
-                              onTap: _react,
-                              onHorizontalDragUpdate: (details) => setState(
-                                () => _angle =
-                                    (_angle + details.delta.dx * .012) %
-                                    (math.pi * 2),
-                              ),
-                              child: SizedBox(
-                                width: 236,
-                                height: 236,
-                                child: Transform(
-                                  key: const Key('character-turn'),
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.identity()
-                                    ..setEntry(3, 2, .001)
-                                    ..rotateY(_angle),
-                                  child: Transform.translate(
-                                    offset: Offset(0, -bounce.abs() * 9),
-                                    child: Transform.rotate(
-                                      angle: bounce * .06,
-                                      child: AppliedClothingCharacter(
-                                        partner: widget.partner,
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.partner.name,
+                            style: const TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            '레벨 · XP 연결 대기',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 238,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Positioned(
+                                  bottom: 12,
+                                  child: Container(
+                                    width: 224,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF6F3EB),
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                  ),
+                                ),
+                                Semantics(
+                                  label:
+                                      '${widget.partner.name}, 터치하면 웃고 좌우로 드래그하면 회전해요.',
+                                  button: true,
+                                  onTap: _react,
+                                  child: GestureDetector(
+                                    key: const Key('profile-character'),
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: _react,
+                                    onHorizontalDragUpdate: (details) =>
+                                        setState(
+                                          () => _angle =
+                                              (_angle +
+                                                  details.delta.dx * .012) %
+                                              (math.pi * 2),
+                                        ),
+                                    child: SizedBox(
+                                      width: 204,
+                                      height: 204,
+                                      child: Transform(
+                                        key: const Key('character-turn'),
+                                        alignment: Alignment.center,
+                                        transform: Matrix4.identity()
+                                          ..setEntry(3, 2, .001)
+                                          ..rotateY(_angle),
+                                        child: Transform.translate(
+                                          offset: Offset(0, -bounce.abs() * 9),
+                                          child: Transform.rotate(
+                                            angle: bounce * .06,
+                                            child: AppliedClothingCharacter(
+                                              partner: widget.partner,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
@@ -205,7 +295,10 @@ class _MyPageScreenState extends State<MyPageScreen>
                   child: _panel(
                     const Row(
                       children: [
-                        Icon(Icons.stars_outlined, color: Color(0xFFB58C4E)),
+                        CustomPaint(
+                          size: Size(29, 29),
+                          painter: _RewardEmblem(coin: true),
+                        ),
                         SizedBox(width: 8),
                         Expanded(child: PreviewCoinLabel()),
                       ],
@@ -217,7 +310,10 @@ class _MyPageScreenState extends State<MyPageScreen>
                   child: _panel(
                     const Row(
                       children: [
-                        Icon(Icons.workspace_premium_outlined),
+                        CustomPaint(
+                          size: Size(29, 33),
+                          painter: _RewardEmblem(coin: false),
+                        ),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -279,6 +375,13 @@ class _MyPageScreenState extends State<MyPageScreen>
                                 partner: widget.partner,
                                 preview: widget.preview,
                               ),
+                            ),
+                          );
+                        } else if (i == 3) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  ActivityScreen(partner: widget.partner),
                             ),
                           );
                         } else if (i == 4) {
