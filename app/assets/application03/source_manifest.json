@@ -1,0 +1,65 @@
+{
+  "source": "v8",
+  "files": [
+    {
+      "path": "assets/background/scene_background.png",
+      "bytes": 467464,
+      "sha256": "c1ca64e2b0bfd4ff478523f7c7f8eedf0134e7358cfb33451d57b5f9957a8923"
+    },
+    {
+      "path": "assets/characters/character_dangdang.png",
+      "bytes": 215749,
+      "sha256": "6cbefa794f520d9fea3235ec564e0fdff7917734eac279d2e9e2ccc4f574c477"
+    },
+    {
+      "path": "assets/characters/character_mongmong.png",
+      "bytes": 235755,
+      "sha256": "ea4468768152814685b4075bd272b8c551d7aec90da2174f2728a933fb358d61"
+    },
+    {
+      "path": "assets/characters/character_nyangnyang.png",
+      "bytes": 244998,
+      "sha256": "decbdabc1dc83de2f59c25af1b73f97d4a926140f753bc5ceed1b9a83ce2bf84"
+    },
+    {
+      "path": "assets/effects/emotion_bystander.png",
+      "bytes": 9746,
+      "sha256": "ccd67b466e73a85d61be724121a53667a82bdbad410d1e3074d07d16923a9ed4"
+    },
+    {
+      "path": "assets/effects/emotion_hero.png",
+      "bytes": 9797,
+      "sha256": "c2cd49029823785b51f5e90aaa839ae7f0df479e77e87539ce7d1e6878a1d6a2"
+    },
+    {
+      "path": "assets/passengers/passenger_bystander.png",
+      "bytes": 204987,
+      "sha256": "aae2b7644dcfd4d6242e2854752159e54021a9ed82001870538170a6b43c24ec"
+    },
+    {
+      "path": "assets/passengers/passenger_seated.png",
+      "bytes": 205113,
+      "sha256": "f505a379e2dd7d45da273087f5142bd2d3b13db78a1db5eba7fe299044a64e00"
+    },
+    {
+      "path": "content/education_content_transit03.md",
+      "bytes": 4366,
+      "sha256": "1491d217a411f6ef80f52a4a678e3df6667a178060a24911f3bb2bdbb4c6bf14"
+    },
+    {
+      "path": "spec/asset_rules.json",
+      "bytes": 11998,
+      "sha256": "da2b0c22a33e0ce1db3f9392b953e6b5f144dc1f75911640e5a7dc852260e8ef"
+    },
+    {
+      "path": "spec/problem_choice_transit03.json",
+      "bytes": 4611,
+      "sha256": "b1485f95dae682f39abe2743d967d901ea4839bb3764b800c3fd6f6501582b93"
+    },
+    {
+      "path": "spec/state_asset_mapping.json",
+      "bytes": 2923,
+      "sha256": "bc3793a0c72ee0d51def1cb8bf259f3e3ba1ff041815315014bb58e04459ac86"
+    }
+  ]
+}

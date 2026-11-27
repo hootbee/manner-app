@@ -1,0 +1,340 @@
+{
+  "schema_version": "1.7",
+  "status": "V8_BACKGROUND_ONLY_REPAIR_PENDING_FINAL_ART_VISUAL_APPROVAL",
+  "coordinate_system": {
+    "origin": "top_left",
+    "x_axis": "right",
+    "y_axis": "down",
+    "units": "pixels",
+    "scene_canvas_px": [
+      1620,
+      938
+    ],
+    "approved_scene_crop_in_fullscreen_px": [
+      60,
+      586,
+      870,
+      1055
+    ],
+    "aspect_ratio": "810:469",
+    "image_scale_from_approved_scene": 2
+  },
+  "ui_implementation": "Flutter Widgets reuse existing layout; no UI text in runtime PNG",
+  "runtime_assets": {
+    "background": "assets/background/scene_background.png",
+    "hero": {
+      "dangdang": "assets/characters/character_dangdang.png",
+      "nyangnyang": "assets/characters/character_nyangnyang.png",
+      "mongmong": "assets/characters/character_mongmong.png"
+    },
+    "passengers": {
+      "seated": "assets/passengers/passenger_seated.png",
+      "bystander": "assets/passengers/passenger_bystander.png"
+    },
+    "effects": {
+      "hero_reaction": "assets/effects/emotion_hero.png",
+      "bystander_reaction": "assets/effects/emotion_bystander.png"
+    }
+  },
+  "layer_order_back_to_front": [
+    "background",
+    "seated_passenger",
+    "bystander",
+    "selected_hero",
+    "bystander_reaction_overlay",
+    "selected_hero_reaction_overlay",
+    "flutter_speech_bubble"
+  ],
+  "canvas_alignment": {
+    "anchor_for_all_full_scene_png": "top_left_0_0",
+    "sprite_source_bbox": "encoded_as_alpha_in_full_scene",
+    "scale_on_device": "BoxFit.contain",
+    "crop_policy": "no_crop",
+    "flutter_layout_padding": "use_existing_choice_screen_theme"
+  },
+  "foot_anchors_scene_px": {
+    "dangdang": [
+      335,
+      901
+    ],
+    "nyangnyang": [
+      335,
+      901
+    ],
+    "mongmong": [
+      335,
+      901
+    ],
+    "seated": [
+      870,
+      879
+    ],
+    "bystander": [
+      1259,
+      925
+    ]
+  },
+  "speech_bubble_flutter_widget": {
+    "text": "저 자리, 괜찮은 걸까?",
+    "body_rect_scene_px": [
+      938,
+      105,
+      1361,
+      348
+    ],
+    "tail_tip_scene_px": [
+      1186,
+      385
+    ],
+    "anchor_to_bystander": "above_head_right",
+    "geometry": "white oval balloon, black 5px border at 1620px canvas, tail oriented down-right toward the bystander",
+    "reference": "approved/scene_crop_APPROVED_REFERENCE_ONLY.png",
+    "text_sp": "reuse existing MANNERS choice scene bubble style",
+    "render_only_in_flutter": true,
+    "do_not_bake_into_bystander_png": true,
+    "render_order": "topmost overlay; ensure ceiling strap visible where not covered by original balloon outline",
+    "responsive": "apply same BoxFit.contain transform and content offset as scene layers",
+    "bubble_reference_bounds_px": [
+      938,
+      105,
+      1364,
+      387
+    ],
+    "stroke_width_at_scene_px": 5,
+    "text_line_breaks": [
+      "저 자리,",
+      "괜찮은 걸까?"
+    ],
+    "note": "For QA the approved balloon is extracted from the raster reference and composited into previews. It is not provided as a runtime PNG and is not a Flutter screenshot."
+  },
+  "hero_variants": {
+    "dangdang": {
+      "source": "approved initial scene",
+      "crop_method": "manual masked extraction",
+      "pose": "thinking"
+    },
+    "nyangnyang": {
+      "source": "MANNERS transit02 v7 approved standalone PNG",
+      "pose": "original independent standing; thinking pose not separately approved"
+    },
+    "mongmong": {
+      "source": "MANNERS transit02 v7 approved standalone PNG",
+      "pose": "original independent standing; thinking pose not separately approved"
+    }
+  },
+  "limitations": [
+    "The original flattened image does not reveal geometry hidden behind the characters or the speech bubble; right-side glazing is inferred, not an approved exact reconstruction.",
+    "Approved emotion lines were extracted into transparent layers. Check selected hero visual relationship in Flutter as hero poses differ.",
+    "Flutter runtime/device testing has not been performed; QA preview speech bubble is cut from approval reference, not a Flutter widget rendering.",
+    "Nyangnyang/Mongmong use approved standing poses; new thinking poses have not been approved.",
+    "v8 reuses all approved people PNGs unchanged. Right window was partially concealed in the flattened reference; final art visual judgment is pending."
+  ],
+  "restoration_v4": {
+    "source_version": "v3",
+    "method": "targeted local restoration only; no change to hero or passenger PNG bytes",
+    "canvas_px": [
+      1620,
+      938
+    ],
+    "repair_regions": {
+      "ceiling_rail_third_handle": [
+        875,
+        75,
+        1010,
+        255
+      ],
+      "right_wall_and_window": [
+        1100,
+        240,
+        1470,
+        548
+      ],
+      "priority_seat_left": [
+        525,
+        525,
+        690,
+        845
+      ],
+      "priority_seat_right": [
+        1048,
+        530,
+        1155,
+        845
+      ],
+      "floor_and_shadow": [
+        520,
+        788,
+        1155,
+        938
+      ]
+    },
+    "priority_seat": "silhouette and upholstery edges locally reconstructed, approved source icon pixels preserved",
+    "geometry_provenance": "existing visible outlines reused wherever practicable; hidden seat/wall geometry estimated",
+    "bubble_widget_geometry_changed": false,
+    "characters_and_passengers_changed": false,
+    "art_approval": "pending manual side-by-side review",
+    "historical_reference": "historical repair metadata; earlier QA images not included or required for v8 runtime"
+  },
+  "restoration_v5": {
+    "source_version": "v4",
+    "method": "localized window/glazing and third-handle-rail junction repair; approved v4 seat/ground and all 5 people PNG source bytes preserved",
+    "repair_regions_scene_px": {
+      "third_handle_and_rail": [
+        835,
+        80,
+        1005,
+        265
+      ],
+      "right_window_and_wall": [
+        1100,
+        240,
+        1470,
+        548
+      ]
+    },
+    "preserved_regions": [
+      "priority seat left and right boundaries",
+      "seat cushions and pictogram",
+      "floor and contact shadows"
+    ],
+    "previous_restoration_status": "restoration_v4 details retained as history, not active art status",
+    "emotion_overlays": {
+      "hero_reaction": {
+        "file": "assets/effects/emotion_hero.png",
+        "source": "three black marks extracted from approved illustration",
+        "source_bounds_scene_px": [
+          419,
+          334,
+          504,
+          413
+        ],
+        "follows_selected_hero": true,
+        "scene_placement": "full-canvas same scene coordinates, aligned to selected hero anchor [335,901]",
+        "do_not_bake_into_hero": true
+      },
+      "bystander_reaction": {
+        "file": "assets/effects/emotion_bystander.png",
+        "source": "three black marks extracted from approved illustration",
+        "source_bounds_scene_px": [
+          1417,
+          287,
+          1503,
+          363
+        ],
+        "follows_bystander": true,
+        "scene_placement": "fixed bystander [1259,925] anchor",
+        "do_not_bake_into_bystander": true
+      }
+    },
+    "character_and_passenger_png_changed": false,
+    "speech_bubble_widget_changed": false,
+    "art_approval": "manual approval pending; hidden wall shape is an inferred restoration",
+    "historical_reference": "historical repair metadata; earlier QA images not included or required for v8 runtime"
+  },
+  "restoration_v6": {
+    "source_version": "v5",
+    "focus": [
+      "right_window_wall_frame",
+      "third_grab_handle_lower_junction",
+      "dangdang_right_cheek_contour"
+    ],
+    "coordinate_canvas_px": [
+      1620,
+      938
+    ],
+    "base_assets_preserved": [
+      "assets/characters/character_nyangnyang.png",
+      "assets/characters/character_mongmong.png",
+      "assets/passengers/passenger_seated.png",
+      "assets/passengers/passenger_bystander.png",
+      "assets/effects/emotion_hero.png",
+      "assets/effects/emotion_bystander.png"
+    ],
+    "bubble_geometry_changed": false,
+    "new_window_geometry": "right-side window reconstructed with a single rounded dark frame and matching adjacent glass reflection; original occluded geometry not known",
+    "source_painted_over": "background limited to upper right wall and third-handle rail; approved seat and floor preserved",
+    "face_repair": "original-approved-pixel reference used to bridge missing right ear/cheek silhouette; no new dog design",
+    "review_status": "VISUAL_REVIEW_REQUIRED; not claimed pixel-exact to flattened original",
+    "historical_reference": "historical repair metadata; earlier QA images not included or required for v8 runtime"
+  },
+  "restoration_v7": {
+    "source_version": "v6",
+    "approach": "A: retain split background/passengers/hero layers; restore damaged geometry locally, no fixed-scene alternative applied",
+    "focus": [
+      "right_window_wall_integrated_structure",
+      "third_handle_window_top_overlap",
+      "dangdang_right_cheek_alpha_outline",
+      "dangdang_internal_hand_transparency"
+    ],
+    "repair_method": {
+      "right_window": "inferred right pane using matching glass texture from the original existing middle window, continuous rounded dark frame and surrounding wall; original masked background not recoverable",
+      "third_handle": "local window-rail band equalization and separation from handle contour; background only",
+      "dangdang_cheek": "approved-source pixel contour + smooth corrected silhouette alpha; no face redesign",
+      "dangdang_hand": "filled isolated alpha hole with original approved hand color"
+    },
+    "unchanged_pngs": [
+      "assets/characters/character_nyangnyang.png",
+      "assets/characters/character_mongmong.png",
+      "assets/passengers/passenger_seated.png",
+      "assets/passengers/passenger_bystander.png",
+      "assets/effects/emotion_hero.png",
+      "assets/effects/emotion_bystander.png"
+    ],
+    "preserved": [
+      "original pink seat and pictogram",
+      "seat lower area and floor pixels at y>=550",
+      "approved hero sizes and placements",
+      "speech bubble Flutter widget parameters"
+    ],
+    "canvas": [
+      1620,
+      938
+    ],
+    "visual_review": "PENDING: compare restored hidden right glazing and small strap-edge join against approved scene; original behind bubble/passenger inaccessible",
+    "flutter_run_test": "NOT_PERFORMED",
+    "historical_reference": "historical repair metadata; earlier QA images not included or required for v8 runtime"
+  },
+  "restoration_v8": {
+    "source_version": "v7",
+    "method": "local line-geometry repair using neighboring undamaged handhold and window frame references, small blemish clean-up, no new character or seat art",
+    "corrected_regions_scene_px": {
+      "third_handle_and_junction": [
+        916,
+        175,
+        982,
+        260
+      ],
+      "upper_wall_seam": [
+        1085,
+        228,
+        1135,
+        247
+      ],
+      "right_window_wall_frame_and_underframe": [
+        1100,
+        250,
+        1141,
+        538
+      ]
+    },
+    "modified_runtime_pngs": [
+      "assets/background/scene_background.png"
+    ],
+    "all_people_and_emotion_pngs_preserved_byte_for_byte": true,
+    "seat_pictogram_and_floor_preserved_byte_for_byte_at_y_at_least_550": true,
+    "active_qa_files": [
+      "qa/background_inspection.png",
+      "qa/third_handle_v7_v8_200pct.png",
+      "qa/right_window_v7_v8_200pct.png",
+      "qa/background_v7_v8_change_map.png",
+      "qa/approved_vs_runtime.png",
+      "qa/three_characters_preview.png",
+      "qa/layer_separation_check.png",
+      "qa/states_preview.png",
+      "qa/flutter_bubble_layout_guide.png"
+    ],
+    "source_occlusion_note": "Original approved flatten hides the right window and wall behind people and bubble; this is a visually inferred repair, not a reconstruction of unavailable pixels.",
+    "flutter_test": "NOT_PERFORMED",
+    "final_art_approval": "PENDING_USER_VISUAL_REVIEW"
+  }
+}

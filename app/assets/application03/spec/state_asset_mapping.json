@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.2",
+  "type": "choice",
+  "initial_asset_set": "scene_base",
+  "runtime_reuse_all_visual_states": true,
+  "selected_hero_default": "dangdang",
+  "hero_switcher": {
+    "dangdang": "assets/characters/character_dangdang.png",
+    "nyangnyang": "assets/characters/character_nyangnyang.png",
+    "mongmong": "assets/characters/character_mongmong.png"
+  },
+  "static_assets": [
+    "assets/background/scene_background.png",
+    "assets/passengers/passenger_seated.png",
+    "assets/passengers/passenger_bystander.png",
+    "assets/effects/emotion_bystander.png"
+  ],
+  "speech_bubble": "Flutter overlay from asset_rules.json",
+  "selection_and_result_ui": "Flutter existing common widgets",
+  "states": {
+    "initial": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "initial"
+    },
+    "selected": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "selected"
+    },
+    "correct": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "correct"
+    },
+    "wrong": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "wrong"
+    },
+    "retry": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "retry"
+    },
+    "final_failure": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "final_failure"
+    },
+    "hint_1": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "hint_1"
+    },
+    "hint_2": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "hint_2"
+    },
+    "explanation_basic": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "explanation_basic"
+    },
+    "explanation_detail": {
+      "asset_set": "scene_base",
+      "visual_change": "none_in_scene_png",
+      "ui_state": "explanation_detail"
+    }
+  },
+  "hint_profile": "reuse existing shared selected-character profile asset, not a new standalone copied PNG",
+  "popup_audio": "reuse existing common Flutter result popup, haptics and SFX",
+  "explanation_layout": "reuse existing basic explanation card and expandable detail component",
+  "choice_evaluation_at": "submit_click",
+  "no_drag_zones": true,
+  "runtime_hero_poses": {
+    "dangdang": "approved_thinking",
+    "nyangnyang": "approved_standing_pending_thinking_art",
+    "mongmong": "approved_standing_pending_thinking_art"
+  },
+  "scene_art_version": "v8_background_local_repair_pending_visual_approval",
+  "selected_hero_reaction_overlay": "assets/effects/emotion_hero.png",
+  "overlay_rule": "render original black emotion marks after selected hero and bystander, before Flutter bubble; same full-canvas coordinates and BoxFit.contain transform"
+}

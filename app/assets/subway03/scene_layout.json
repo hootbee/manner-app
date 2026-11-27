@@ -1,0 +1,200 @@
+{
+  "canvas": [
+    1536,
+    1024
+  ],
+  "background": "background.png",
+  "footAnchor": [
+    320,
+    960
+  ],
+  "initialBodyHeight": 520,
+  "calibration": "Temporary placement, adjustable after visual review; foot anchors measured at alpha>=60 in bottom 13 rows; pose scale preserves initial shoe width.",
+  "characters": {
+    "dog": {
+      "referenceBodyHeight": 980,
+      "referenceFeetWidth": 343,
+      "poses": {
+        "tired": {
+          "asset": "characters/dog_tired.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            262,
+            236,
+            980,
+            1216
+          ],
+          "sourceFoot": [
+            652,
+            1216
+          ],
+          "sourceFeetWidth": 343
+        },
+        "thinking": {
+          "asset": "characters/dog_thinking.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            218,
+            75,
+            1113,
+            1195
+          ],
+          "sourceFoot": [
+            616.5,
+            1195
+          ],
+          "sourceFeetWidth": 322
+        },
+        "positive": {
+          "asset": "characters/dog_positive.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            255,
+            126,
+            978,
+            1174
+          ],
+          "sourceFoot": [
+            646,
+            1174
+          ],
+          "sourceFeetWidth": 331
+        }
+      }
+    },
+    "cat": {
+      "referenceBodyHeight": 1013,
+      "referenceFeetWidth": 371,
+      "poses": {
+        "tired": {
+          "asset": "characters/cat_tired.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            265,
+            148,
+            964,
+            1161
+          ],
+          "sourceFoot": [
+            651,
+            1161
+          ],
+          "sourceFeetWidth": 371
+        },
+        "thinking": {
+          "asset": "characters/cat_thinking.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            237,
+            113,
+            1120,
+            1125
+          ],
+          "sourceFoot": [
+            604.5,
+            1125
+          ],
+          "sourceFeetWidth": 326
+        },
+        "positive": {
+          "asset": "characters/cat_positive.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            256,
+            164,
+            1014,
+            1151
+          ],
+          "sourceFoot": [
+            646.5,
+            1151
+          ],
+          "sourceFeetWidth": 348
+        }
+      }
+    },
+    "monkey": {
+      "referenceBodyHeight": 1054,
+      "referenceFeetWidth": 447,
+      "poses": {
+        "tired": {
+          "asset": "characters/monkey_tired.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            215,
+            119,
+            1011,
+            1173
+          ],
+          "sourceFoot": [
+            600,
+            1173
+          ],
+          "sourceFeetWidth": 447
+        },
+        "thinking": {
+          "asset": "characters/monkey_thinking.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            210,
+            65,
+            1131,
+            1177
+          ],
+          "sourceFoot": [
+            575,
+            1177
+          ],
+          "sourceFeetWidth": 427
+        },
+        "positive": {
+          "asset": "characters/monkey_positive.png",
+          "sourceSize": [
+            1254,
+            1254
+          ],
+          "alphaBounds": [
+            209,
+            92,
+            1014,
+            1144
+          ],
+          "sourceFoot": [
+            596.5,
+            1144
+          ],
+          "sourceFeetWidth": 448
+        }
+      }
+    }
+  },
+  "profiles": {
+    "dog": "avatars/dog_thinking.png",
+    "cat": "avatars/cat_thinking.png",
+    "monkey": "avatars/monkey_thinking.png"
+  }
+}
