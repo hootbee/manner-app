@@ -51,7 +51,9 @@ class _WelcomeRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) => WelcomeScreen(
     onStart: () => Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const PartnerSelectionScreen()),
+      MaterialPageRoute<void>(
+        builder: (_) => const PartnerSelectionScreen(preview: true),
+      ),
     ),
   );
 }

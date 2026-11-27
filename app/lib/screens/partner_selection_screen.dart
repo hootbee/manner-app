@@ -45,8 +45,13 @@ enum MannerPartner {
 }
 
 class PartnerSelectionScreen extends StatefulWidget {
-  const PartnerSelectionScreen({super.key, this.onConfirm});
+  const PartnerSelectionScreen({
+    super.key,
+    this.onConfirm,
+    this.preview = false,
+  });
   final ValueChanged<MannerPartner>? onConfirm;
+  final bool preview;
 
   @override
   State<PartnerSelectionScreen> createState() => _PartnerSelectionScreenState();
@@ -126,7 +131,8 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen>
     if (_turn.isAnimating) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PartnerGrowthScreen(partner: partner),
+        builder: (_) =>
+            PartnerGrowthScreen(partner: partner, preview: widget.preview),
       ),
     );
   }

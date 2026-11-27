@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+
 import 'partner_selection_screen.dart';
 import 'partner_artwork.dart';
 import 'home_screen.dart';
 import 'welcome_screen.dart';
 
 class PartnerGrowthScreen extends StatelessWidget {
-  const PartnerGrowthScreen({super.key, required this.partner});
+  const PartnerGrowthScreen({
+    super.key,
+    required this.partner,
+    this.preview = false,
+  });
   final MannerPartner partner;
+  final bool preview;
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: const Color(0xFFF8F8F8),
@@ -101,7 +107,8 @@ class PartnerGrowthScreen extends StatelessWidget {
                   primary: true,
                   onPressed: () => Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute<void>(
-                      builder: (_) => HomeScreen(partner: partner),
+                      builder: (_) =>
+                          HomeScreen(partner: partner, preview: preview),
                     ),
                     (_) => false,
                   ),
