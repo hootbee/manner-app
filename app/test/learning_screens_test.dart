@@ -76,7 +76,7 @@ void main() {
       }
       final transport = learningCategories.first;
       expect(transport.search('분실물').single.id, 'transport-10');
-      expect(transport.search('소음').single.title, '큰 소리로 통화하지 않기');
+      expect(transport.search('임산부').single.title, '임산부 배려석 비워 두기');
       expect(transport.search('  자리  ').isNotEmpty, isTrue);
       expect(transport.search('없는검색어'), isEmpty);
     },
@@ -110,10 +110,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('분실물 발견 시 대처 방법'), findsOneWidget);
     expect(find.text('10'), findsOneWidget);
-    expect(find.text('자리 양보하기'), findsNothing);
+    expect(find.text('혼잡한 지하철에서 백팩 관리하기'), findsNothing);
     await tester.tap(find.byTooltip('검색어 지우기'));
     await tester.pumpAndSettle();
-    expect(find.text('자리 양보하기'), findsOneWidget);
+    expect(find.text('혼잡한 지하철에서 백팩 관리하기'), findsOneWidget);
     await tester.tap(find.byTooltip('카테고리로 돌아가기'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), '없는검색어');
@@ -133,18 +133,18 @@ void main() {
         tester,
         LearningLessonScreen(category: learningCategories.first),
       );
-      await tester.enterText(find.byType(TextField), '소음');
+      await tester.enterText(find.byType(TextField), '임산부');
       await tester.pumpAndSettle();
-      expect(find.text('큰 소리로 통화하지 않기'), findsOneWidget);
+      expect(find.text('임산부 배려석 비워 두기'), findsOneWidget);
       expect(find.text('03'), findsOneWidget);
-      expect(find.text('자리 양보하기'), findsNothing);
+      expect(find.text('혼잡한 지하철에서 백팩 관리하기'), findsNothing);
       await shot(tester, 'learning_search');
       await tester.enterText(find.byType(TextField), '결과없음');
       await tester.pumpAndSettle();
       expect(find.text('일치하는 학습 목록이 없어요.'), findsOneWidget);
       await tester.tap(find.byTooltip('검색어 지우기'));
       await tester.pumpAndSettle();
-      expect(find.text('자리 양보하기'), findsOneWidget);
+      expect(find.text('혼잡한 지하철에서 백팩 관리하기'), findsOneWidget);
       expect(find.text('미학습'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

@@ -77,10 +77,11 @@ void main() {
     t,
   ) async {
     final store = TransportProgress(persist: false);
-    await mount(t, 2, store);
+    // Keep immediate-choice regression coverage on legacy 07; 03/04 have dedicated flows.
+    await mount(t, 6, store);
     await t.tap(find.text('A'));
     await t.pumpAndSettle();
-    expect(store.session('transport-3').attempts, 1);
+    expect(store.session('transport-7').attempts, 1);
     await t.tap(find.text('B'));
     await t.pumpAndSettle();
     expect(find.text('정답이에요!'), findsOneWidget);
@@ -92,18 +93,19 @@ void main() {
     expect(store.xp, 330);
     await t.tap(find.text('다음 문제 풀러가기'));
     await t.pumpAndSettle();
-    expect(find.textContaining('음식물 섭취'), findsOneWidget);
+    expect(find.textContaining(transportQuestions[7].title), findsOneWidget);
     expect(t.takeException(), isNull);
   });
   testWidgets('sequence retains incorrect order and can reorder then confirm', (
     t,
   ) async {
     final store = TransportProgress(persist: false);
-    await mount(t, 1, store);
+    // 06 now has a dedicated recline interaction; 10 retains the legacy sequence UI.
+    await mount(t, 9, store);
     await t.ensureVisible(find.text('정답 확인하기'));
     await t.tap(find.text('정답 확인하기'));
     await t.pumpAndSettle();
-    expect(store.session('transport-2').order, [0, 1, 2, 3]);
+    expect(store.session('transport-10').order, [0, 1, 2]);
     final list = t.widget<ReorderableListView>(
       find.byType(ReorderableListView),
     );
@@ -112,13 +114,13 @@ void main() {
     list.onReorder!(1, 0);
     await t.pump();
     // ignore: unnecessary_non_null_assertion, deprecated_member_use
-    list.onReorder!(3, 1);
+    list.onReorder!(2, 1);
     await t.pump();
-    expect(store.session('transport-2').order, [1, 3, 0, 2]);
+    expect(store.session('transport-10').order, [1, 2, 0]);
     await t.ensureVisible(find.text('정답 확인하기'));
     await t.tap(find.text('정답 확인하기'));
     await t.pumpAndSettle();
-    expect(store.session('transport-2').phase, 'explanation');
+    expect(store.session('transport-10').phase, 'explanation');
     expect(t.takeException(), isNull);
   });
   testWidgets('last problem completion shows last-question notice', (t) async {
@@ -133,20 +135,61 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('마지막 문제입니다.'), findsOneWidget);
   });
-  testWidgets(
-    'touch accepts own seat, drag follows pointer and wrong drop resets',
-    (t) async {
+  testWidgets('05 now routes to the dedicated submit-only choice lesson', (
+    t,
+  ) async {
+    t.view.physicalSize = const Size(393, 900);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+    final store = TransportProgress(persist: false);
+    addTearDown(store.dispose);
+    await t.pumpWidget(
+      MaterialApp(home: TransportLessonScreen(index: 4, store: store)),
+    );
+    for (
+      var i = 0;
+      i < 400 && find.byKey(const Key('transit05-ready')).evaluate().isEmpty;
+      i++
+    ) {
+      await t.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 25)),
+      );
+      await t.pump(const Duration(milliseconds: 10));
+    }
+    expect(find.byKey(const Key('transit05-ready')), findsOneWidget);
+    expect(store.session('transport-5').attempts, 0);
+    expect(
+      t
+          .widget<FilledButton>(find.byKey(const Key('transit05-primary')))
+          .onPressed,
+      isNull,
+    );
+    expect(t.takeException(), isNull);
+  });
+  testWidgets('remaining touch question retains wrong mark and changes scene', (
+    t,
+  ) async {
+    for (final index in [7]) {
       final store = TransportProgress(persist: false);
-      await mount(t, 0, store);
+      await mount(t, index, store);
       final scene = find.byKey(const ValueKey('action-scene'));
       await t.ensureVisible(scene);
-      final rect = t.getRect(scene);
+      await t.pumpAndSettle();
+      var rect = t.getRect(scene);
+      await t.tapAt(
+        Offset(rect.left + rect.width * .8, rect.top + rect.height * .3),
+      );
+      await t.pumpAndSettle();
+      expect(find.text('X'), findsOneWidget);
+      expect(store.session('transport-${index + 1}').attempts, 1);
+      rect = t.getRect(scene);
       await t.tapAt(
         Offset(rect.left + rect.width * .2, rect.top + rect.height * .75),
       );
       await t.pumpAndSettle();
-      expect(store.session('transport-1').phase, 'explanation');
       expect(find.text('O'), findsWidgets);
+      expect(store.session('transport-${index + 1}').phase, 'explanation');
       expect(
         find.byWidgetPredicate(
           (w) =>
@@ -156,58 +199,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      await mount(t, 4, TransportProgress(persist: false));
-      final bag = find.byIcon(Icons.backpack);
-      await t.ensureVisible(bag);
-      await t.pumpAndSettle();
-      final gesture = await t.startGesture(t.getCenter(bag));
-      await t.pump(const Duration(milliseconds: 600));
-      await gesture.moveBy(const Offset(100, -20));
-      await t.pump();
-      await gesture.up();
-      await t.pumpAndSettle();
-      expect(find.text('정답이에요!'), findsOneWidget);
-      expect(find.byKey(const ValueKey('drag-success-scene')), findsOneWidget);
-      expect(find.byIcon(Icons.backpack), findsNothing);
       expect(t.takeException(), isNull);
-    },
-  );
-  testWidgets(
-    'both touch questions retain wrong mark and change scene on correct touch',
-    (t) async {
-      for (final index in [0, 7]) {
-        final store = TransportProgress(persist: false);
-        await mount(t, index, store);
-        final scene = find.byKey(const ValueKey('action-scene'));
-        await t.ensureVisible(scene);
-        await t.pumpAndSettle();
-        var rect = t.getRect(scene);
-        await t.tapAt(
-          Offset(rect.left + rect.width * .8, rect.top + rect.height * .3),
-        );
-        await t.pumpAndSettle();
-        expect(find.text('X'), findsOneWidget);
-        expect(store.session('transport-${index + 1}').attempts, 1);
-        rect = t.getRect(scene);
-        await t.tapAt(
-          Offset(rect.left + rect.width * .2, rect.top + rect.height * .75),
-        );
-        await t.pumpAndSettle();
-        expect(find.text('O'), findsWidgets);
-        expect(store.session('transport-${index + 1}').phase, 'explanation');
-        expect(
-          find.byWidgetPredicate(
-            (w) =>
-                w is Image &&
-                w.image is AssetImage &&
-                (w.image as AssetImage).assetName.endsWith(
-                  'touch_success.webp',
-                ),
-          ),
-          findsOneWidget,
-        );
-        expect(t.takeException(), isNull);
-      }
-    },
-  );
+    }
+  });
 }
