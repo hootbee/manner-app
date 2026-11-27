@@ -1,0 +1,536 @@
+{
+  "schema_version": "1.1-hitbox-dual-correct",
+  "scene": "manners_public_transport_subway_02_basic",
+  "canvas": {
+    "width": 1536,
+    "height": 1024,
+    "origin": "top-left",
+    "unit": "px",
+    "background_fit": "contain",
+    "allow_crop": false
+  },
+  "character": "몽몽이",
+  "interaction": "drag_immediate_judgement",
+  "draggable": {
+    "asset": "assets/characters/monkey_default.png",
+    "initial_top_left": [
+      695,
+      560
+    ],
+    "size_px": [
+      270,
+      342
+    ],
+    "sprite_foot_anchor_px": [
+      830,
+      902
+    ],
+    "hit_mask": "assets/masks/monkey_initial_hit_mask.png",
+    "hit_alpha_threshold": 60,
+    "movement_threshold_px": 26,
+    "drag_delta_mode": "pointer_relative_no_snap_on_touch",
+    "wrong_drop_rule": "Preserve actual pointer-relative WRONG drop position until retry.",
+    "gesture_drag_bounds_px": [
+      0,
+      0,
+      1536,
+      1024
+    ],
+    "visual_sprite_clamp": {
+      "rule": "snap_fully_inside_after_original_foot_anchor_judgement",
+      "top_left_x_px": [
+        0,
+        1266
+      ],
+      "top_left_y_px": [
+        0,
+        682
+      ],
+      "note": "Final developer request takes priority: judge the original foot anchor including x=0 first, then align inside. Do not clamp the judgement point."
+    },
+    "start_hit_rule": "alpha hit of monkey_initial_hit_mask.png only; taps elsewhere cannot begin drag",
+    "drop_anchor_rule": "initial foot (830,902) plus pointer delta; judge before visual snap/clamp, never use the finger itself",
+    "cancel_rule": "pointer leaves scene / gesture is cancelled: no judgement; restore initial (695,560), initial passengers, clear effects"
+  },
+  "judgement": {
+    "point": "monkey_sprite_feet_center (not pointer position)",
+    "correct_zones": [
+      {
+        "id": "left_safe_standing",
+        "rect_px": [
+          0,
+          810,
+          430,
+          960
+        ],
+        "inclusive_xyxy": true
+      },
+      {
+        "id": "right_safe_standing",
+        "rect_px": [
+          1105,
+          810,
+          1355,
+          960
+        ],
+        "inclusive_xyxy": true
+      }
+    ],
+    "wrong_zones": [
+      {
+        "id": "exit_path_blocked",
+        "rect_px": [
+          500,
+          810,
+          1035,
+          963
+        ],
+        "inclusive_xyxy": true
+      }
+    ],
+    "drag_bounds_px": [
+      0,
+      0,
+      1536,
+      1024
+    ],
+    "invalid": "all_locations_outside_correct_and_wrong_zones_no_score_return_to_initial",
+    "priority": [
+      "cancelled_or_outside_canvas",
+      "correct_zone_left_or_right",
+      "wrong_zone_main",
+      "invalid_no_score"
+    ],
+    "overlap": false,
+    "zone_geometry": "rect_px=[left,top,right,bottom]; scene-local coordinates with BoxFit.contain"
+  },
+  "correct_snap": {
+    "select_by_zone_id": true,
+    "sprite_source_reused": "assets/characters/monkey_correct.png",
+    "variants": {
+      "left_safe_standing": {
+        "asset": "assets/characters/monkey_correct_left.png",
+        "top_left_px": [
+          285,
+          578
+        ],
+        "sprite_size_px": [
+          270,
+          324
+        ],
+        "foot_anchor_px": [
+          420,
+          902
+        ],
+        "effect_asset": "assets/effects/effect_correct_left.png",
+        "preview": "verification/correct_left_composite.png",
+        "layer_note": "monkey behind dog observer where silhouettes slightly overlap"
+      },
+      "right_safe_standing": {
+        "asset": "assets/characters/monkey_correct_right.png",
+        "top_left_px": [
+          990,
+          578
+        ],
+        "sprite_size_px": [
+          270,
+          324
+        ],
+        "foot_anchor_px": [
+          1125,
+          902
+        ],
+        "effect_asset": "assets/effects/effect_correct_right.png",
+        "preview": "verification/correct_right_composite.png",
+        "layer_note": "monkey before cat observer; no bbox overlap with cat"
+      }
+    }
+  },
+  "timing_ms": {
+    "correct_feedback": 900,
+    "wrong_shake": 200,
+    "correct_O_popup": 250
+  },
+  "attempts": {
+    "initial": 1,
+    "additional_retries": 3,
+    "total": 4,
+    "hint_read_cost": 0
+  },
+  "screen_conversion": {
+    "formula": "scale=min(viewport_width/1536,viewport_height/1024); image_offset=(viewport_size-(canvas_size*scale))/2; canvas_xy=(screen_xy-image_offset)/scale",
+    "note": "BoxFit.contain, scene-local coordinates only; outside release is invalid. Drag covers the whole scene. Correct snap keeps the entire sprite inside after judgement.",
+    "touch_point": "Convert pointer to scene coordinates, preserve initial offset, evaluate original foot anchor plus delta before visual alignment."
+  },
+  "layer_order": [
+    "background",
+    "exiting_passengers",
+    "monkey_sprite",
+    "dog",
+    "cat",
+    "hint_or_correct_wrong_effect",
+    "Flutter_UI"
+  ],
+  "assets": [
+    {
+      "file": "assets/background/subway_open_clean.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        0,
+        0,
+        1536,
+        1024
+      ],
+      "has_transparency": false
+    },
+    {
+      "file": "assets/characters/cat_observer.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        1297,
+        600,
+        1509,
+        910
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/cat_positive.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        1297,
+        600,
+        1522,
+        910
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/cat_thinking_avatar_256.png",
+      "canvas_px": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        0,
+        10,
+        245,
+        252
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/dog_observer.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        100,
+        604,
+        373,
+        914
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/dog_positive.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        100,
+        604,
+        373,
+        914
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/dog_thinking_avatar_256.png",
+      "canvas_px": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        0,
+        5,
+        250,
+        251
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/monkey_correct.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        1048,
+        578,
+        1318,
+        902
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/monkey_correct_left.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        285,
+        578,
+        555,
+        902
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/monkey_correct_right.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        990,
+        578,
+        1260,
+        902
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/monkey_default.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        695,
+        560,
+        965,
+        902
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/monkey_thinking_avatar_256.png",
+      "canvas_px": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        4,
+        0,
+        249,
+        250
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/characters/monkey_wrong.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        695,
+        560,
+        965,
+        902
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/effects/effect_correct.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        1240,
+        490,
+        1337,
+        587
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/effects/effect_correct_left.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        525,
+        475,
+        622,
+        572
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/effects/effect_correct_right.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        1220,
+        475,
+        1317,
+        572
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/effects/effect_wrong.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        1025,
+        500,
+        1122,
+        597
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/effects/hint_1_overlay.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        560,
+        735,
+        1024,
+        896
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/effects/hint_2_overlay.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        180,
+        810,
+        1356,
+        961
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/masks/monkey_initial_hit_mask.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        695,
+        560,
+        965,
+        902
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/passengers/exiting_passengers_relieved.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        577,
+        392,
+        985,
+        784
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/passengers/exiting_passengers_stuck.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        577,
+        384,
+        985,
+        776
+      ],
+      "has_transparency": true
+    },
+    {
+      "file": "assets/passengers/exiting_passengers_waiting.png",
+      "canvas_px": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha_bbox": [
+        577,
+        384,
+        985,
+        776
+      ],
+      "has_transparency": true
+    }
+  ],
+  "source_reference": {
+    "existing_01_mascots": "reused PNGs from manners_subway01_dev_assets_verified.zip",
+    "subway_background": "custom cleaned open-door scene for draggable layer composition",
+    "passenger_sprites": "reconstructed simplified cartoon standing commuters",
+    "hint_avatars": "existing thinking avatars retained from prior MANNERS designs, standalone 256px PNGs"
+  },
+  "known_limitations": [
+    "현재 복원된 배경과 승객은 02번 시안의 원본 편집 레이어가 없어 새로 구성한 에셋으로, 기존 이미지와 픽셀 단위 일치하지 않음",
+    "폰 미리보기 화면의 텍스트는 기준 시안으로, 실제 앱은 Flutter 위젯으로 렌더링할 것",
+    "hint avatars are not newly generated; reuse existing global selection profile assets",
+    "모바일 UI 미리보기는 화면 구성 참고용이며 별도 Flutter 프로젝트에서 01번 공통 헤더/컴포넌트에 연결 필요",
+    "Left-side correct sprite is bounded fully within the scene and the left correct zone; it overlaps dog bounding boxes by 88px x (not necessarily visible pixel collision). Dog is layered in front. Human visual review required on devices.",
+    "The original designer image and reconstructed subway background/passengers are not pixel-for-pixel identical. Runtime Flutter verification not performed.",
+    "The original source/build_subway02.py is a LEGACY generator with old one-sided zones. Do not rerun it as final build without reapplying source/apply_hitbox_update.py."
+  ]
+}

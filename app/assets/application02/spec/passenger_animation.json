@@ -1,0 +1,427 @@
+{
+  "version": "7.1-continuous-platform-exit",
+  "coordinate_system": "1536x1024, origin top-left, foot anchors; x to right y down",
+  "duration_ms": 1750,
+  "trigger": "step1_success_feedback_finished",
+  "completes_when": "all 5 exiting riders finish; set exiting_complete=true; enable stage2 only if train_stopped && doors_fully_open && reboarding_safe",
+  "walk_frame_switch": "A/B alternate every 130ms of local elapsed time after each rider delay; waiting_asset stays static until its own delay.",
+  "stay_passengers": {
+    "remain_hoodie": {
+      "asset": "runtime/passengers/remain/remain_hoodie.png",
+      "foot_anchor_px": [
+        345,
+        660
+      ],
+      "render_height_px": 300,
+      "movement": "none",
+      "visible_in": [
+        "initial",
+        "step1_success",
+        "passengers_exiting",
+        "step2_ready",
+        "final_success"
+      ]
+    },
+    "remain_phone": {
+      "asset": "runtime/passengers/remain/remain_phone.png",
+      "foot_anchor_px": [
+        735,
+        674
+      ],
+      "render_height_px": 292,
+      "movement": "none",
+      "visible_in": [
+        "initial",
+        "step1_success",
+        "passengers_exiting",
+        "step2_ready",
+        "final_success"
+      ]
+    },
+    "remain_glasses": {
+      "asset": "runtime/passengers/remain/remain_glasses.png",
+      "foot_anchor_px": [
+        855,
+        680
+      ],
+      "render_height_px": 285,
+      "movement": "none",
+      "visible_in": [
+        "initial",
+        "step1_success",
+        "passengers_exiting",
+        "step2_ready",
+        "final_success"
+      ]
+    },
+    "remain_man_glasses": {
+      "asset": "runtime/passengers/remain/remain_man_glasses.png",
+      "foot_anchor_px": [
+        545,
+        570
+      ],
+      "render_height_px": 245,
+      "movement": "none",
+      "visible_in": [
+        "initial",
+        "step1_success",
+        "passengers_exiting",
+        "step2_ready",
+        "final_success"
+      ]
+    },
+    "remain_man_shirt": {
+      "asset": "runtime/passengers/remain/remain_man_shirt.png",
+      "foot_anchor_px": [
+        680,
+        583
+      ],
+      "render_height_px": 246,
+      "movement": "none",
+      "visible_in": [
+        "initial",
+        "step1_success",
+        "passengers_exiting",
+        "step2_ready",
+        "final_success"
+      ]
+    }
+  },
+  "exiting_passengers": {
+    "exit_office": {
+      "idle_asset": "runtime/passengers/exit/exit_office.png",
+      "walking_asset": "runtime/passengers/exit/exit_office_walk_b.png",
+      "start_foot_anchor_px": [
+        450,
+        830
+      ],
+      "finish_foot_anchor_px": [
+        1670,
+        1250
+      ],
+      "render_height_px": 440,
+      "delay_ms": 540,
+      "duration_ms": 670,
+      "total_sequence_duration_ms": 1750,
+      "keyframes": [
+        {
+          "t": 0,
+          "anchor_px": [
+            450,
+            830
+          ],
+          "scale": 1.0
+        },
+        {
+          "t": 0.31374126438247035,
+          "anchor_px": [
+            840,
+            955
+          ],
+          "scale": 0.97
+        },
+        {
+          "t": 0.7301274995710678,
+          "anchor_px": [
+            1320,
+            1210
+          ],
+          "scale": 0.94
+        },
+        {
+          "t": 1.0,
+          "anchor_px": [
+            1670,
+            1250
+          ],
+          "scale": 0.9
+        }
+      ],
+      "visibility": {
+        "initial": true,
+        "step1_success": true,
+        "passengers_exiting": true,
+        "step2_ready": false,
+        "final_success": false
+      },
+      "collision_guidance": "Platform path stays left/below hero waiting silhouette, avoids fixed station walkers; do not use original rightward path near (1414,715).",
+      "waiting_asset": "runtime/passengers/exit/exit_office_waiting.png",
+      "walking_a_asset": "runtime/passengers/exit/exit_office.png",
+      "start_pose": "standing_waiting",
+      "first_walk_frame_at_ms": 540,
+      "body_sprite_stays_visible_during_wait": true,
+      "exit_motion": "Smooth continuous path to lower-right platform edge; fully outside horizontally at finish; no alpha disappearance.",
+      "interpolation": "monotone_cubic"
+    },
+    "exit_tote": {
+      "idle_asset": "runtime/passengers/exit/exit_tote.png",
+      "walking_asset": "runtime/passengers/exit/exit_tote_walk_b.png",
+      "start_foot_anchor_px": [
+        825,
+        830
+      ],
+      "finish_foot_anchor_px": [
+        1650,
+        1250
+      ],
+      "render_height_px": 440,
+      "delay_ms": 0,
+      "duration_ms": 670,
+      "total_sequence_duration_ms": 1750,
+      "keyframes": [
+        {
+          "t": 0,
+          "anchor_px": [
+            825,
+            830
+          ],
+          "scale": 1.0
+        },
+        {
+          "t": 0.21725999084249675,
+          "anchor_px": [
+            1000,
+            940
+          ],
+          "scale": 0.97
+        },
+        {
+          "t": 0.6818833077608706,
+          "anchor_px": [
+            1350,
+            1210
+          ],
+          "scale": 0.94
+        },
+        {
+          "t": 1.0,
+          "anchor_px": [
+            1650,
+            1250
+          ],
+          "scale": 0.9
+        }
+      ],
+      "visibility": {
+        "initial": true,
+        "step1_success": true,
+        "passengers_exiting": true,
+        "step2_ready": false,
+        "final_success": false
+      },
+      "collision_guidance": "Platform path stays left/below hero waiting silhouette, avoids fixed station walkers; do not use original rightward path near (1414,715).",
+      "waiting_asset": "runtime/passengers/exit/exit_tote_waiting.png",
+      "walking_a_asset": "runtime/passengers/exit/exit_tote.png",
+      "start_pose": "standing_waiting",
+      "first_walk_frame_at_ms": 0,
+      "body_sprite_stays_visible_during_wait": true,
+      "exit_motion": "Smooth continuous path to lower-right platform edge; fully outside horizontally at finish; no alpha disappearance.",
+      "interpolation": "monotone_cubic"
+    },
+    "exit_backpack": {
+      "idle_asset": "runtime/passengers/exit/exit_backpack.png",
+      "walking_asset": "runtime/passengers/exit/exit_backpack_walk_b.png",
+      "start_foot_anchor_px": [
+        720,
+        808
+      ],
+      "finish_foot_anchor_px": [
+        1660,
+        1250
+      ],
+      "render_height_px": 418,
+      "delay_ms": 270,
+      "duration_ms": 670,
+      "total_sequence_duration_ms": 1750,
+      "keyframes": [
+        {
+          "t": 0,
+          "anchor_px": [
+            720,
+            808
+          ],
+          "scale": 1.0
+        },
+        {
+          "t": 0.2373973415137608,
+          "anchor_px": [
+            940,
+            930
+          ],
+          "scale": 0.97
+        },
+        {
+          "t": 0.6850283353697878,
+          "anchor_px": [
+            1330,
+            1200
+          ],
+          "scale": 0.94
+        },
+        {
+          "t": 1.0,
+          "anchor_px": [
+            1660,
+            1250
+          ],
+          "scale": 0.9
+        }
+      ],
+      "visibility": {
+        "initial": true,
+        "step1_success": true,
+        "passengers_exiting": true,
+        "step2_ready": false,
+        "final_success": false
+      },
+      "collision_guidance": "Platform path stays left/below hero waiting silhouette, avoids fixed station walkers; do not use original rightward path near (1414,715).",
+      "waiting_asset": "runtime/passengers/exit/exit_backpack_waiting.png",
+      "walking_a_asset": "runtime/passengers/exit/exit_backpack.png",
+      "start_pose": "standing_waiting",
+      "first_walk_frame_at_ms": 270,
+      "body_sprite_stays_visible_during_wait": true,
+      "exit_motion": "Smooth continuous path to lower-right platform edge; fully outside horizontally at finish; no alpha disappearance.",
+      "interpolation": "monotone_cubic"
+    },
+    "exit_woman": {
+      "idle_asset": "runtime/passengers/exit/exit_woman.png",
+      "walking_asset": "runtime/passengers/exit/exit_woman_walk_b.png",
+      "start_foot_anchor_px": [
+        585,
+        690
+      ],
+      "finish_foot_anchor_px": [
+        1680,
+        1250
+      ],
+      "render_height_px": 303,
+      "delay_ms": 810,
+      "duration_ms": 670,
+      "total_sequence_duration_ms": 1750,
+      "keyframes": [
+        {
+          "t": 0,
+          "anchor_px": [
+            585,
+            690
+          ],
+          "scale": 1.0
+        },
+        {
+          "t": 0.2917728049695642,
+          "anchor_px": [
+            870,
+            920
+          ],
+          "scale": 0.97
+        },
+        {
+          "t": 0.7256038233576945,
+          "anchor_px": [
+            1340,
+            1195
+          ],
+          "scale": 0.94
+        },
+        {
+          "t": 1.0,
+          "anchor_px": [
+            1680,
+            1250
+          ],
+          "scale": 0.9
+        }
+      ],
+      "visibility": {
+        "initial": true,
+        "step1_success": true,
+        "passengers_exiting": true,
+        "step2_ready": false,
+        "final_success": false
+      },
+      "collision_guidance": "Platform path stays left/below hero waiting silhouette, avoids fixed station walkers; do not use original rightward path near (1414,715).",
+      "waiting_asset": "runtime/passengers/exit/exit_woman.png",
+      "walking_a_asset": "runtime/passengers/exit/exit_woman.png",
+      "start_pose": "standing_waiting",
+      "first_walk_frame_at_ms": 810,
+      "body_sprite_stays_visible_during_wait": true,
+      "exit_motion": "Smooth continuous path to lower-right platform edge; fully outside horizontally at finish; no alpha disappearance.",
+      "interpolation": "monotone_cubic"
+    },
+    "exit_man": {
+      "idle_asset": "runtime/passengers/exit/exit_man.png",
+      "walking_asset": "runtime/passengers/exit/exit_man_walk_b.png",
+      "start_foot_anchor_px": [
+        790,
+        700
+      ],
+      "finish_foot_anchor_px": [
+        1690,
+        1250
+      ],
+      "render_height_px": 296,
+      "delay_ms": 1080,
+      "duration_ms": 670,
+      "total_sequence_duration_ms": 1750,
+      "keyframes": [
+        {
+          "t": 0,
+          "anchor_px": [
+            790,
+            700
+          ],
+          "scale": 1.0
+        },
+        {
+          "t": 0.2651128270162112,
+          "anchor_px": [
+            980,
+            920
+          ],
+          "scale": 0.97
+        },
+        {
+          "t": 0.6955997661360919,
+          "anchor_px": [
+            1360,
+            1200
+          ],
+          "scale": 0.94
+        },
+        {
+          "t": 1.0,
+          "anchor_px": [
+            1690,
+            1250
+          ],
+          "scale": 0.9
+        }
+      ],
+      "visibility": {
+        "initial": true,
+        "step1_success": true,
+        "passengers_exiting": true,
+        "step2_ready": false,
+        "final_success": false
+      },
+      "collision_guidance": "Platform path stays left/below hero waiting silhouette, avoids fixed station walkers; do not use original rightward path near (1414,715).",
+      "waiting_asset": "runtime/passengers/exit/exit_man.png",
+      "walking_a_asset": "runtime/passengers/exit/exit_man.png",
+      "start_pose": "standing_waiting",
+      "first_walk_frame_at_ms": 1080,
+      "body_sprite_stays_visible_during_wait": true,
+      "exit_motion": "Smooth continuous path to lower-right platform edge; fully outside horizontally at finish; no alpha disappearance.",
+      "interpolation": "monotone_cubic"
+    }
+  },
+  "initial_pose_policy": "Use waiting_asset for initial and step1_success; use walking_a_asset and walking_asset only after passengers_exiting begins.",
+  "sequence_order": [
+    "exit_tote",
+    "exit_backpack",
+    "exit_office",
+    "exit_woman",
+    "exit_man"
+  ],
+  "keyframe_interpolation": "Monotone cubic Hermite for foot x/y and scale; internal harmonic-mean tangents, rest at start. Knot times proportional to path distance; per-rider delays and 670ms duration unchanged.",
+  "safety_path_notes": "All five riders move via the doorway into the lower platform foreground and leave below scene; platform hero at [1414,715] never intersects. Crossing the dotted strip happens only during necessary alighting, never as a waiting target."
+}

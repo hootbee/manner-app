@@ -1,0 +1,278 @@
+{
+  "schema_version": "1.1-hitbox-dual-correct",
+  "layer_order_back_to_front": [
+    "background",
+    "exiting_passengers",
+    "monkey_sprite",
+    "dog",
+    "cat",
+    "hint_or_correct_wrong_effect",
+    "Flutter_UI"
+  ],
+  "states": {
+    "initial": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_waiting.png",
+        "assets/characters/monkey_default.png",
+        "assets/characters/dog_observer.png",
+        "assets/characters/cat_observer.png"
+      ],
+      "ui_button": "힌트 보기",
+      "feedback": "문 앞에 서 있는 승객들이 불편해하고 있어요.",
+      "preview": "verification/initial_composite.png"
+    },
+    "dragging": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_waiting.png",
+        "assets/characters/monkey_default.png",
+        "assets/characters/dog_observer.png",
+        "assets/characters/cat_observer.png"
+      ],
+      "ui_button": "",
+      "feedback": "",
+      "preview": "verification/dragging_composite.png",
+      "note": "Only monkey moves, preserving pointer offset over the whole scene. Judge original foot anchor first; align fully inside on correct snap."
+    },
+    "hint_1": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_waiting.png",
+        "assets/characters/monkey_default.png",
+        "assets/characters/dog_observer.png",
+        "assets/characters/cat_observer.png",
+        "assets/effects/hint_1_overlay.png"
+      ],
+      "ui_button": "다음 힌트 보기",
+      "feedback": "문 앞에 서 있으면 내리는 사람들이 지나가기 어려워요. 어디로 비켜야 할까요?",
+      "preview": "verification/hint_1_composite.png"
+    },
+    "hint_2": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_waiting.png",
+        "assets/characters/monkey_default.png",
+        "assets/characters/dog_observer.png",
+        "assets/characters/cat_observer.png",
+        "assets/effects/hint_2_overlay.png"
+      ],
+      "ui_button": "",
+      "feedback": "출입문 앞을 비우고, 다른 승객의 이동을 방해하지 않는 옆 공간으로 이동해 보세요.",
+      "preview": "verification/hint_2_composite.png",
+      "note": "Hint visual shows both left and right safe possibilities. No submission button."
+    },
+    "correct_just_judged": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_relieved.png",
+        "assets/characters/monkey_correct_right.png",
+        "assets/characters/dog_positive.png",
+        "assets/characters/cat_positive.png",
+        "assets/effects/effect_correct_right.png"
+      ],
+      "ui_button": "",
+      "feedback": "좋아요! 내리는 승객이 먼저 지나갈 수 있도록 길을 비켜주었어요.",
+      "preview": "verification/correct_right_composite.png",
+      "requires_correct_zone_id": true,
+      "variants": {
+        "left_safe_standing": {
+          "layer_assets": [
+            "assets/background/subway_open_clean.png",
+            "assets/passengers/exiting_passengers_relieved.png",
+            "assets/characters/monkey_correct_left.png",
+            "assets/characters/dog_positive.png",
+            "assets/characters/cat_positive.png",
+            "assets/effects/effect_correct_left.png"
+          ],
+          "preview": "verification/correct_left_composite.png",
+          "snap": {
+            "asset": "assets/characters/monkey_correct_left.png",
+            "top_left_px": [
+              285,
+              578
+            ],
+            "sprite_size_px": [
+              270,
+              324
+            ],
+            "foot_anchor_px": [
+              420,
+              902
+            ],
+            "effect_asset": "assets/effects/effect_correct_left.png",
+            "preview": "verification/correct_left_composite.png",
+            "layer_note": "monkey behind dog observer where silhouettes slightly overlap"
+          }
+        },
+        "right_safe_standing": {
+          "layer_assets": [
+            "assets/background/subway_open_clean.png",
+            "assets/passengers/exiting_passengers_relieved.png",
+            "assets/characters/monkey_correct_right.png",
+            "assets/characters/dog_positive.png",
+            "assets/characters/cat_positive.png",
+            "assets/effects/effect_correct_right.png"
+          ],
+          "preview": "verification/correct_right_composite.png",
+          "snap": {
+            "asset": "assets/characters/monkey_correct_right.png",
+            "top_left_px": [
+              990,
+              578
+            ],
+            "sprite_size_px": [
+              270,
+              324
+            ],
+            "foot_anchor_px": [
+              1125,
+              902
+            ],
+            "effect_asset": "assets/effects/effect_correct_right.png",
+            "preview": "verification/correct_right_composite.png",
+            "layer_note": "monkey before cat observer; no bbox overlap with cat"
+          }
+        }
+      }
+    },
+    "correct_complete": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_relieved.png",
+        "assets/characters/monkey_correct_right.png",
+        "assets/characters/dog_positive.png",
+        "assets/characters/cat_positive.png",
+        "assets/effects/effect_correct_right.png"
+      ],
+      "ui_button": "해설 보기",
+      "feedback": "좋아요! 내리는 승객이 먼저 지나갈 수 있도록 길을 비켜주었어요.",
+      "preview": "verification/correct_right_composite.png",
+      "requires_correct_zone_id": true,
+      "variants": {
+        "left_safe_standing": {
+          "layer_assets": [
+            "assets/background/subway_open_clean.png",
+            "assets/passengers/exiting_passengers_relieved.png",
+            "assets/characters/monkey_correct_left.png",
+            "assets/characters/dog_positive.png",
+            "assets/characters/cat_positive.png",
+            "assets/effects/effect_correct_left.png"
+          ],
+          "preview": "verification/correct_left_composite.png",
+          "snap": {
+            "asset": "assets/characters/monkey_correct_left.png",
+            "top_left_px": [
+              285,
+              578
+            ],
+            "sprite_size_px": [
+              270,
+              324
+            ],
+            "foot_anchor_px": [
+              420,
+              902
+            ],
+            "effect_asset": "assets/effects/effect_correct_left.png",
+            "preview": "verification/correct_left_composite.png",
+            "layer_note": "monkey behind dog observer where silhouettes slightly overlap"
+          }
+        },
+        "right_safe_standing": {
+          "layer_assets": [
+            "assets/background/subway_open_clean.png",
+            "assets/passengers/exiting_passengers_relieved.png",
+            "assets/characters/monkey_correct_right.png",
+            "assets/characters/dog_positive.png",
+            "assets/characters/cat_positive.png",
+            "assets/effects/effect_correct_right.png"
+          ],
+          "preview": "verification/correct_right_composite.png",
+          "snap": {
+            "asset": "assets/characters/monkey_correct_right.png",
+            "top_left_px": [
+              990,
+              578
+            ],
+            "sprite_size_px": [
+              270,
+              324
+            ],
+            "foot_anchor_px": [
+              1125,
+              902
+            ],
+            "effect_asset": "assets/effects/effect_correct_right.png",
+            "preview": "verification/correct_right_composite.png",
+            "layer_note": "monkey before cat observer; no bbox overlap with cat"
+          }
+        }
+      }
+    },
+    "wrong_just_judged": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_stuck.png",
+        "assets/characters/monkey_wrong.png",
+        "assets/characters/dog_observer.png",
+        "assets/characters/cat_observer.png",
+        "assets/effects/effect_wrong.png"
+      ],
+      "ui_button": "",
+      "feedback": "아직 내리는 승객의 길을 막고 있어요. 다른 위치로 이동해 보세요.",
+      "preview": "verification/wrong_composite.png"
+    },
+    "wrong_complete": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_stuck.png",
+        "assets/characters/monkey_wrong.png",
+        "assets/characters/dog_observer.png",
+        "assets/characters/cat_observer.png",
+        "assets/effects/effect_wrong.png"
+      ],
+      "ui_button": "힌트 보기 / 다시 시도하기",
+      "feedback": "아직 내리는 승객의 길을 막고 있어요. 다른 위치로 이동해 보세요.",
+      "preview": "verification/wrong_composite.png",
+      "note": "Show monkey at actual wrong dropped anchor; example mockup uses central initial location; do not auto-reset until retry."
+    },
+    "retry_reset": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_waiting.png",
+        "assets/characters/monkey_default.png",
+        "assets/characters/dog_observer.png",
+        "assets/characters/cat_observer.png"
+      ],
+      "ui_button": "힌트 보기",
+      "feedback": "문 앞에 서 있는 승객들이 불편해하고 있어요.",
+      "preview": "verification/initial_composite.png",
+      "note": "Reset alpha sprite top-left (695,560), foot (830,902), passengers and all O/X effects; do not award XP on replay."
+    },
+    "final_failure": {
+      "layer_assets": [
+        "assets/background/subway_open_clean.png",
+        "assets/passengers/exiting_passengers_relieved.png",
+        "assets/characters/monkey_correct_right.png",
+        "assets/characters/dog_positive.png",
+        "assets/characters/cat_positive.png"
+      ],
+      "ui_button": "정답 확인",
+      "feedback": "",
+      "preview": "verification/final_failure_demo.png",
+      "credits_success": false,
+      "note": "Demonstration only; no XP/success recorded."
+    }
+  },
+  "judgement_variants": {
+    "correct": [
+      "left_safe_standing",
+      "right_safe_standing"
+    ],
+    "wrong": [
+      "exit_path_blocked"
+    ],
+    "invalid": "no score, restore initial"
+  }
+}

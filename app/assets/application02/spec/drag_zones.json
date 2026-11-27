@@ -1,0 +1,1235 @@
+{
+  "problem_id": "transit02_application",
+  "version": "7.0-animation-safe-drop-geometry",
+  "coordinate_system": {
+    "width": 1536,
+    "height": 1024,
+    "origin": "top-left",
+    "x_direction": "right",
+    "y_direction": "down",
+    "source_approved_scene_crop_941x1672": [
+      40,
+      840,
+      888,
+      1406
+    ],
+    "responsive_formula": "scene_x=(pointer_x-scene_rect.left)*1536/scene_rect.width; scene_y=(pointer_y-scene_rect.top)*1024/scene_rect.height. Scene must use BoxFit.contain and ignore letterbox.",
+    "background_reference": "runtime/background/scene_background.png"
+  },
+  "anchor_kind": "foot_bottom_center+preserved_drag_pointer_offset",
+  "drop_footprint": {
+    "check": "DROP_INTENT_ONLY: match selected character visual foot-anchor point to correct drop-intent polygon (no full body rectangle containment). For every accepted correct drop, validate fixed snapped landing alpha and safety before applying success state. Wrong/invalid masks override; never snap into hazard.",
+    "occupied_box_ratio_to_sprite": {
+      "left": -0.25,
+      "right": 0.25,
+      "top": -0.46,
+      "bottom": 0.0,
+      "purpose": "for snapped landing collision QA only, not for drop-intent containment"
+    },
+    "notes": "Do not require the full leg bounding rectangle to fit inside a tight UI target. The accepted drop represents movement intent; the character is placed at the prevalidated safe landing anchor after correction. Only that final pose must pass full collision tests."
+  },
+  "stage1": {
+    "start_anchor_px": [
+      650,
+      868
+    ],
+    "target_anchor_px": [
+      1414,
+      715
+    ],
+    "target_visual_scale": 0.61,
+    "on_correct": "set step1_success, show interim feedback only, then animate passengers_exiting",
+    "on_wrong": "O/X feedback and attempt increment; keep stage1",
+    "on_invalid": "reset to stage1 start with no attempt increment"
+  },
+  "stage2": {
+    "start_anchor_px": [
+      1414,
+      715
+    ],
+    "target_anchor_px": [
+      475,
+      835
+    ],
+    "target_visual_scale": 0.58,
+    "required_flags": [
+      "train_stopped",
+      "doors_fully_open",
+      "exiting_complete",
+      "reboarding_safe"
+    ],
+    "on_correct": "final O only; show existing common correct popup",
+    "on_wrong": "X feedback and attempt increment; keep stage2",
+    "on_invalid": "reset to step2 start with no attempt increment"
+  },
+  "zones": [
+    {
+      "id": "stage1_platform_column",
+      "stage": "step1",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          1425,
+          0
+        ],
+        [
+          1535,
+          0
+        ],
+        [
+          1535,
+          640
+        ],
+        [
+          1425,
+          640
+        ]
+      ],
+      "priority": 70,
+      "description_ko": "승강장 오른쪽 기둥/벽체, 유효 바닥 아님",
+      "polygon_normalized": [
+        [
+          0.927734,
+          0.0
+        ],
+        [
+          0.999349,
+          0.0
+        ],
+        [
+          0.999349,
+          0.625
+        ],
+        [
+          0.927734,
+          0.625
+        ]
+      ]
+    },
+    {
+      "id": "stage1_station_background_walker",
+      "stage": "step1",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          1310,
+          295
+        ],
+        [
+          1420,
+          295
+        ],
+        [
+          1420,
+          565
+        ],
+        [
+          1310,
+          565
+        ]
+      ],
+      "priority": 70,
+      "description_ko": "승강장 고정 배경 보행자·인물 배경(발을 놓을 수 없는 상부 시각영역)",
+      "polygon_normalized": [
+        [
+          0.852865,
+          0.288086
+        ],
+        [
+          0.924479,
+          0.288086
+        ],
+        [
+          0.924479,
+          0.551758
+        ],
+        [
+          0.852865,
+          0.551758
+        ]
+      ]
+    },
+    {
+      "id": "stage1_platform_back_wall",
+      "stage": "step1",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          1240,
+          0
+        ],
+        [
+          1535,
+          0
+        ],
+        [
+          1535,
+          655
+        ],
+        [
+          1240,
+          655
+        ]
+      ],
+      "priority": 65,
+      "description_ko": "원근상 먼 배경·정지 보행자 근처, 정답 드롭 불가",
+      "polygon_normalized": [
+        [
+          0.807292,
+          0.0
+        ],
+        [
+          0.999349,
+          0.0
+        ],
+        [
+          0.999349,
+          0.639648
+        ],
+        [
+          0.807292,
+          0.639648
+        ]
+      ]
+    },
+    {
+      "id": "stage1_station_wall",
+      "stage": "step1",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          1250,
+          0
+        ],
+        [
+          1535,
+          0
+        ],
+        [
+          1535,
+          415
+        ],
+        [
+          1250,
+          330
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.813802,
+          0.0
+        ],
+        [
+          0.999349,
+          0.0
+        ],
+        [
+          0.999349,
+          0.405273
+        ],
+        [
+          0.813802,
+          0.322266
+        ]
+      ],
+      "priority": 60,
+      "description_ko": "승강장 벽·기둥/구조물 높이 영역"
+    },
+    {
+      "id": "stage1_train_wall",
+      "stage": "step1",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          0,
+          0
+        ],
+        [
+          332,
+          0
+        ],
+        [
+          332,
+          888
+        ],
+        [
+          0,
+          888
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.216146,
+          0.0
+        ],
+        [
+          0.216146,
+          0.867188
+        ],
+        [
+          0.0,
+          0.867188
+        ]
+      ],
+      "priority": 60,
+      "description_ko": "열차 차체·창문 등 실제 서 있을 수 없는 면"
+    },
+    {
+      "id": "stage1_tactile_strip",
+      "stage": "step1",
+      "result": "wrong",
+      "polygon_px": [
+        [
+          1004,
+          370
+        ],
+        [
+          1088,
+          366
+        ],
+        [
+          1358,
+          1015
+        ],
+        [
+          1020,
+          1016
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.653646,
+          0.361328
+        ],
+        [
+          0.708333,
+          0.357422
+        ],
+        [
+          0.884115,
+          0.991211
+        ],
+        [
+          0.664062,
+          0.992188
+        ]
+      ],
+      "priority": 45,
+      "description_ko": "점형블록·안전선 주변 위험한 대기 위치"
+    },
+    {
+      "id": "stage1_alighting_path",
+      "stage": "step1",
+      "result": "wrong",
+      "polygon_px": [
+        [
+          938,
+          360
+        ],
+        [
+          1220,
+          395
+        ],
+        [
+          1252,
+          890
+        ],
+        [
+          950,
+          930
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.610677,
+          0.351562
+        ],
+        [
+          0.794271,
+          0.385742
+        ],
+        [
+          0.815104,
+          0.869141
+        ],
+        [
+          0.61849,
+          0.908203
+        ]
+      ],
+      "priority": 35,
+      "description_ko": "승강장 하차 승객 이동 경로"
+    },
+    {
+      "id": "stage1_door_block",
+      "stage": "step1",
+      "result": "wrong",
+      "polygon_px": [
+        [
+          430,
+          350
+        ],
+        [
+          934,
+          350
+        ],
+        [
+          942,
+          895
+        ],
+        [
+          411,
+          895
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.279948,
+          0.341797
+        ],
+        [
+          0.608073,
+          0.341797
+        ],
+        [
+          0.613281,
+          0.874023
+        ],
+        [
+          0.267578,
+          0.874023
+        ]
+      ],
+      "priority": 30,
+      "description_ko": "하차 통로를 가로막는 객실 문 앞 위치"
+    },
+    {
+      "id": "stage1_inside_full",
+      "stage": "step1",
+      "result": "wrong",
+      "polygon_px": [
+        [
+          344,
+          200
+        ],
+        [
+          913,
+          210
+        ],
+        [
+          912,
+          350
+        ],
+        [
+          344,
+          355
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.223958,
+          0.195312
+        ],
+        [
+          0.594401,
+          0.205078
+        ],
+        [
+          0.59375,
+          0.341797
+        ],
+        [
+          0.223958,
+          0.34668
+        ]
+      ],
+      "priority": 30,
+      "description_ko": "객실 안 승객으로 가득 찬 위치"
+    },
+    {
+      "id": "stage1_safe_platform",
+      "stage": "step1",
+      "result": "correct",
+      "polygon_px": [
+        [
+          1265,
+          665
+        ],
+        [
+          1478,
+          665
+        ],
+        [
+          1478,
+          884
+        ],
+        [
+          1342,
+          884
+        ],
+        [
+          1265,
+          785
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.823568,
+          0.649414
+        ],
+        [
+          0.96224,
+          0.649414
+        ],
+        [
+          0.96224,
+          0.863281
+        ],
+        [
+          0.873698,
+          0.863281
+        ],
+        [
+          0.823568,
+          0.766602
+        ]
+      ],
+      "priority": 20,
+      "description_ko": "승강장 오른쪽 바닥(구조물·배경 보행자·안전선 제외)의 발 기준 드롭 의도 구역. 유효 시 [1414,715] 안전 좌표에 스냅."
+    },
+    {
+      "id": "stage2_station_background_walker",
+      "stage": "step2",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          1305,
+          295
+        ],
+        [
+          1430,
+          295
+        ],
+        [
+          1430,
+          565
+        ],
+        [
+          1305,
+          565
+        ]
+      ],
+      "priority": 70,
+      "description_ko": "역사 고정 배경 보행자/구조물",
+      "polygon_normalized": [
+        [
+          0.849609,
+          0.288086
+        ],
+        [
+          0.93099,
+          0.288086
+        ],
+        [
+          0.93099,
+          0.551758
+        ],
+        [
+          0.849609,
+          0.551758
+        ]
+      ]
+    },
+    {
+      "id": "stage2_station_structure",
+      "stage": "step2",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          1290,
+          0
+        ],
+        [
+          1535,
+          0
+        ],
+        [
+          1535,
+          406
+        ],
+        [
+          1290,
+          300
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.839844,
+          0.0
+        ],
+        [
+          0.999349,
+          0.0
+        ],
+        [
+          0.999349,
+          0.396484
+        ],
+        [
+          0.839844,
+          0.292969
+        ]
+      ],
+      "priority": 60,
+      "description_ko": "승강장 구조물"
+    },
+    {
+      "id": "stage2_wall",
+      "stage": "step2",
+      "result": "invalid",
+      "polygon_px": [
+        [
+          0,
+          0
+        ],
+        [
+          332,
+          0
+        ],
+        [
+          332,
+          880
+        ],
+        [
+          0,
+          880
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.216146,
+          0.0
+        ],
+        [
+          0.216146,
+          0.859375
+        ],
+        [
+          0.0,
+          0.859375
+        ]
+      ],
+      "priority": 60,
+      "description_ko": "지하철 벽·차체 등 이동 불가능한 영역"
+    },
+    {
+      "id": "stage2_platform_edge",
+      "stage": "step2",
+      "result": "wrong",
+      "polygon_px": [
+        [
+          1005,
+          352
+        ],
+        [
+          1078,
+          352
+        ],
+        [
+          1350,
+          1016
+        ],
+        [
+          1010,
+          1016
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.654297,
+          0.34375
+        ],
+        [
+          0.701823,
+          0.34375
+        ],
+        [
+          0.878906,
+          0.992188
+        ],
+        [
+          0.657552,
+          0.992188
+        ]
+      ],
+      "priority": 45,
+      "description_ko": "점형블록·안전선 위 위험한 위치"
+    },
+    {
+      "id": "stage2_exiting_path",
+      "stage": "step2",
+      "result": "wrong",
+      "polygon_px": [
+        [
+          941,
+          400
+        ],
+        [
+          1300,
+          400
+        ],
+        [
+          1332,
+          907
+        ],
+        [
+          942,
+          901
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.61263,
+          0.390625
+        ],
+        [
+          0.846354,
+          0.390625
+        ],
+        [
+          0.867188,
+          0.885742
+        ],
+        [
+          0.613281,
+          0.879883
+        ]
+      ],
+      "priority": 35,
+      "description_ko": "다른 승객의 이동을 방해하는 위치"
+    },
+    {
+      "id": "stage2_doorway_block",
+      "stage": "step2",
+      "result": "wrong",
+      "polygon_px": [
+        [
+          575,
+          510
+        ],
+        [
+          940,
+          505
+        ],
+        [
+          939,
+          887
+        ],
+        [
+          576,
+          885
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.374349,
+          0.498047
+        ],
+        [
+          0.611979,
+          0.493164
+        ],
+        [
+          0.611328,
+          0.866211
+        ],
+        [
+          0.375,
+          0.864258
+        ]
+      ],
+      "priority": 30,
+      "description_ko": "출입문을 막는 재승차 위치"
+    },
+    {
+      "id": "stage2_safe_car",
+      "stage": "step2",
+      "result": "correct",
+      "polygon_px": [
+        [
+          338,
+          688
+        ],
+        [
+          568,
+          688
+        ],
+        [
+          568,
+          902
+        ],
+        [
+          338,
+          902
+        ]
+      ],
+      "polygon_normalized": [
+        [
+          0.220052,
+          0.671875
+        ],
+        [
+          0.369792,
+          0.671875
+        ],
+        [
+          0.369792,
+          0.880859
+        ],
+        [
+          0.220052,
+          0.880859
+        ]
+      ],
+      "priority": 20,
+      "description_ko": "객실 내부 안전 공간에 대한 발 기준 드롭 의도 구역. 유효 시 [475,835] 안전 좌표에 스냅."
+    }
+  ],
+  "overlap_policy": "disabled stage2 if flags false; invalid/outside > explicit hazardous wrong > correct foot-anchor polygon > unspecified invalid; accepted foot anchor snaps to preverified stable position; no full sprite rectangle containment on gesture.",
+  "testing_examples": [
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        1414,
+        715
+      ],
+      "expected": "correct",
+      "actual": "correct",
+      "pass": true
+    },
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        1350,
+        810
+      ],
+      "expected": "correct",
+      "actual": "correct",
+      "pass": true
+    },
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        1465,
+        805
+      ],
+      "expected": "correct",
+      "actual": "correct",
+      "pass": true
+    },
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        1500,
+        470
+      ],
+      "expected": "invalid",
+      "actual": "invalid",
+      "pass": true
+    },
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        1360,
+        480
+      ],
+      "expected": "invalid",
+      "actual": "invalid",
+      "pass": true
+    },
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        1110,
+        835
+      ],
+      "expected": "wrong",
+      "actual": "wrong",
+      "pass": true
+    },
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        650,
+        860
+      ],
+      "expected": "wrong",
+      "actual": "wrong",
+      "pass": true
+    },
+    {
+      "stage": "step1",
+      "foot_anchor": [
+        -5,
+        720
+      ],
+      "expected": "invalid",
+      "actual": "invalid",
+      "pass": true
+    },
+    {
+      "stage": "step2",
+      "foot_anchor": [
+        475,
+        835
+      ],
+      "expected": "correct",
+      "actual": "correct",
+      "pass": true
+    },
+    {
+      "stage": "step2",
+      "foot_anchor": [
+        355,
+        840
+      ],
+      "expected": "correct",
+      "actual": "correct",
+      "pass": true
+    },
+    {
+      "stage": "step2",
+      "foot_anchor": [
+        557,
+        870
+      ],
+      "expected": "correct",
+      "actual": "correct",
+      "pass": true
+    },
+    {
+      "stage": "step2",
+      "foot_anchor": [
+        760,
+        820
+      ],
+      "expected": "wrong",
+      "actual": "wrong",
+      "pass": true
+    },
+    {
+      "stage": "step2",
+      "foot_anchor": [
+        1110,
+        800
+      ],
+      "expected": "wrong",
+      "actual": "wrong",
+      "pass": true
+    },
+    {
+      "stage": "step2",
+      "foot_anchor": [
+        -5,
+        720
+      ],
+      "expected": "invalid",
+      "actual": "invalid",
+      "pass": true
+    },
+    {
+      "stage": "step2",
+      "foot_anchor": [
+        475,
+        835
+      ],
+      "expected": "blocked_no_count",
+      "flags": false,
+      "actual": "blocked_no_count",
+      "pass": true
+    }
+  ],
+  "art_quality_gate": "NOT_FOR_PRODUCTION_UNTIL_APPROVED",
+  "attempt_policy": {
+    "scope": "entire_application_problem_across_both_stages",
+    "total_valid_wrong_drop_limit": 4,
+    "initial_attempts": 1,
+    "max_retries": 3,
+    "increment_on": [
+      "step1_wrong",
+      "step2_wrong"
+    ],
+    "do_not_increment_on": [
+      "correct_drop",
+      "invalid_drop",
+      "cancel",
+      "pointer_move"
+    ],
+    "on_fourth_valid_wrong": {
+      "transition_to": "answer_reveal",
+      "direct_success": false,
+      "awards_xp": false,
+      "show_correct_route": true
+    },
+    "step1_success_is_intermediate": true,
+    "can_award_xp_after_step1": false
+  },
+  "temporal_safety_guards": {
+    "stage2_requires_all": [
+      "train_stopped",
+      "doors_fully_open",
+      "exiting_complete",
+      "reboarding_safe"
+    ],
+    "door_closing_blocks_stage2": true,
+    "train_moving_blocks_stage2": true,
+    "passengers_exiting_blocks_stage2": true,
+    "exiting_complete": "after runtime passenger_animation finished at 1750ms and all exiting entities have moved out"
+  },
+  "footprint_adjustments_v5": "for station and cabin, verify actual alpha silhouette / occupied lower-body region against retain passenger masks and tactile strip; superseded for runtime drop acceptance by drop_acceptance_v6, still used for landing QA",
+  "drop_acceptance_v6": {
+    "style": "correct-intent foot-anchor point + canonical-position snap",
+    "gesture": "grab on visible hero alpha or expanded touch target; convert pointer and drag-start offset to scene coordinates, preserving initial pointer-to-visual-foot displacement; recompute release visual foot anchor, not raw finger point; clamp sprite to scene during drag, treat out-of-scene as invalid.",
+    "drop_foot_anchor_formula": "release_scene_foot_anchor = scene_pointer_release - pointer_offset_at_drag_start (in scene coordinate units). For touch proxy use the dragged sprite mapped visual foot anchor.",
+    "classification_order": [
+      "blocked_stage2_flag=>disabled_no_count",
+      "outside_scene_or_explicit_invalid_structure=>invalid_no_count",
+      "explicit_wrong_hazard=>wrong_valid",
+      "correct_foot_anchor_intent=>correct_snap",
+      "other_unclassified_background=>invalid_no_count"
+    ],
+    "target_zone_kind": "GESTURE_ACCEPTANCE_AREA_NOT_A_PLACE_TO_LEAVE_THE_SPRITE",
+    "step1": {
+      "zone_id": "stage1_safe_platform",
+      "snap_foot_anchor_px": [
+        1414,
+        715
+      ],
+      "snap_scale": 0.61,
+      "snap_duration_ms": 180,
+      "final_XP_or_O_on_step1": false
+    },
+    "step2": {
+      "zone_id": "stage2_safe_car",
+      "snap_foot_anchor_px": [
+        475,
+        835
+      ],
+      "snap_scale": 0.58,
+      "snap_duration_ms": 210,
+      "guard_flags": [
+        "train_stopped",
+        "doors_fully_open",
+        "exiting_complete",
+        "reboarding_safe"
+      ]
+    },
+    "on_invalid": {
+      "deduct_attempts": false,
+      "animate_back_to_start": true
+    },
+    "on_wrong": {
+      "deduct_attempts": true,
+      "feedback": "shared_X",
+      "restore_to_current_stage_start": true
+    },
+    "on_correct": {
+      "deduct_attempts": false,
+      "snap_before_state_transition": true
+    },
+    "no_visible_correct_overlay_in_initial": true,
+    "mobile_preview": {
+      "scene_fit": "BoxFit.contain",
+      "illustration_width_dp_reference": [
+        320,
+        360,
+        390
+      ],
+      "scene_bounds_only_ignore_letterbox": true,
+      "device_test_status": "NOT_RUN; coordinate geometry verified",
+      "rectangle_dp_at_display_widths": {
+        "320": {
+          "stage1_target_width_dp": 42.71,
+          "stage1_target_height_dp": 83.33,
+          "stage2_target_width_dp": 45.83,
+          "stage2_target_height_dp": 38.96
+        },
+        "360": {
+          "stage1_target_width_dp": 48.05,
+          "stage1_target_height_dp": 93.75,
+          "stage2_target_width_dp": 51.56,
+          "stage2_target_height_dp": 43.83
+        },
+        "390": {
+          "stage1_target_width_dp": 52.05,
+          "stage1_target_height_dp": 101.56,
+          "stage2_target_width_dp": 55.86,
+          "stage2_target_height_dp": 47.48
+        }
+      }
+    }
+  },
+  "reboard_safety_v6": {
+    "old_foot_anchor_px": [
+      505,
+      913
+    ],
+    "old_scale": 0.8,
+    "new_foot_anchor_px": [
+      475,
+      835
+    ],
+    "new_scale": 0.58,
+    "no_threshold_placement": "The foot anchor is inside the car, visually above/behind the doorway sill; remaining passengers retain exact v5 anchors",
+    "must_check": [
+      "3 characters alpha vs 5 fixed remaining passenger alphas",
+      "snap final foot anchor inside stage2 safe zone",
+      "doorway must not be blocked by final character",
+      "structural and hazard polygons do not contain snap anchor"
+    ],
+    "design_lock": "Do not modify character art, remaining passenger positions, v5 platform wait, scene background or animation timing."
+  },
+  "mobile_accessibility_v7": {
+    "scene_display_width_dp": [
+      320,
+      360,
+      390
+    ],
+    "coordinate_formula": "scene_x=(pointer_dx-renderRect.left)*1536/renderRect.width; scene_y=(pointer_dy-renderRect.top)*1024/renderRect.height; apply drag-start pointer-to-foot offset in scene px",
+    "scale_with_scene_width": "scene image ratio 1.5, height dp = width dp *1024/1536. Do not use whole device height for normalization.",
+    "right_edge_gesture_margin_px": 58,
+    "safety_gate": "invalid and hazard have precedence, never enlarge accepted polygon across tactile strip, moving exit lane, stationary background person or pillar",
+    "acceptance": "use polygon foot-anchor intent + snap to canonical verified safe pose",
+    "touch_region": "hero drawable alpha plus optional expanded touch region; releasing uses actual foot anchor with pointer offset",
+    "device_touch_test": "NOT_RUN; static geometry and pointer offsets simulated only",
+    "static_size_proxies": {
+      "320": {
+        "step1": {
+          "bbox_width_dp": 44.38,
+          "bbox_height_dp": 45.62,
+          "area_dp2": 1859.2
+        },
+        "step2": {
+          "bbox_width_dp": 47.92,
+          "bbox_height_dp": 44.58,
+          "area_dp2": 2136.3
+        }
+      },
+      "360": {
+        "step1": {
+          "bbox_width_dp": 49.92,
+          "bbox_height_dp": 51.33,
+          "area_dp2": 2353.0
+        },
+        "step2": {
+          "bbox_width_dp": 53.91,
+          "bbox_height_dp": 50.16,
+          "area_dp2": 2703.7
+        }
+      },
+      "390": {
+        "step1": {
+          "bbox_width_dp": 54.08,
+          "bbox_height_dp": 55.61,
+          "area_dp2": 2761.5
+        },
+        "step2": {
+          "bbox_width_dp": 58.4,
+          "bbox_height_dp": 54.34,
+          "area_dp2": 3173.1
+        }
+      }
+    }
+  },
+  "qa_evidence_v7": {
+    "interval_ms": 25,
+    "frames_checked": 71,
+    "3_character_total_npc_hero_alpha_overlap_pixels": {
+      "dangdang": 0,
+      "nyangnyang": 0,
+      "mongmong": 0
+    },
+    "platform_exit_npc_pair_overlaps": 0,
+    "mobile_proxy": {
+      "320": {
+        "step1": {
+          "bbox_width_dp": 44.38,
+          "bbox_height_dp": 45.62,
+          "area_dp2": 1859.2
+        },
+        "step2": {
+          "bbox_width_dp": 47.92,
+          "bbox_height_dp": 44.58,
+          "area_dp2": 2136.3
+        }
+      },
+      "360": {
+        "step1": {
+          "bbox_width_dp": 49.92,
+          "bbox_height_dp": 51.33,
+          "area_dp2": 2353.0
+        },
+        "step2": {
+          "bbox_width_dp": 53.91,
+          "bbox_height_dp": 50.16,
+          "area_dp2": 2703.7
+        }
+      },
+      "390": {
+        "step1": {
+          "bbox_width_dp": 54.08,
+          "bbox_height_dp": 55.61,
+          "area_dp2": 2761.5
+        },
+        "step2": {
+          "bbox_width_dp": 58.4,
+          "bbox_height_dp": 54.34,
+          "area_dp2": 3173.1
+        }
+      }
+    },
+    "effective_zones": {
+      "step1": {
+        "polygon_area_px2": 42835.5,
+        "effective_correct_area_px2": 42835.5,
+        "effective_bbox_px": [
+          1265.0,
+          665.0,
+          1478.0,
+          884.0
+        ]
+      },
+      "step2": {
+        "polygon_area_px2": 49220.0,
+        "effective_correct_area_px2": 49220.0,
+        "effective_bbox_px": [
+          338.0,
+          688.0,
+          568.0,
+          902.0
+        ]
+      }
+    },
+    "sample_counts_by_stage_10px_grid": {
+      "step1": {
+        "correct": 424,
+        "wrong": 5618,
+        "invalid": 9820
+      },
+      "step2": {
+        "correct": 506,
+        "wrong": 3647,
+        "invalid": 11709
+      }
+    },
+    "device_test": "NOT RUN"
+  }
+}
