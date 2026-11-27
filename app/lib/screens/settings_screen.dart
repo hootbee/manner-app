@@ -80,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              '지금까지의 학습 기록, 보유한 코인과 배지가\n모두 삭제되며 복구할 수 없습니다.',
+              '지금까지의 학습 기록, 보유한 배지가\n모두 삭제되며 복구할 수 없습니다.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
