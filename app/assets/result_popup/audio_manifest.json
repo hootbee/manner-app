@@ -1,0 +1,20 @@
+{
+  "version": "2.0-user-sfx",
+  "mapping": {
+    "correct": {
+      "file": "audio/popup_correct.mp3",
+      "wav": "audio/popup_correct.wav",
+      "source_uploaded_filename": "정답(1).mp3",
+      "duration_sec": 2.769,
+      "sha256_mp3": "2a136b29ab9b0d725ef3ca221381ef53eb7d7653018ca39fa2bd90901c62245d"
+    },
+    "wrong": {
+      "file": "audio/popup_wrong.mp3",
+      "wav": "audio/popup_wrong.wav",
+      "source_uploaded_filename": "효과음 삐빅(오답) [긴장 효과음 _ 실속 효과음]  39.mp3",
+      "duration_sec": 0.627,
+      "sha256_mp3": "ff3b78b05023c1998c842c049f306efad1c0826671bb7e08d46f8e454689bf16"
+    }
+  },
+  "notes": "사용자 제공 두 효과음으로 이전 자체 제작 사운드를 교체. 원본 MP3 비트스트림 변환 없이 보관했고 WAV는 PCM 변환본."
+}
