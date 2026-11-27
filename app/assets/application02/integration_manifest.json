@@ -1,0 +1,138 @@
+{
+  "version": "7.1-motion-only-integration",
+  "self_reference_excluded": true,
+  "original_source_hashes": "source_sha256.json",
+  "note": "Original PNGs and drag_zones unchanged. Three spec JSON files contain reviewed motion updates.",
+  "files": [
+    {
+      "path": "runtime/background/scene_background.png",
+      "bytes": 858898,
+      "sha256": "5381eb65e388df327bf997aa0dd45609461cb65fca3e6dc42274bdaeb7508a15"
+    },
+    {
+      "path": "runtime/characters/character_dangdang.png",
+      "bytes": 141052,
+      "sha256": "e10fd7416bd79b1b8dd666d5bc8017bfec9c52148069675d2a40d9755c3224dc"
+    },
+    {
+      "path": "runtime/characters/character_mongmong.png",
+      "bytes": 146619,
+      "sha256": "67e4adacae7bee40a2202c618d96acb371f58e33fbcab86fce4d227eb50f7143"
+    },
+    {
+      "path": "runtime/characters/character_nyangnyang.png",
+      "bytes": 145456,
+      "sha256": "008b219a0d215f6181f78208fc1df9e38be541c3947500b33ce3ff9a2d18ce23"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_backpack.png",
+      "bytes": 158424,
+      "sha256": "6e83b93c0120ec47abc3046b8b6eec1517484111953ec774b1ce89a05b3dbd8d"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_backpack_waiting.png",
+      "bytes": 380616,
+      "sha256": "6aa2ff22e3e62e5da25509d51038d898cd83291ca586abe547f1d92cfb62c2ef"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_backpack_walk_b.png",
+      "bytes": 116127,
+      "sha256": "9c4e8cfabe4e2aec6630dcaa615c479627003b362d7bb2e30e7b77a9152ccc43"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_man.png",
+      "bytes": 25824,
+      "sha256": "a44d97453ff7ab9266a330ed8ac0ff265d27a8d65d35fa656a4729e58fff16b8"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_man_walk_b.png",
+      "bytes": 26687,
+      "sha256": "fef9a6a90912f0871f6964de53aa529875a429a2bdaec80c1af5fe4e2f99aa87"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_office.png",
+      "bytes": 152331,
+      "sha256": "0fc3fe256e87ef43508c85a7226c4007e35b0ea704444576dececdda158467e3"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_office_waiting.png",
+      "bytes": 358576,
+      "sha256": "184aefc007f6b0553da9774b63e3e7df41eddb8ea11ba57016bd0befbf0e5ee2"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_office_walk_b.png",
+      "bytes": 113489,
+      "sha256": "6a5d07e98541901dc51525a0467607987f5985b62293a5d9fb3821e389df861c"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_tote.png",
+      "bytes": 156120,
+      "sha256": "79829b4525b45cd7dfb5e6e908ea4c48ac0432a5c36e0b21fe7fb3d603fe1f39"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_tote_waiting.png",
+      "bytes": 402284,
+      "sha256": "095ed75594378e5cbd73a56301221fcb57c6c414a699a232f112530743d6f22a"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_tote_walk_b.png",
+      "bytes": 118297,
+      "sha256": "172e14f5f89f5e1016ffbe5d015cdc80e9609d2213faf2376f016377be770db3"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_woman.png",
+      "bytes": 26861,
+      "sha256": "9d427001990dc994497465cc9a79411e44f47643fdffb429696fb19234523ce1"
+    },
+    {
+      "path": "runtime/passengers/exit/exit_woman_walk_b.png",
+      "bytes": 29099,
+      "sha256": "f84fb0bc01c9f7f07e5756190f7e29d7741acb2226f2f63e0b10b95a0519e48c"
+    },
+    {
+      "path": "runtime/passengers/remain/remain_glasses.png",
+      "bytes": 136817,
+      "sha256": "aaf520771f221b1b7053e3a47aeabe32c2c460990a53d18f7efaab6f4537c956"
+    },
+    {
+      "path": "runtime/passengers/remain/remain_hoodie.png",
+      "bytes": 159997,
+      "sha256": "c52ee0e97e5d0d0b9e63aaad6271fc96be6315157cc48e8336b7998d8f570ba3"
+    },
+    {
+      "path": "runtime/passengers/remain/remain_man_glasses.png",
+      "bytes": 25892,
+      "sha256": "57f63741f290db277e15949bfcace8783c5cab706380725b061525a7f705919b"
+    },
+    {
+      "path": "runtime/passengers/remain/remain_man_shirt.png",
+      "bytes": 23220,
+      "sha256": "cb467fff0aa0c31eeb1a0802834ec199e1328d4ccadda439c52d7f6bf680c373"
+    },
+    {
+      "path": "runtime/passengers/remain/remain_phone.png",
+      "bytes": 156478,
+      "sha256": "3ee3564c4808cda5f03be66db68f5c6fd706e6e39928aa1e0e0052baebe66a54"
+    },
+    {
+      "path": "spec/asset_rules.json",
+      "bytes": 8485,
+      "sha256": "560e9d6b3baef58b102ab23a357134b907580ad89c69d0cb79e8cc1f7279e10e"
+    },
+    {
+      "path": "spec/drag_zones.json",
+      "bytes": 26120,
+      "sha256": "9428fe5efd19b82ae33f8bdd5ee35030facc82bf88579df163ab60507def0d99"
+    },
+    {
+      "path": "spec/passenger_animation.json",
+      "bytes": 12656,
+      "sha256": "9edd96d0c231d2ed1f270a07b29bfc08260d18e8d8fa851a3037064043cf6b75"
+    },
+    {
+      "path": "spec/state_asset_mapping.json",
+      "bytes": 13535,
+      "sha256": "9cc6c27bc632d8f7520b23523e62993c63fa988c7f76e35496c8a9b391f0f709"
+    }
+  ]
+}

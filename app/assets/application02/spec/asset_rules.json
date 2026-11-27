@@ -1,0 +1,251 @@
+{
+  "project": "MANNERS",
+  "lesson": "transit02_application",
+  "version": "7.0-animation-safe-drop-geometry",
+  "canvas": {
+    "scene_size_px": [
+      1536,
+      1024
+    ],
+    "origin": "top_left",
+    "x_right_y_down": true,
+    "responsive": "BoxFit.contain and sceneRect pointer-to-scene mapping; ignore letterboxing"
+  },
+  "ui_policy": {
+    "do_not_redesign": true,
+    "native_flutter_widgets": [
+      "logo",
+      "header",
+      "progress",
+      "title",
+      "situation",
+      "instructions",
+      "feedback",
+      "hint",
+      "O_X_popup",
+      "sound",
+      "vibration"
+    ]
+  },
+  "layers_back_to_front": [
+    "runtime/background/scene_background.png",
+    "runtime/passengers/remain/* (fixed 5 individual sprite layers)",
+    "runtime/passengers/exit/* (only until exiting ends)",
+    "runtime/characters/<selection>.png",
+    "Flutter native feedback/popup"
+  ],
+  "approved_initial": "approved/approved_initial_full_screen_REFERENCE_ONLY.png",
+  "background": "runtime/background/scene_background.png",
+  "character_foot_anchor": "visual alpha bounding box bottom center",
+  "characters": {
+    "dangdang": {
+      "path": "runtime/characters/character_dangdang.png",
+      "size_px": [
+        341,
+        430
+      ],
+      "source": "existing 07 confirmed adult transparent reference art; distress overlay only"
+    },
+    "nyangnyang": {
+      "path": "runtime/characters/character_nyangnyang.png",
+      "size_px": [
+        312,
+        430
+      ],
+      "source": "existing 07 confirmed adult transparent reference art; distress overlay only"
+    },
+    "mongmong": {
+      "path": "runtime/characters/character_mongmong.png",
+      "size_px": [
+        326,
+        430
+      ],
+      "source": "existing 07 confirmed adult transparent reference art; distress overlay only"
+    }
+  },
+  "passengers": {
+    "exit_office": {
+      "path": "runtime/passengers/exit/exit_office.png",
+      "walking_variant": "runtime/passengers/exit/exit_office_walk_b.png",
+      "start_foot_anchor_px": [
+        450,
+        830
+      ],
+      "render_height_px": 440,
+      "moves": true,
+      "waiting_path": "runtime/passengers/exit/exit_office_waiting.png",
+      "animation_start_delay_ms": 540,
+      "animation_duration_ms": 670,
+      "finish_foot_anchor_px": [
+        1670,
+        1250
+      ]
+    },
+    "exit_tote": {
+      "path": "runtime/passengers/exit/exit_tote.png",
+      "walking_variant": "runtime/passengers/exit/exit_tote_walk_b.png",
+      "start_foot_anchor_px": [
+        825,
+        830
+      ],
+      "render_height_px": 440,
+      "moves": true,
+      "waiting_path": "runtime/passengers/exit/exit_tote_waiting.png",
+      "animation_start_delay_ms": 0,
+      "animation_duration_ms": 670,
+      "finish_foot_anchor_px": [
+        1650,
+        1250
+      ]
+    },
+    "exit_backpack": {
+      "path": "runtime/passengers/exit/exit_backpack.png",
+      "walking_variant": "runtime/passengers/exit/exit_backpack_walk_b.png",
+      "start_foot_anchor_px": [
+        720,
+        808
+      ],
+      "render_height_px": 418,
+      "moves": true,
+      "waiting_path": "runtime/passengers/exit/exit_backpack_waiting.png",
+      "animation_start_delay_ms": 270,
+      "animation_duration_ms": 670,
+      "finish_foot_anchor_px": [
+        1660,
+        1250
+      ]
+    },
+    "exit_woman": {
+      "path": "runtime/passengers/exit/exit_woman.png",
+      "walking_variant": "runtime/passengers/exit/exit_woman_walk_b.png",
+      "start_foot_anchor_px": [
+        585,
+        690
+      ],
+      "render_height_px": 303,
+      "moves": true,
+      "waiting_path": "runtime/passengers/exit/exit_woman.png",
+      "animation_start_delay_ms": 810,
+      "animation_duration_ms": 670,
+      "finish_foot_anchor_px": [
+        1680,
+        1250
+      ]
+    },
+    "exit_man": {
+      "path": "runtime/passengers/exit/exit_man.png",
+      "walking_variant": "runtime/passengers/exit/exit_man_walk_b.png",
+      "start_foot_anchor_px": [
+        790,
+        700
+      ],
+      "render_height_px": 296,
+      "moves": true,
+      "waiting_path": "runtime/passengers/exit/exit_man.png",
+      "animation_start_delay_ms": 1080,
+      "animation_duration_ms": 670,
+      "finish_foot_anchor_px": [
+        1690,
+        1250
+      ]
+    }
+  },
+  "stage_character_anchors": {
+    "initial": [
+      650,
+      868
+    ],
+    "step1_success": [
+      1414,
+      715
+    ],
+    "passengers_exiting": [
+      1414,
+      715
+    ],
+    "step2_ready": [
+      1414,
+      715
+    ],
+    "final_success": [
+      475,
+      835
+    ]
+  },
+  "stage_character_scale": {
+    "initial": 1.0,
+    "step1_success": 0.61,
+    "passengers_exiting": 0.61,
+    "step2_ready": 0.61,
+    "final_success": 0.58
+  },
+  "asset_quality_note": "New seat/wall restoration and fully redrawn passenger silhouettes from flattened approved screenshot are not original layered art. Require visual acceptance; original approved UI image stays unchanged.",
+  "common_popup": "Reuse installed MANNERS common O/X popup and SFX; not copied into this ZIP.",
+  "remaining_passengers": {
+    "remain_hoodie": {
+      "path": "runtime/passengers/remain/remain_hoodie.png",
+      "foot_anchor_px": [
+        345,
+        660
+      ],
+      "render_height_px": 300,
+      "moves": false,
+      "visible_all_stages": true
+    },
+    "remain_phone": {
+      "path": "runtime/passengers/remain/remain_phone.png",
+      "foot_anchor_px": [
+        735,
+        674
+      ],
+      "render_height_px": 292,
+      "moves": false,
+      "visible_all_stages": true
+    },
+    "remain_glasses": {
+      "path": "runtime/passengers/remain/remain_glasses.png",
+      "foot_anchor_px": [
+        855,
+        680
+      ],
+      "render_height_px": 285,
+      "moves": false,
+      "visible_all_stages": true
+    },
+    "remain_man_glasses": {
+      "path": "runtime/passengers/remain/remain_man_glasses.png",
+      "foot_anchor_px": [
+        545,
+        570
+      ],
+      "render_height_px": 245,
+      "moves": false,
+      "visible_all_stages": true
+    },
+    "remain_man_shirt": {
+      "path": "runtime/passengers/remain/remain_man_shirt.png",
+      "foot_anchor_px": [
+        680,
+        583
+      ],
+      "render_height_px": 246,
+      "moves": false,
+      "visible_all_stages": true
+    }
+  },
+  "passenger_motion_duration_ms": 1750,
+  "passenger_animation_file": "spec/passenger_animation.json",
+  "note_on_art": "Passenger art reconstructed into separate transparent sprites, not pixel-identical to flattened approved reference; all previews are generated from the actual runtime sprites.",
+  "state_asset_mapping": "spec/state_asset_mapping.json",
+  "drag_zones": "spec/drag_zones.json",
+  "initial_passenger_pose": "stand_idle until step1_success feedback finishes; move cycle begins only at passengers_exiting",
+  "notes_v5": "v4 approved characters, original background and existing walking frames are byte-identical. Rear retain riders have depth-corrected positions and three new waiting sprites added.",
+  "qa_reference_scene_poses": "qa/QA_five_state_runtime_sequence.jpg",
+  "validation_art_status": "VISUAL_QA_REQUIRED_AFTER_RECONSTRUCTED_STANDING_POSES",
+  "drop_evaluation": "spec/drag_zones.json drop_acceptance_v6; canonical snap after foot-anchor point passes; reboard final position checked against fixed remain alpha masks",
+  "notes_v6": "No runtime PNG was redrawn. New stage2 placement x=475 y=835 scale=.58 places all characters farther inside the cabin and avoids visible overlap with static riders; 1/2 stage successful gestures use canonical snap, not full-body contained-in-safe-polygon drop.",
+  "visual_qa_status": "Runtime visual differences from flattened approved original still require user review; no pixel-identical art claim.",
+  "notes_v7": "Only motion path timing and 1/2-stage acceptance geometry/spec references changed. All pre-approved PNG files preserved byte-identically.",
+  "all_movement_QA_v7": "all 3 heroes unchanged; 25ms sampled alpha intersections zero with moving riders; 5 rider pairs also do not overlap outside car on platform at sampled instants.",
+  "integration_motion_revision": "7.1-continuous-platform-exit; hero anchors, drop zones and 1750ms total unchanged"
+}

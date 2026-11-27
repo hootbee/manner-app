@@ -1,0 +1,422 @@
+{
+  "problem_id": "transit02_application",
+  "canvas": [
+    1536,
+    1024
+  ],
+  "layers_back_to_front": [
+    "runtime/background/scene_background.png",
+    "runtime/passengers/remain/* (fixed 5 individual sprite layers)",
+    "runtime/passengers/exit/* (only until exiting ends)",
+    "runtime/characters/<selection>.png",
+    "Flutter native feedback/popup"
+  ],
+  "assets": {
+    "background": "runtime/background/scene_background.png",
+    "characters": {
+      "dangdang": "runtime/characters/character_dangdang.png",
+      "nyangnyang": "runtime/characters/character_nyangnyang.png",
+      "mongmong": "runtime/characters/character_mongmong.png"
+    },
+    "exit_passengers": {
+      "exit_office": "runtime/passengers/exit/exit_office.png",
+      "exit_tote": "runtime/passengers/exit/exit_tote.png",
+      "exit_backpack": "runtime/passengers/exit/exit_backpack.png",
+      "exit_woman": "runtime/passengers/exit/exit_woman.png",
+      "exit_man": "runtime/passengers/exit/exit_man.png"
+    },
+    "remaining_passengers": {
+      "remain_hoodie": "runtime/passengers/remain/remain_hoodie.png",
+      "remain_phone": "runtime/passengers/remain/remain_phone.png",
+      "remain_glasses": "runtime/passengers/remain/remain_glasses.png",
+      "remain_man_glasses": "runtime/passengers/remain/remain_man_glasses.png",
+      "remain_man_shirt": "runtime/passengers/remain/remain_man_shirt.png"
+    },
+    "exit_walking_variants": {
+      "exit_office": "runtime/passengers/exit/exit_office_walk_b.png",
+      "exit_tote": "runtime/passengers/exit/exit_tote_walk_b.png",
+      "exit_backpack": "runtime/passengers/exit/exit_backpack_walk_b.png",
+      "exit_woman": "runtime/passengers/exit/exit_woman_walk_b.png",
+      "exit_man": "runtime/passengers/exit/exit_man_walk_b.png"
+    },
+    "passenger_animation_spec": "spec/passenger_animation.json",
+    "preview_qa_only": [
+      "preview/01_initial.png",
+      "preview/02_step1_success.png",
+      "preview/03_passengers_exiting.png",
+      "preview/04_step2_ready.png",
+      "preview/05_final_success.png"
+    ]
+  },
+  "stages": {
+    "initial": {
+      "character_anchor_px": [
+        650,
+        868
+      ],
+      "character_scale": 1,
+      "passenger_mode": "waiting_static",
+      "next": "step1_dragging",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "visible_waiting_at_start",
+      "moving_passenger_pose": "waiting_asset"
+    },
+    "step1_dragging": {
+      "character_drag": "user_pointer",
+      "passenger_mode": "waiting_static",
+      "on_correct": "step1_success",
+      "on_wrong": "step1_wrong",
+      "on_invalid": "initial",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "visible_waiting_at_start",
+      "moving_passenger_pose": "waiting_asset",
+      "drop_evaluation": "foot-anchor intent zone, then snap to stage1 target; no final popup, no XP"
+    },
+    "step1_success": {
+      "character_anchor_px": [
+        1414,
+        715
+      ],
+      "character_scale": 0.61,
+      "passenger_mode": "waiting_static",
+      "feedback": "좋아요! 하차 통로를 비웠어요.",
+      "show_final_O": false,
+      "next": "passengers_exiting",
+      "grants_completion": false,
+      "grants_xp": false,
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "visible_waiting_at_start",
+      "moving_passenger_pose": "waiting_asset"
+    },
+    "passengers_exiting": {
+      "character_anchor_px": [
+        1414,
+        715
+      ],
+      "character_scale": 0.61,
+      "passenger_mode": "tween_exit",
+      "duration_ms": 1750,
+      "next": "step2_ready",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "animate_only_exit_entities",
+      "feedback": "승객들이 먼저 내리고 있어요.",
+      "moving_passenger_pose": "walking_A/B",
+      "animation_spec": "spec/passenger_animation.json",
+      "drag_enabled": false
+    },
+    "step2_ready": {
+      "character_anchor_px": [
+        1414,
+        715
+      ],
+      "character_scale": 0.61,
+      "passenger_mode": "hidden",
+      "required_flags": [
+        "train_stopped",
+        "doors_fully_open",
+        "exiting_complete",
+        "reboarding_safe"
+      ],
+      "next": "step2_dragging",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "hidden_after_animation_complete",
+      "feedback": "하차가 끝났어요. 안전하게 다시 탑승해 보세요.",
+      "drag_enabled": "all five passenger paths completed at 1750ms AND train_stopped && doors_fully_open && exiting_complete && reboarding_safe"
+    },
+    "step2_dragging": {
+      "character_drag": "user_pointer",
+      "passenger_mode": "hidden",
+      "on_correct": "final_success",
+      "on_wrong": "step2_wrong",
+      "on_invalid": "step2_ready",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "hidden_after_animation_complete",
+      "required_flags": [
+        "train_stopped",
+        "doors_fully_open",
+        "exiting_complete",
+        "reboarding_safe"
+      ],
+      "drop_evaluation": "guard flags all true; foot-anchor intent zone, then snap to stage2 target before final O"
+    },
+    "final_success": {
+      "character_anchor_px": [
+        475,
+        835
+      ],
+      "character_scale": 0.58,
+      "passenger_mode": "hidden",
+      "show_final_O": true,
+      "popup": "shared_correct_popup",
+      "reward": "handled_only_after_application_explanation_and_completion, not in this stage",
+      "direct_success": true,
+      "grants_xp_directly": false,
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "hidden_after_animation_complete",
+      "feedback": "좋아요! 안전하게 다시 탑승했어요."
+    },
+    "step1_wrong": {
+      "restore_anchor_px": [
+        650,
+        868
+      ],
+      "feedback": "기존 공통 X 규칙",
+      "retry_stage": "initial",
+      "attempts_after_valid_wrong": "wrong_drop_count += 1; if >= 4 -> answer_reveal; else retry initial",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "visible_waiting_at_start"
+    },
+    "step2_wrong": {
+      "restore_anchor_px": [
+        1414,
+        715
+      ],
+      "feedback": "기존 공통 X 규칙",
+      "retry_stage": "step2_ready",
+      "attempts_after_valid_wrong": "wrong_drop_count += 1; if >= 4 -> answer_reveal; else retry step2_ready",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "hidden_after_animation_complete"
+    },
+    "answer_reveal": {
+      "hero_anchor_px": [
+        475,
+        835
+      ],
+      "final_answer_is_revealed": true,
+      "direct_success": false,
+      "grants_xp": false,
+      "show_final_O": false,
+      "route": "application_explanation_then_completion_without_xp",
+      "remaining_passengers": "fixed_visible",
+      "exiting_passengers": "hidden_after_animation_complete"
+    }
+  },
+  "transitions": [
+    {
+      "from": "initial",
+      "event": "drag_start",
+      "to": "step1_dragging"
+    },
+    {
+      "from": "step1_dragging",
+      "event": "correct_drop",
+      "to": "step1_success"
+    },
+    {
+      "from": "step1_success",
+      "event": "feedback_finished",
+      "to": "passengers_exiting"
+    },
+    {
+      "from": "passengers_exiting",
+      "event": "animation_finished_and_safety_flags_valid",
+      "to": "step2_ready"
+    },
+    {
+      "from": "step2_ready",
+      "event": "drag_start",
+      "to": "step2_dragging"
+    },
+    {
+      "from": "step2_dragging",
+      "event": "correct_drop",
+      "to": "final_success"
+    },
+    {
+      "from": "step1_wrong",
+      "event": "fourth_valid_wrong",
+      "to": "answer_reveal"
+    },
+    {
+      "from": "step2_wrong",
+      "event": "fourth_valid_wrong",
+      "to": "answer_reveal"
+    },
+    {
+      "from": "step1_dragging",
+      "event": "invalid_or_cancel",
+      "to": "initial"
+    },
+    {
+      "from": "step2_dragging",
+      "event": "invalid_or_cancel",
+      "to": "step2_ready"
+    }
+  ],
+  "guardrails": {
+    "max_valid_wrong_drops": 4,
+    "attempts_scope": "entire_problem",
+    "invalid_drop_counted": false,
+    "hint_sequence": [
+      "hint1",
+      "hint2"
+    ],
+    "step1_success_awards_completion": false,
+    "final_answer_reveal_counts_as_direct_success": false,
+    "final_answer_reveal_awards_xp": false,
+    "only_existing_common_popup_after_step2_success": true,
+    "door_closing_or_train_moving_must_block_reboarding": true,
+    "initial_attempts": 1,
+    "max_retry_attempts": 3,
+    "answer_reveal_after_fourth_valid_wrong": true,
+    "answer_reveal_is_not_correct": true,
+    "answer_reveal_awards_xp": false,
+    "step2_flags_all_true_required": true,
+    "stage1_no_final_popup_or_xp": true
+  },
+  "shared_ui": "Do not embed text/buttons/popup in runtime art. Reuse existing MANNERS Flutter widget styles and popup assets.",
+  "production_gate": "VISUAL_REVIEW_REQUIRED_BEFORE_FINAL_APPROVAL",
+  "version": "7.0-animation-safe-drop-geometry",
+  "all_moving_passengers_have_complete_bodies": true,
+  "render_info": {
+    "foot_anchors": {
+      "hero_initial": [
+        650,
+        868
+      ],
+      "hero_platform_wait": [
+        1414,
+        715
+      ],
+      "hero_reboard": [
+        475,
+        835
+      ]
+    },
+    "hero_scales": {
+      "initial": 1.0,
+      "platform_wait": 0.61,
+      "reboard": 0.58
+    },
+    "exit_sprites": {
+      "exit_office": {
+        "anchor": [
+          450,
+          830
+        ],
+        "height": 440,
+        "start_delay_ms": 540,
+        "target": [
+          1670,
+          1250
+        ]
+      },
+      "exit_tote": {
+        "anchor": [
+          825,
+          830
+        ],
+        "height": 440,
+        "start_delay_ms": 0,
+        "target": [
+          1650,
+          1250
+        ]
+      },
+      "exit_backpack": {
+        "anchor": [
+          720,
+          808
+        ],
+        "height": 418,
+        "start_delay_ms": 270,
+        "target": [
+          1660,
+          1250
+        ]
+      },
+      "exit_woman": {
+        "anchor": [
+          585,
+          690
+        ],
+        "height": 303,
+        "start_delay_ms": 810,
+        "target": [
+          1680,
+          1250
+        ]
+      },
+      "exit_man": {
+        "anchor": [
+          790,
+          700
+        ],
+        "height": 296,
+        "start_delay_ms": 1080,
+        "target": [
+          1690,
+          1250
+        ]
+      }
+    },
+    "remaining_sprites": {
+      "remain_hoodie": {
+        "anchor": [
+          345,
+          660
+        ],
+        "height": 300
+      },
+      "remain_phone": {
+        "anchor": [
+          735,
+          674
+        ],
+        "height": 292
+      },
+      "remain_glasses": {
+        "anchor": [
+          855,
+          680
+        ],
+        "height": 285
+      },
+      "remain_man_glasses": {
+        "anchor": [
+          545,
+          570
+        ],
+        "height": 245
+      },
+      "remain_man_shirt": {
+        "anchor": [
+          680,
+          583
+        ],
+        "height": 246
+      }
+    },
+    "render_order": [
+      "background",
+      "remain",
+      "exit_before_completion",
+      "hero",
+      "Flutter_UI"
+    ]
+  },
+  "safety_notes": "Do not allow stage2 drag during exiting; if doors close / train moves / route blocked, stop and reset safely. Stage1 correct does not show final O/XP.",
+  "notes_v5": "Reboard pocket front-left kept free of stationary rider alpha silhouettes; retain passengers stay fixed at all stages. Waiting poses do not move until pass exiting animation.",
+  "art_revision": {
+    "initial_exit_pose": "waiting/standing; no movement until passengers_exiting",
+    "waiting_assets": [
+      "runtime/passengers/exit/exit_office_waiting.png",
+      "runtime/passengers/exit/exit_tote_waiting.png",
+      "runtime/passengers/exit/exit_backpack_waiting.png",
+      "runtime/passengers/exit/exit_woman.png",
+      "runtime/passengers/exit/exit_man.png"
+    ],
+    "retained_riders": "same sprites and anchors in initial, step1_success, exiting, step2_ready, final_success",
+    "reboarding_pocket": [
+      475,
+      835
+    ],
+    "rendering": "scene composed dynamically; preview/*.png are QA references, not runtime layers",
+    "reboarding_pocket_scale": 0.58
+  },
+  "gesture_and_snap_v6": "spec/drag_zones.json -> drop_acceptance_v6; on accepted correct drop animate snap, then change state. Wrong/invalid retain previous common behavior.",
+  "notes_v6": "Only stage2 final anchor+scale and drag acceptance policy changed. Remain passenger art/positions, stage1 waiting anchor 2-4, 1750ms animation and user interface remain v5.",
+  "notes_v7": "Fixed stale art_revision.reboarding_pocket. Exit riders now follow individually delayed 670ms four-point paths (overall 1750ms) that leave bottom frame and avoid the unchanged 1414,715 wait anchor.",
+  "all_movement_QA_v7": "stage1 waiting anchor fixed [1414,715] and reboard [475,835]; 25ms compositing collision tests; state2 only after 1750ms.",
+  "integration_motion_revision": "7.1-continuous-platform-exit; hero anchors, drop zones and 1750ms total unchanged"
+}
