@@ -1,0 +1,169 @@
+{
+  "id": "transit04_application",
+  "category": "대중교통",
+  "topic": "내릴 정류장을 놓쳤을 때 안전하게 대처하기",
+  "number": "04/20",
+  "stage": "application",
+  "stage_label": "응용 04/20 · 2/2",
+  "type": "sequence",
+  "title": "내릴 정류장을 지나쳤다면 어떻게 해야 할까요?",
+  "scenario": [
+    "냥냥이는 버스에서 내릴 정류장을 놓쳤어요.",
+    "버스는 이미 출발했고, 다음 정류장까지 조금 더 가야 해요.",
+    "안전하게 내리려면 어떤 순서로 행동해야 할까요?"
+  ],
+  "operation": "올바른 행동 순서대로 카드를 드래그해 주세요.",
+  "cards": {
+    "A": {
+      "id": "A",
+      "text": "손잡이를 잡고 버스가 멈추기를 기다린다.",
+      "image": "assets/cards/action_hold_handle.png",
+      "sprite_size_px": [
+        247,
+        86
+      ],
+      "background_handling": "approved soft-gray thumbnail background retained; outside rounded rectangle transparent"
+    },
+    "B": {
+      "id": "B",
+      "text": "버스 안내 화면에서 다음 정류장을 확인한다.",
+      "image": "assets/cards/action_check_next_stop.png",
+      "sprite_size_px": [
+        247,
+        86
+      ],
+      "background_handling": "approved soft-gray thumbnail background retained; outside rounded rectangle transparent"
+    },
+    "C": {
+      "id": "C",
+      "text": "버스가 완전히 멈춘 뒤 차례대로 내린다.",
+      "image": "assets/cards/action_exit_after_stop.png",
+      "sprite_size_px": [
+        247,
+        86
+      ],
+      "background_handling": "approved soft-gray thumbnail background retained; outside rounded rectangle transparent"
+    },
+    "D": {
+      "id": "D",
+      "text": "다음 정류장에서 내리도록 하차벨을 누른다.",
+      "image": "assets/cards/action_press_stop_button.png",
+      "sprite_size_px": [
+        247,
+        85
+      ],
+      "background_handling": "approved soft-gray thumbnail background retained; outside rounded rectangle transparent"
+    }
+  },
+  "initial_order": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "planning_recommended_order": [
+    "B",
+    "D",
+    "A",
+    "C"
+  ],
+  "grading": {
+    "status": "APPROVED",
+    "accepted_orders": [
+      [
+        "B",
+        "D",
+        "A",
+        "C"
+      ],
+      [
+        "B",
+        "A",
+        "D",
+        "C"
+      ],
+      [
+        "A",
+        "B",
+        "D",
+        "C"
+      ],
+      [
+        "A",
+        "D",
+        "B",
+        "C"
+      ],
+      [
+        "D",
+        "B",
+        "A",
+        "C"
+      ],
+      [
+        "D",
+        "A",
+        "B",
+        "C"
+      ]
+    ],
+    "allow_multiple_safe_orders": true,
+    "submit_trigger": "submit_button_only",
+    "cannot_grade_until_accepted_orders_approved": false,
+    "movement_itself_is_not_submission": true,
+    "max_valid_submissions": 4,
+    "initial_submission": 1,
+    "max_retries": 3,
+    "invalid_moves_consume_attempt": false,
+    "hint_views_consume_attempt": false,
+    "final_failure": "show learning answer only, no successful_completion, no_XP",
+    "mode": "multiple_accepted_orders"
+  },
+  "buttons": {
+    "initial_hint": "힌트 보기",
+    "initial_submit": "제출하기",
+    "submit_initial_enabled": false,
+    "submit_enable_after": "at least one completed card reorder"
+  },
+  "hint_source": "spec/problem_sequence_transit04.json#hints",
+  "explanation_source": "content/explanation.json",
+  "implementation_warning": "User-approved six permutations of A/B/D followed by C. Preferred reveal order B-D-A-C.",
+  "scenario_name_binding": {
+    "selected_character_ids": {
+      "dangdang": "댕댕이",
+      "nyangnyang": "냥냥이",
+      "mongmong": "몽몽이"
+    },
+    "template_lines": [
+      "{character_name}는 버스에서 내릴 정류장을 놓쳤어요.",
+      "버스는 이미 출발했고, 다음 정류장까지 조금 더 가야 해요.",
+      "안전하게 내리려면 어떤 순서로 행동해야 할까요?"
+    ],
+    "default_character_id": "nyangnyang",
+    "rendering": "Replace the named placeholder only when Flutter selects a character; default approved static scenario remains untouched; use current selected character ID.",
+    "qa_examples": {
+      "dangdang": "댕댕이는 버스에서 내릴 정류장을 놓쳤어요.",
+      "nyangnyang": "냥냥이는 버스에서 내릴 정류장을 놓쳤어요.",
+      "mongmong": "몽몽이는 버스에서 내릴 정류장을 놓쳤어요."
+    }
+  },
+  "scene_mode": "character_specific_completed_scene_png_B",
+  "scene_by_character": {
+    "nyangnyang": "assets/scenes/scene_nyangnyang.png",
+    "dangdang": "assets/scenes/scene_dangdang.png",
+    "mongmong": "assets/scenes/scene_mongmong.png"
+  },
+  "runtime_scene_reference": "spec/state_asset_mapping.json",
+  "scene_crop_note": "Approval images are 1024x1536 full UI screenshots; each runtime scene is the exact unmodified [24,425,1000,822] crop, 976x397; do not show cropped UI components as raster.",
+  "education_content_status": "APPROVED",
+  "accepted_orders_approval_required": false,
+  "hints": [
+    "정류장을 놓쳤더라도 당황하지 마세요. 다음 정류장에서 안전하게 내리려면 무엇을 해야 할까요?",
+    "다음 정류장 확인, 하차벨 누르기, 손잡이 잡기는 정차 전에 할 수 있어요. 버스에서 내리는 행동은 언제 해야 할까요?"
+  ],
+  "feedback": {
+    "reveal": "권장 순서: B → D → A → C\nA·B·D 사이의 순서는 달라도 정답이에요. C는 마지막에 놓아요. 정답 확인은 성공으로 기록되지 않으며 XP는 지급되지 않아요.",
+    "correct": "좋아요! 다음 정류장에서 안전하게 내릴 준비를 마쳤어요!",
+    "wrong": "버스가 완전히 멈춘 뒤에 내려야 해요. 다시 순서를 확인해 보세요!"
+  }
+}
