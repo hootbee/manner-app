@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "problem_id": "MANNERS_TRANSIT_05_APPLICATION",
+  "category": {
+    "id": "transit",
+    "label": "대중교통"
+  },
+  "lesson_progress": {
+    "number": 5,
+    "total": 20,
+    "stage": "application",
+    "part_index": 2,
+    "part_total": 2,
+    "display_label": "응용 05/20 · 2/2"
+  },
+  "problem_type": "choice",
+  "title": "포장한 피자를 들고 버스를 탈 때는 어떻게 해야 할까요?",
+  "description": {
+    "template": "{characterName}는 피자를 포장해서 서울 시내버스를 타려고 해요.\n피자는 종이상자에 담겨 있고, 버스 안에는 다른 승객들도 있어요.\n어떻게 행동하는 것이 가장 적절할까요?",
+    "character_name_map": {
+      "mongmong": "몽몽이",
+      "dangdang": "댕댕이",
+      "nyangnyang": "냥냥이"
+    },
+    "per_character_lines": {
+      "mongmong": [
+        "몽몽이는 피자를 포장해서 서울 시내버스를 타려고 해요.",
+        "피자는 종이상자에 담겨 있고, 버스 안에는 다른 승객들도 있어요.",
+        "어떻게 행동하는 것이 가장 적절할까요?"
+      ],
+      "dangdang": [
+        "댕댕이는 피자를 포장해서 서울 시내버스를 타려고 해요.",
+        "피자는 종이상자에 담겨 있고, 버스 안에는 다른 승객들도 있어요.",
+        "어떻게 행동하는 것이 가장 적절할까요?"
+      ],
+      "nyangnyang": [
+        "냥냥이는 피자를 포장해서 서울 시내버스를 타려고 해요.",
+        "피자는 종이상자에 담겨 있고, 버스 안에는 다른 승객들도 있어요.",
+        "어떻게 행동하는 것이 가장 적절할까요?"
+      ]
+    }
+  },
+  "instruction": "가장 권장되는 행동을 선택해 주세요.",
+  "choices": [
+    {
+      "id": "A",
+      "text": "피자는 음식이므로 포장되어 있어도 버스에 가지고 탈 수 없다고 생각한다."
+    },
+    {
+      "id": "B",
+      "text": "피자 상자를 닫은 채 안전하게 들고 타며, 다른 승객에게 불편을 주지 않도록 보관한다."
+    },
+    {
+      "id": "C",
+      "text": "상자가 닫혀 있으므로 버스 통로 바닥에 내려놓고 이동한다."
+    }
+  ],
+  "correct_choice_id": "B",
+  "initial_selection": null,
+  "grading": {
+    "trigger": "submit_button_only",
+    "selection_changes_do_not_grade": true,
+    "submit_button_enabled_if": "one_choice_selected",
+    "max_valid_submissions": 4,
+    "initial_attempts": 1,
+    "max_retries": 3,
+    "hint_does_not_count_attempt": true,
+    "on_correct": "reuse_common_correct_popup_then_application_explanation",
+    "on_wrong_with_attempts_left": "reuse_common_wrong_popup_then_retry",
+    "on_fourth_wrong": "show_learning_answer_reveal",
+    "answer_reveal_is_success": false,
+    "award_xp_on_answer_reveal": false,
+    "common_effects": "reuse_existing_O_X_sound_haptics_animation"
+  },
+  "hint": {
+    "sequence": [
+      "hint_1",
+      "hint_2"
+    ],
+    "content_status": "APPROVED",
+    "content_pointer": "content/education_content_transit05.md",
+    "do_not_publish_unapproved_copy": false,
+    "messages": [
+      "음식이라고 모두 버스에 가지고 탈 수 없는 건 아니에요. 어떤 상태로 포장되어 있는지 생각해 보세요.",
+      "종이상자에 포장된 피자는 반입할 수 있어요. 그렇다면 다른 승객의 이동을 방해하지 않으려면 어떻게 해야 할까요?"
+    ]
+  },
+  "explanation": {
+    "content_status": "APPROVED",
+    "content_pointer": "content/education_content_transit05.md",
+    "reuse_common_application_explanation_ui": true
+  },
+  "rewards": {
+    "granting_logic": "reuse existing MANNERS shared per-topic completion and XP policy; do not grant twice"
+  },
+  "scene_file_map": {
+    "mongmong": "assets/scenes/scene_mongmong.png",
+    "dangdang": "assets/scenes/scene_dangdang.png",
+    "nyangnyang": "assets/scenes/scene_nyangnyang.png"
+  },
+  "ui": "reuse approved Flutter Choice components",
+  "feedback": {
+    "C": "상자가 닫혀 있어도 통로를 막으면 다른 승객에게 불편을 줄 수 있어요. 다시 생각해 보세요!",
+    "A": "포장된 음식물을 모두 버스에 가져갈 수 없는 것은 아니에요. 피자 상자의 포장 상태를 다시 생각해 보세요!",
+    "B": "좋아요! 포장 상태를 유지하고 다른 승객까지 배려했어요!"
+  },
+  "answer_reveal": "가장 권장되는 행동은 B예요. 종이상자에 포장된 피자는 버스에 가지고 탈 수 있지만, 다른 승객에게 불편을 주지 않도록 안전하게 운반해야 해요."
+}

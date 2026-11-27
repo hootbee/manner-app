@@ -1,0 +1,170 @@
+{
+  "canvas": {
+    "width": 1536,
+    "height": 1024,
+    "origin": "top_left",
+    "coordinateSystem": "pixel",
+    "aspectRatio": 1.5
+  },
+  "rendering": {
+    "method": "stack_full_canvas",
+    "fit": "contain",
+    "sameScaleForSceneAndCharacters": true,
+    "letterboxOffsetNeeded": true,
+    "uiRenderedByFlutter": true
+  },
+  "layers": [
+    {
+      "z": 0,
+      "id": "background",
+      "path": "assets/background/scene_background.png"
+    },
+    {
+      "z": 10,
+      "id": "selected_character",
+      "pathTemplate": "assets/characters/character_{characterId}.png"
+    },
+    {
+      "z": 20,
+      "id": "flutter_ui",
+      "image": false
+    }
+  ],
+  "characterPlacements": {
+    "mongmong": {
+      "fullCanvas": [
+        1536,
+        1024
+      ],
+      "visibleBounds": [
+        547,
+        202,
+        1104,
+        970
+      ],
+      "anchor": {
+        "kind": "feet_bottom_center",
+        "x": 780,
+        "y": 970
+      },
+      "renderAt": {
+        "x": 0,
+        "y": 0
+      },
+      "originalSourceDimensions": [
+        1254,
+        1254
+      ],
+      "originalCutoutRect": [
+        157,
+        32,
+        1022,
+        1204
+      ],
+      "tailDirection": "screen_right (matches 04 adult reference direction)",
+      "tailRevision": "Existing 05 illustration reoriented; face/clothes/drink objects retained. Manual final art approval still required."
+    },
+    "dangdang": {
+      "fullCanvas": [
+        1536,
+        1024
+      ],
+      "visibleBounds": [
+        468,
+        202,
+        1093,
+        970
+      ],
+      "anchor": {
+        "kind": "feet_bottom_center",
+        "x": 780,
+        "y": 970
+      },
+      "renderAt": {
+        "x": 0,
+        "y": 0
+      },
+      "originalSourceDimensions": [
+        1254,
+        1254
+      ],
+      "originalCutoutRect": [
+        192,
+        101,
+        1056,
+        1162
+      ]
+    },
+    "nyangnyang": {
+      "fullCanvas": [
+        1536,
+        1024
+      ],
+      "visibleBounds": [
+        511,
+        202,
+        1050,
+        970
+      ],
+      "anchor": {
+        "kind": "feet_bottom_center",
+        "x": 780,
+        "y": 970
+      },
+      "renderAt": {
+        "x": 0,
+        "y": 0
+      },
+      "originalSourceDimensions": [
+        1254,
+        1254
+      ],
+      "originalCutoutRect": [
+        221,
+        75,
+        983,
+        1161
+      ]
+    }
+  },
+  "props": {
+    "coffee": {
+      "path": "assets/props/prop_iced_coffee.png",
+      "referenceOnly": true
+    },
+    "water": {
+      "path": "assets/props/prop_water_bottle.png",
+      "referenceOnly": true
+    },
+    "note": "The props are already integrated in each character illustration; never overlay the standalone props by default."
+  },
+  "widgetLayoutReference": {
+    "screenReferencePixels": [
+      941,
+      1672
+    ],
+    "scenePanelPx": [
+      25,
+      488,
+      904,
+      962
+    ],
+    "scenePreviewCropOf1536x1024": {
+      "left": 0,
+      "top": 193,
+      "right": 1536,
+      "bottom": 1021
+    },
+    "note": "scene preview crop is for reference mockups; Flutter BoxFit must be defined consistently across screen sizes."
+  },
+  "gradeAction": "submit_button_only",
+  "artLimitations": {
+    "approvedImage": "reference/approved_initial_full_screen.png",
+    "finalCharacter": "Mongmong tail direction adapted to 04 adult. Head/body proportions still require approval; original editable layers not available.",
+    "sceneBackground": "The approved screenshot has no editable unobstructed background. We retain the consistent reconstructed asset; see verification/background_comparison.png for highlighted mismatches.",
+    "bodyPose": "newly drawn holding cups; no editable original layers",
+    "widgetMockups": "reference-only; never merge as assets"
+  },
+  "stateMapping": "state_asset_mapping.json",
+  "characterSituationMapPath": "problem_choice_transit05.json#/situationByCharacter"
+}

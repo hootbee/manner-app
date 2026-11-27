@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "problem_id": "MANNERS_TRANSIT_05_APPLICATION",
+  "selected_character_scene_map": {
+    "mongmong": "assets/scenes/scene_mongmong.png",
+    "dangdang": "assets/scenes/scene_dangdang.png",
+    "nyangnyang": "assets/scenes/scene_nyangnyang.png"
+  },
+  "selected_character_name_map": {
+    "mongmong": "몽몽이",
+    "dangdang": "댕댕이",
+    "nyangnyang": "냥냥이"
+  },
+  "scene_selection_rule": "assets/scenes/scene_${selectedCharacter}.png via map above. Do not build path from arbitrary untrusted names.",
+  "scene_reuse_for_all_states": true,
+  "states": {
+    "initial": {
+      "selected_choice": null,
+      "submit_enabled": false,
+      "hint_visible": false,
+      "scene": "selected_character_scene_map"
+    },
+    "selected": {
+      "selected_choice": "A|B|C",
+      "submit_enabled": true,
+      "scene": "same"
+    },
+    "submit": {
+      "trigger": "tap_submit",
+      "judge_choice": true,
+      "scene": "same"
+    },
+    "correct": {
+      "condition": "submitted_choice == B",
+      "feedback": "common_correct",
+      "scene": "same",
+      "next": "application_explanation"
+    },
+    "wrong": {
+      "condition": "submitted_choice in [A,C] and remaining_valid_submissions>0",
+      "feedback": "common_wrong",
+      "scene": "same",
+      "next": "retry"
+    },
+    "retry": {
+      "allow_change_choice": true,
+      "scene": "same"
+    },
+    "final_failure": {
+      "condition": "4 valid wrong submissions",
+      "feedback": "learning_answer_reveal",
+      "count_as_success": false,
+      "award_xp": false,
+      "scene": "same"
+    },
+    "hint_1": {
+      "source": "content/education_content_transit05.md",
+      "content_status": "APPROVED",
+      "scene": "same"
+    },
+    "hint_2": {
+      "source": "content/education_content_transit05.md",
+      "content_status": "APPROVED",
+      "scene": "same"
+    },
+    "application_explanation": {
+      "source": "content/education_content_transit05.md",
+      "content_status": "APPROVED",
+      "ui": "shared_application_explanation_ui"
+    }
+  },
+  "transition_summary": [
+    "initial -> selected",
+    "selected -> submit",
+    "submit -> correct OR wrong",
+    "wrong -> retry OR final_failure",
+    "correct -> application_explanation"
+  ],
+  "note": "No extra per-state scene PNGs are required. O/X and options rendered via existing Flutter widgets."
+}

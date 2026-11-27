@@ -1,0 +1,76 @@
+{
+  "id": "transit_05_basic",
+  "category": "대중교통",
+  "index": "05/20",
+  "type": "choice",
+  "region": "서울특별시 시내버스 사례",
+  "title": "버스에 음료를 가지고 탈 때는 어떻게 해야 할까요?",
+  "situationTemplate": "{characterName}는 일회용 컵에 담긴 아이스커피와 뚜껑이 닫힌 물병을 들고 서울 시내버스를 기다리고 있어요. 다른 승객에게 불편을 주지 않으려면 어떻게 해야 할까요?",
+  "instruction": "가장 권장되는 행동을 선택해 주세요.",
+  "options": [
+    {
+      "id": "A",
+      "text": "컵에 뚜껑이 있으니 두 음료를 모두 들고 탄다."
+    },
+    {
+      "id": "B",
+      "text": "컵 음료는 버스 밖에서 마치고, 밀폐된 물병만 들고 탄다."
+    },
+    {
+      "id": "C",
+      "text": "버스에는 음료를 가져갈 수 없으니 둘 다 가지고 타지 않는다."
+    }
+  ],
+  "correctOptionId": "B",
+  "hints": [
+    {
+      "stage": 1,
+      "text": "컵의 뚜껑이 있다고 해서 완전히 밀폐되는 것은 아니에요. 어떤 용기가 쏟아지기 쉬울까요?"
+    },
+    {
+      "stage": 2,
+      "text": "서울 시내버스에서는 쏟아질 우려가 있는 음료와 잘 밀폐된 물병을 구분해 보세요."
+    }
+  ],
+  "feedback": {
+    "A": "일회용 컵에 뚜껑이 있어도 완전히 밀폐되지 않아 내용물이 쏟아질 수 있어요.",
+    "B": "좋아요! 쏟아지기 쉬운 컵 음료는 탑승 전에 마치고 밀폐된 물병을 선택했어요.",
+    "C": "모든 음료가 일률적으로 금지되는 것은 아니에요. 용기의 밀폐 상태를 살펴보세요."
+  },
+  "attempts": {
+    "initial": 1,
+    "maxRetries": 3,
+    "maxJudgedAttempts": 4,
+    "hintsCountAsAttempts": false
+  },
+  "grading": {
+    "on": "submit_only",
+    "selectionChangesBeforeSubmit": true,
+    "rewardOnSolutionReveal": false
+  },
+  "selectedCharacters": {
+    "mongmong": "몽몽이",
+    "dangdang": "댕댕이",
+    "nyangnyang": "냥냥이"
+  },
+  "sources": [
+    {
+      "name": "서울시 시내버스 음식물 반입금지 세부기준",
+      "url": "https://news.seoul.go.kr/traffic/archives/36023",
+      "type": "서울시 공식 안내"
+    },
+    {
+      "name": "서울특별시 시내버스 재정지원 및 안전 운행기준에 관한 조례",
+      "url": "https://www.law.go.kr/LSW/ordinInfoP.do?ordinSeq=2009399",
+      "type": "서울시 조례",
+      "effectiveVersionShown": "2025-01-03"
+    }
+  ],
+  "legalCaution": "전국 모든 버스에서 일률적으로 금지된다는 뜻이 아니며, 반입 자체가 자동으로 벌금 부과되는 것으로 표현하지 않습니다.",
+  "situationByCharacter": {
+    "mongmong": "몽몽이는 일회용 컵에 담긴 아이스커피와 뚜껑이 닫힌 물병을 들고 서울 시내버스를 기다리고 있어요. 다른 승객에게 불편을 주지 않으려면 어떻게 해야 할까요?",
+    "dangdang": "댕댕이는 일회용 컵에 담긴 아이스커피와 뚜껑이 닫힌 물병을 들고 서울 시내버스를 기다리고 있어요. 다른 승객에게 불편을 주지 않으려면 어떻게 해야 할까요?",
+    "nyangnyang": "냥냥이는 일회용 컵에 담긴 아이스커피와 뚜껑이 닫힌 물병을 들고 서울 시내버스를 기다리고 있어요. 다른 승객에게 불편을 주지 않으려면 어떻게 해야 할까요?"
+  },
+  "situationRendering": "Flutter Text widget; chosen by selectedCharacter. Do not read text from mockup bitmaps."
+}
