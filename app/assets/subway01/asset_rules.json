@@ -1,0 +1,666 @@
+{
+  "schema_version": "1.2",
+  "problem_id": "subway_01",
+  "canvas_px": {
+    "width": 1536,
+    "height": 1024,
+    "origin": "top_left"
+  },
+  "scene_background": "background.png",
+  "reference_ground_baseline_px": 864,
+  "hit_test_anchor": "visual bounding box center of the backpack after its drag translation; not the finger-down position",
+  "placement_units": "canvas pixels; x/y top-left of backpack visual rectangle after resampling; w/h are rendered size",
+  "backpack_placements": {
+    "initial": {
+      "x": 821,
+      "y": 610,
+      "w": 160,
+      "h": 174,
+      "center": [
+        901.0,
+        697.0
+      ],
+      "scale_relative_to_initial": 1.0
+    },
+    "correct": {
+      "x": 699,
+      "y": 652,
+      "w": 149,
+      "h": 149,
+      "center": [
+        773.5,
+        726.5
+      ],
+      "scale_relative_to_initial": 0.93125
+    },
+    "wrong": {
+      "x": 949,
+      "y": 750,
+      "w": 143,
+      "h": 143,
+      "center": [
+        1020.5,
+        821.5
+      ],
+      "scale_relative_to_initial": 0.89375
+    }
+  },
+  "backpack_drag_asset": "backpack_drag.png",
+  "zones": {
+    "backpack_drag_start": {
+      "type": "alpha_mask",
+      "mask_file": "backpack_start_hit_mask.png",
+      "bounding_rect": [
+        818,
+        613,
+        986,
+        786
+      ],
+      "normalized_bounding_rect": [
+        0.532552,
+        0.598633,
+        0.641927,
+        0.767578
+      ],
+      "point_rule": "pointer-down pixel is white (>127) in full-canvas PNG; hit area is the actually visible backpack body or front shoulder strap, with 5 px tolerance"
+    },
+    "correct": {
+      "type": "polygon",
+      "points": [
+        [
+          649,
+          620
+        ],
+        [
+          861,
+          620
+        ],
+        [
+          861,
+          841
+        ],
+        [
+          649,
+          841
+        ]
+      ],
+      "normalized_points": [
+        [
+          0.422526,
+          0.605469
+        ],
+        [
+          0.560547,
+          0.605469
+        ],
+        [
+          0.560547,
+          0.821289
+        ],
+        [
+          0.422526,
+          0.821289
+        ]
+      ]
+    },
+    "wrong": {
+      "type": "polygon",
+      "points": [
+        [
+          923,
+          752
+        ],
+        [
+          1143,
+          752
+        ],
+        [
+          1143,
+          932
+        ],
+        [
+          923,
+          932
+        ]
+      ],
+      "normalized_points": [
+        [
+          0.600911,
+          0.734375
+        ],
+        [
+          0.744141,
+          0.734375
+        ],
+        [
+          0.744141,
+          0.910156
+        ],
+        [
+          0.600911,
+          0.910156
+        ]
+      ]
+    },
+    "drag_bounds": {
+      "type": "polygon",
+      "points": [
+        [
+          480,
+          495
+        ],
+        [
+          1190,
+          495
+        ],
+        [
+          1190,
+          945
+        ],
+        [
+          480,
+          945
+        ]
+      ],
+      "normalized_points": [
+        [
+          0.3125,
+          0.483398
+        ],
+        [
+          0.77474,
+          0.483398
+        ],
+        [
+          0.77474,
+          0.922852
+        ],
+        [
+          0.3125,
+          0.922852
+        ]
+      ]
+    },
+    "invalid": {
+      "type": "derived",
+      "rule": "Drop outside correct/wrong polygons or outside drag_bounds: no score, restore initial pack x/y/w/h and visible front strap."
+    }
+  },
+  "states": {
+    "initial": {
+      "layers": [
+        "background.png",
+        "cat_uncomfortable.png",
+        "backpack_initial_layer.png",
+        "dog_default.png",
+        "strap_front_overlay.png",
+        "monkey_uncomfortable.png"
+      ],
+      "effects": [],
+      "hint_button": true,
+      "action_button": null
+    },
+    "dragging": {
+      "layers": [
+        "background.png",
+        "cat_uncomfortable.png",
+        "backpack_drag.png (at initial x/y + pointer delta, below dog until travel>20px)",
+        "dog_default.png",
+        "monkey_uncomfortable.png"
+      ],
+      "judge": false,
+      "remove_on_pointer_down": [
+        "strap_front_overlay.png"
+      ],
+      "asset_size_px": [
+        160,
+        174
+      ],
+      "origin_px": [
+        821,
+        610
+      ],
+      "keep_initial_pointer_offset": true
+    },
+    "hint_1": {
+      "layers": [
+        "background.png",
+        "cat_uncomfortable.png",
+        "backpack_initial_layer.png",
+        "dog_default.png",
+        "strap_front_overlay.png",
+        "monkey_uncomfortable.png"
+      ],
+      "overlay": "contact highlight implemented in Flutter",
+      "judge_after_drag": true
+    },
+    "hint_2": {
+      "layers": [
+        "background.png",
+        "cat_uncomfortable.png",
+        "backpack_initial_layer.png",
+        "dog_default.png",
+        "strap_front_overlay.png",
+        "monkey_uncomfortable.png"
+      ],
+      "overlay": "optional dashed front position in Flutter; not included in scene",
+      "judge_after_drag": true
+    },
+    "correct_just_judged": {
+      "layers": [
+        "background.png",
+        "cat_comfortable.png",
+        "dog_front_pose.png",
+        "backpack_correct_layer.png",
+        "dog_front_hands_overlay.png",
+        "monkey_comfortable.png"
+      ],
+      "effects": [
+        "effect_correct.png"
+      ],
+      "animation": "O popup 0.25s; reaction 0.4s"
+    },
+    "correct_complete": {
+      "layers": [
+        "background.png",
+        "cat_comfortable.png",
+        "dog_front_pose.png",
+        "backpack_correct_layer.png",
+        "dog_front_hands_overlay.png",
+        "monkey_comfortable.png"
+      ],
+      "effects": [],
+      "footer": "해설 보기"
+    },
+    "wrong_just_judged": {
+      "layers": [
+        "background.png",
+        "cat_uncomfortable.png",
+        "dog_default.png",
+        "monkey_blocked.png",
+        "backpack_wrong_layer.png"
+      ],
+      "effects": [
+        "effect_wrong.png"
+      ],
+      "animation": "illustration-only shake 0.2s; haptic once"
+    },
+    "wrong_complete": {
+      "layers": [
+        "background.png",
+        "cat_uncomfortable.png",
+        "dog_default.png",
+        "monkey_blocked.png",
+        "backpack_wrong_layer.png"
+      ],
+      "effects": [],
+      "footer": [
+        "힌트 보기",
+        "다시 시도하기"
+      ]
+    },
+    "retry_reset": {
+      "layers": [
+        "background.png",
+        "cat_uncomfortable.png",
+        "backpack_initial_layer.png",
+        "dog_default.png",
+        "strap_front_overlay.png",
+        "monkey_uncomfortable.png"
+      ],
+      "reset": "backpack alpha, pose, effects and passenger expressions"
+    },
+    "final_failure": {
+      "layers": [
+        "background.png",
+        "cat_comfortable.png",
+        "dog_front_pose.png",
+        "backpack_correct_layer.png",
+        "dog_front_hands_overlay.png",
+        "monkey_comfortable.png"
+      ],
+      "explanation": "front-holding is recommended; not counted as success"
+    }
+  },
+  "layers_bottom_to_top": {
+    "initial": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "backpack_initial_layer.png",
+      "dog_default.png",
+      "strap_front_overlay.png",
+      "monkey_uncomfortable.png"
+    ],
+    "correct": [
+      "background.png",
+      "cat_comfortable.png",
+      "dog_front_pose.png",
+      "backpack_correct_layer.png",
+      "dog_front_hands_overlay.png",
+      "monkey_comfortable.png"
+    ],
+    "wrong": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "dog_default.png",
+      "monkey_blocked.png",
+      "backpack_wrong_layer.png"
+    ],
+    "drag_start_no_movement": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "backpack_initial_layer.png",
+      "dog_default.png",
+      "monkey_uncomfortable.png"
+    ],
+    "dragging_raised": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "dog_default.png",
+      "monkey_uncomfortable.png",
+      "backpack_drag.png (positioned x+dx,y+dy)"
+    ]
+  },
+  "characters": {
+    "dog_default": {
+      "source": "선글라스_정장_강아지_마스코트.png",
+      "source_core_bbox": [
+        534,
+        329,
+        995,
+        852
+      ],
+      "content_bbox": [
+        549,
+        385,
+        971,
+        864
+      ],
+      "canvas": [
+        1536,
+        1024
+      ],
+      "ground_baseline_y": 864,
+      "resampled_px": [
+        422,
+        479
+      ]
+    },
+    "dog_front_pose": {
+      "source": "정장_차림_선글라스_댕댕이.png",
+      "source_core_bbox": [
+        485,
+        209,
+        1050,
+        868
+      ],
+      "content_bbox": [
+        554,
+        385,
+        965,
+        864
+      ],
+      "canvas": [
+        1536,
+        1024
+      ],
+      "ground_baseline_y": 864,
+      "resampled_px": [
+        411,
+        479
+      ]
+    },
+    "cat_uncomfortable": {
+      "source": "불편한_표정의_선글라스_고양이_마스코트.png",
+      "source_core_bbox": [
+        75,
+        437,
+        403,
+        915
+      ],
+      "content_bbox": [
+        106,
+        419,
+        411,
+        864
+      ],
+      "canvas": [
+        1536,
+        1024
+      ],
+      "ground_baseline_y": 864,
+      "resampled_px": [
+        305,
+        445
+      ]
+    },
+    "cat_comfortable": {
+      "source": "편안한_선글라스_고양이_마스코트.png",
+      "source_core_bbox": [
+        60,
+        422,
+        404,
+        896
+      ],
+      "content_bbox": [
+        96,
+        419,
+        419,
+        864
+      ],
+      "canvas": [
+        1536,
+        1024
+      ],
+      "ground_baseline_y": 864,
+      "resampled_px": [
+        323,
+        445
+      ]
+    },
+    "monkey_uncomfortable": {
+      "source": "불편한_표정의_정장_원숭이.png",
+      "source_core_bbox": [
+        1018,
+        411,
+        1412,
+        911
+      ],
+      "content_bbox": [
+        1068,
+        396,
+        1437,
+        864
+      ],
+      "canvas": [
+        1536,
+        1024
+      ],
+      "ground_baseline_y": 864,
+      "resampled_px": [
+        369,
+        468
+      ]
+    },
+    "monkey_comfortable": {
+      "source": "선글라스_쓴_뿌듯한_원숭이_마스코트.png",
+      "source_core_bbox": [
+        1015,
+        414,
+        1431,
+        913
+      ],
+      "content_bbox": [
+        1057,
+        396,
+        1447,
+        864
+      ],
+      "canvas": [
+        1536,
+        1024
+      ],
+      "ground_baseline_y": 864,
+      "resampled_px": [
+        390,
+        468
+      ]
+    },
+    "monkey_blocked": {
+      "source": "차단된_길_앞의_긴장한_원숭이_마스코트.png",
+      "source_core_bbox": [
+        1040,
+        420,
+        1440,
+        926
+      ],
+      "content_bbox": [
+        1067,
+        396,
+        1437,
+        864
+      ],
+      "canvas": [
+        1536,
+        1024
+      ],
+      "ground_baseline_y": 864,
+      "resampled_px": [
+        370,
+        468
+      ]
+    }
+  },
+  "backpack_source": {
+    "source": "매너스_스타일_백팩_아이콘.png",
+    "source_core_bbox": [
+      492,
+      268,
+      1049,
+      827
+    ],
+    "canvas": [
+      1536,
+      1024
+    ],
+    "asset_intrinsic_size": [
+      557,
+      559
+    ]
+  },
+  "scoring_rules": {
+    "drop_center_in_correct_polygon": "immediately correct",
+    "drop_center_in_wrong_polygon": "immediately wrong",
+    "drop_elsewhere_inside_drag_bounds": "no score; restore bag initial and strap",
+    "drop_outside_drag_bounds": "no score; restore bag initial and strap",
+    "pointer_cancel": "no score; reset exactly to (821,610) (160x174) with strap_front_overlay.png visible",
+    "while_pointer_down": "do not score",
+    "while_feedback_animation": "ignore duplicate input",
+    "hints": "do not count as attempts",
+    "max_attempts": 4,
+    "final_failure": "show answer, do not credit success",
+    "retry": "reset pack, front strap, faces and effects; preserve original dog_default.png"
+  },
+  "notes": [
+    "Scene only. UI, logos, texts, buttons implemented as Flutter widgets.",
+    "All character PNGs and backpack_*_layer PNGs use 1536x1024 RGBA and top-left origin. backpack_drag.png is tight/cropped for efficient drag rendering.",
+    "Correct state hands overlay derived from original dog pose, may need hand-level visual polish in Flutter on device.",
+    "Only the cat/monkey variants with no extra bag are used.",
+    "This is a reconstructed scene from previously generated raster assets; not a pixel-identical reproduction of the early full UI mockups.",
+    "All original dog, cat, monkey and subway background pixels remain unchanged from the previous package.",
+    "Worn backpack is now positioned at (821,610) with size 160x174; the draggable crop uses the identical resized pixels.",
+    "Front strap is an independent transparent PNG removed for drag and restored on cancel/retry.",
+    "Dragging start preview shows bag behind dog; moving preview raises the bag after physical movement without a coordinate snap."
+  ],
+  "backpack_drag_asset_size_px": [
+    160,
+    174
+  ],
+  "backpack_wear_asset": "backpack_initial_layer.png",
+  "front_strap_asset": "strap_front_overlay.png",
+  "front_strap_canvas_px": [
+    1536,
+    1024
+  ],
+  "drag_anchor": "backpack top-left + pointer displacement, retaining initial pointer-down offset; do not snap backpack center to pointer",
+  "drag_visual_policy": {
+    "pointer_down": "leave backpack at initial x/y with original w/h; immediately hide wearer-only strap_front_overlay.png; keep bag behind dog to avoid instant pop",
+    "moving_0_to_20_px": "bag translation equals accumulated pointer delta, worn strap remains hidden; bag remains behind dog while near shoulder",
+    "moving_beyond_20_px": "show bag above dog layer when pulled forward, transition its visibility over 80ms if needed; do not alter x/y/w/h beyond pointer delta",
+    "release_correct": "replace movable bag with existing correct_pose + backpack_correct_layer + hands overlay, run success effect",
+    "release_wrong": "replace movable bag with existing wrong floor layer, show X and retry UI",
+    "release_invalid_or_cancel": "restore worn bag at exact initial bounds and re-enable strap layer; no attempt spent",
+    "retry": "restore worn bag and front strap exactly, clear drag delta/effects, reset faces",
+    "note": "For a visually continuous drag, start drag using same resized RGBA pixels as the initial worn body; no position warp on pointer down"
+  },
+  "interaction_overrides": {
+    "note": "Retain original correct zone. Preserve original wrong area and add floor aisle on both sides. Mask dilation is limited to the visible backpack bounding box inflated by tolerance.",
+    "drag_start_tolerance_px": 32,
+    "drag_bounds": {
+      "type": "polygon",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          1536,
+          0
+        ],
+        [
+          1536,
+          1024
+        ],
+        [
+          0,
+          1024
+        ]
+      ]
+    },
+    "wrong": {
+      "type": "polygons",
+      "polygons": [
+        {
+          "points": [
+            [
+              923,
+              752
+            ],
+            [
+              1143,
+              752
+            ],
+            [
+              1143,
+              932
+            ],
+            [
+              923,
+              932
+            ]
+          ]
+        },
+        {
+          "points": [
+            [
+              96,
+              864
+            ],
+            [
+              1448,
+              864
+            ],
+            [
+              1448,
+              980
+            ],
+            [
+              96,
+              980
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}

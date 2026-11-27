@@ -1,0 +1,252 @@
+{
+  "canvas": {
+    "width": 1536,
+    "height": 1024,
+    "origin": "top_left",
+    "image_fit": "contain",
+    "content_region": [
+      99,
+      0,
+      1338,
+      1024
+    ]
+  },
+  "sprite": {
+    "source_file": "runtime/luggage/suitcase_approved_cutout_185x277.png",
+    "render_scale": 1.479768786,
+    "canvas_alpha_sprite": "runtime/luggage/suitcase_drag_sprite_274x410.png",
+    "anchor": "visual_alpha_bbox_center",
+    "initial_visual_bbox": [
+      567,
+      604,
+      813,
+      986
+    ],
+    "initial_center": [
+      690,
+      795
+    ],
+    "visual_body_relative_to_center_polygon": [
+      [
+        -117,
+        -72
+      ],
+      [
+        117,
+        -72
+      ],
+      [
+        117,
+        187
+      ],
+      [
+        -117,
+        187
+      ]
+    ],
+    "ground_contact_relative_to_center_polygon": [
+      [
+        -100,
+        140
+      ],
+      [
+        100,
+        140
+      ],
+      [
+        100,
+        185
+      ],
+      [
+        -100,
+        185
+      ]
+    ],
+    "canvas_alpha_sprite_size": {
+      "width": 274,
+      "height": 410
+    },
+    "canvas_alpha_to_scene_mapping": {
+      "description": "274x410 sprite image is positioned in the 1536x1024 scene by matching its visual bbox center to one of the example centers below.",
+      "visual_bbox_in_sprite": [
+        14,
+        10,
+        260,
+        392
+      ]
+    },
+    "render_scale_from_source": 1.479768786,
+    "render_scale_pre_scaled_sprite": 1.0,
+    "preferred_flutter_asset": "runtime/luggage/suitcase_drag_sprite_274x410.png",
+    "render_in_canvas": {
+      "scene_canvas_px": [
+        1536,
+        1024
+      ],
+      "pre_scaled_sprite_px": [
+        274,
+        410
+      ],
+      "sprite_layout_anchor": "image_top_left",
+      "pixel_alpha_bounds_local_xyxy": [
+        14,
+        14,
+        260,
+        396
+      ],
+      "placed_sprite_top_left_initial": [
+        553,
+        590
+      ],
+      "placed_sprite_top_left_correct": [
+        334,
+        590
+      ],
+      "placed_sprite_top_left_wrong": [
+        878,
+        602
+      ],
+      "placement_formula": "top_left=example_center-(137,205); first convert pointer to 1536x1024 content coordinates",
+      "warning": "Do NOT scale the 274x410 sprite by 1.479768786 again."
+    }
+  },
+  "examples": {
+    "initial": {
+      "visual_bbox": [
+        567,
+        604,
+        813,
+        986
+      ],
+      "center": [
+        690,
+        795
+      ]
+    },
+    "correct": {
+      "visual_bbox": [
+        348,
+        604,
+        594,
+        986
+      ],
+      "center": [
+        471,
+        795
+      ]
+    },
+    "wrong": {
+      "visual_bbox": [
+        892,
+        616,
+        1138,
+        998
+      ],
+      "center": [
+        1015,
+        807
+      ]
+    }
+  },
+  "zones": {
+    "safe_own_ground_polygon": [
+      [
+        237,
+        875
+      ],
+      [
+        615,
+        875
+      ],
+      [
+        615,
+        1015
+      ],
+      [
+        237,
+        1015
+      ]
+    ],
+    "public_aisle_polygon": [
+      [
+        735,
+        900
+      ],
+      [
+        929,
+        642
+      ],
+      [
+        1432,
+        545
+      ],
+      [
+        1432,
+        1018
+      ],
+      [
+        735,
+        1018
+      ]
+    ],
+    "neighbor_footspace_polygon": [
+      [
+        624,
+        760
+      ],
+      [
+        920,
+        755
+      ],
+      [
+        968,
+        930
+      ],
+      [
+        650,
+        990
+      ]
+    ],
+    "supported_floor_polygon": [
+      [
+        200,
+        893
+      ],
+      [
+        660,
+        810
+      ],
+      [
+        935,
+        645
+      ],
+      [
+        1431,
+        545
+      ],
+      [
+        1431,
+        1017
+      ],
+      [
+        200,
+        1017
+      ]
+    ]
+  },
+  "rules": {
+    "check_entire_contact_footprint": true,
+    "check_body_intersections": true,
+    "correct": "support floor AND all ground contact polygon inside safe_own_ground_polygon AND no body intersection with public_aisle_polygon or neighbor_footspace_polygon",
+    "wrong": "valid_on_floor AND (contact overlaps aisle/neighbor OR body intrudes aisle/neighbor OR contact not fully within own safe zone)",
+    "invalid": "pointer cancel/outside scene; case unsupported on walls/windows/seat backs; out-of-canvas drop",
+    "judge_on_pointer_up": true,
+    "no_submit": true,
+    "invalid_no_attempt_decrement": true,
+    "maximum_valid_attempts": 4,
+    "disable_drag_while_judging": true,
+    "hint_attempt_free": true,
+    "correct_on_release_overlay_popup": true,
+    "target_geometry": "visual whole case mask; ground-contact footprint and body polygon are separate to avoid treating raised handle as floor obstruction"
+  }
+}

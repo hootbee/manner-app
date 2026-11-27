@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "status": "PROPOSED_NOT_FINAL",
+  "currency": "XP",
+  "topic_id": "transit_01",
+  "topic_title": "지하철에서 다른 승객을 배려하며 짐 관리하기",
+  "topic_problem_ids": {
+    "basic": "transit_01_basic",
+    "application": "transit_01_application"
+  },
+  "rewards": {
+    "FIRST_DIRECT": 20,
+    "FIRST_ANSWER_REVEAL": 10,
+    "REVIEW": 0
+  },
+  "completion_requirements": {
+    "must_finish_both_basic_and_application": true,
+    "completion_definition": "Both basic and application have reached their learning-end flow, including explanation acknowledgment (after direct success or final answer reveal).",
+    "success_definition": "direct_correct means solved in up to 4 valid attempts without revealing final answer",
+    "answer_reveal_definition": "On 4th valid wrong attempt, user views correct answer; mark direct_correct=false",
+    "completed_problem_outcome_enum": [
+      "DIRECT_CORRECT",
+      "ANSWER_REVEALED"
+    ],
+    "unknown_or_unfinished_outcome_policy": "No first topic completion and no reward until both outcomes are final.",
+    "first_direct_rule": "both basic and application direct_correct=true on first learning completion",
+    "first_answer_reveal_rule": "on first completed topic, at least one basic/application learning end result has answer_revealed=true",
+    "review_rule": "topic already contains first_completion_at, no additional reward",
+    "invalid_drag_consumes_attempt": false,
+    "max_valid_attempts_per_problem": 4,
+    "hints_consume_attempt": false,
+    "grant_once_per_user_topic": true,
+    "idempotency_key_pattern": "user:{userId}:topic:transit_01:first_completion",
+    "persist_atomicity": "Check topic first-completion + create first grant event + apply XP delta in ONE database transaction; unique constraint on idempotency key.",
+    "resuming_completed_topic": "Return saved first-completion status; no duplicate XP award, even after app restart/re-entry.",
+    "already_completed_topic_with_both_direct": "REVIEW takes precedence once grant exists"
+  },
+  "runtime_user_data_contract": {
+    "level_current": "provided_by_existing_user_level_system",
+    "level_progress_before": "from_authoritative_user_xp_state",
+    "level_progress_after": "from_authoritative_user_xp_state_after_unique_reward_commit",
+    "next_level_required_xp": "provided_by_existing_level_policy",
+    "level_threshold_formula": "NOT_DEFINED_HERE",
+    "xp_balance_total": "provided_by_backend_or_local_persisted_profile",
+    "level_up_when": "only if the user-level service detects a threshold crossing",
+    "preview_values_are_not_defaults": true
+  }
+}

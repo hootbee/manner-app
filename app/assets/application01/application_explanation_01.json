@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "problem_id": "transit_01_application",
+  "topic_id": "transit_01",
+  "category": "대중교통",
+  "progress": "01/20",
+  "step": "2/2",
+  "stage_label": "응용 01/20 · 2/2",
+  "action_type": "drag",
+  "character_name_key": "selected_character_display_name",
+  "situation": "{characterName}는 작은 캐리어를 가지고 지하철에 탔어요. 빈자리에 앉았지만, 캐리어가 통로 쪽으로 튀어나와 다른 승객의 이동을 방해하고 있어요.",
+  "prompt": "지하철 좌석에 앉았다면 캐리어는 어디에 두는 게 좋을까요?",
+  "instruction": "캐리어를 드래그해 보세요.",
+  "hints": [
+    {
+      "id": 1,
+      "text": "다른 승객이 지나가는 길을 살펴볼까요?"
+    },
+    {
+      "id": 2,
+      "text": "캐리어를 내 공간 안에 두고 움직이지 않게 관리해 보세요."
+    }
+  ],
+  "feedback": {
+    "correct": "좋아요! 캐리어를 안전하게 옮겨 통로를 비웠어요.",
+    "wrong": {
+      "public_aisle": "캐리어가 통로를 막으면 다른 승객이 지나가기 어려워요.",
+      "neighbor_footspace": "옆 승객이 이용하는 공간도 배려해 주세요.",
+      "other_valid_wrong": "캐리어를 다른 승객의 이동을 방해하지 않는 내 공간으로 옮겨 보세요."
+    },
+    "invalid_drag": "캐리어를 놓을 수 있는 바닥 위치로 옮겨 주세요.",
+    "on_fourth_valid_wrong": "정답을 함께 확인해 볼까요?",
+    "invalid_drag_is_attempt": false,
+    "valid_wrong_max_attempts": 4,
+    "on_reveal_correct_solution": "직접 정답 성공으로 기록하지 않고 정답 확인 학습으로 표시합니다."
+  },
+  "explanation": {
+    "title": null,
+    "sections": [
+      {
+        "id": "core_manner",
+        "title": "핵심 매너",
+        "text": "캐리어는 다른 승객의 이동을 방해하지 않는 위치에 두고 안전하게 관리해요."
+      },
+      {
+        "id": "why_important",
+        "title": "왜 중요할까요?",
+        "text": "캐리어가 통로를 막거나 열차가 흔들릴 때 움직이면 다른 승객에게 불편과 위험을 줄 수 있기 때문이에요."
+      },
+      {
+        "id": "practical_tip",
+        "title": "실전 팁",
+        "text": "캐리어는 내 발 앞의 안전한 공간에 두고, 손잡이를 잡아 움직이지 않게 관리해요."
+      },
+      {
+        "id": "learning_key",
+        "title": "학습 핵심",
+        "text": "내 짐은 내 공간 안에 두고, 다른 승객이 다니는 통로는 비워요."
+      }
+    ],
+    "character_speech": {
+      "title_template": "{characterName}의 한마디",
+      "text": "내 짐은 가까이, 다른 사람의 길은 넓게!",
+      "profiles": {
+        "dangdang": "runtime/explanation/profiles/dangdang_profile_rgba_256.png",
+        "nyangnyang": "runtime/explanation/profiles/nyangnyang_profile_rgba_256.png",
+        "mongmong": "runtime/explanation/profiles/mongmong_profile_rgba_256.png"
+      }
+    }
+  },
+  "judge_source_of_truth": "spec/hitboxes_and_drag_coordinates.json",
+  "button": {
+    "label": "학습 완료",
+    "on_tap": "route_to_completion_reward_after_topic_learning_end",
+    "route": "/learning/transit/01/completion"
+  },
+  "flow": [
+    "transit_01_basic",
+    "transit_01_basic_explanation",
+    "transit_01_application",
+    "transit_01_application_explanation",
+    "transit_01_completion_reward",
+    "transit_02_basic"
+  ]
+}

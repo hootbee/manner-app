@@ -1,0 +1,59 @@
+{
+  "scene_canvas_px": [
+    1536,
+    1024
+  ],
+  "back_to_front": [
+    "background (same PNG all characters, all states)",
+    "hero (idle or correct_body; correct_body includes curved rear suit arm)",
+    "suitcase (translated 274x410 PNG, must be above hero)",
+    "correct_hand_front (only on correct, over suitcase handle)",
+    "feedback (Flutter UI, not in PNG)",
+    "common_result_popup (Flutter UI, not in PNG)"
+  ],
+  "correct_grip": {
+    "hand_sprites": {
+      "dangdang": "runtime/characters/dangdang/correct_grasp_hand_FRONT_1536x1024.png",
+      "nyangnyang": "runtime/characters/nyangnyang/correct_grasp_hand_FRONT_1536x1024.png",
+      "mongmong": "runtime/characters/mongmong/correct_grasp_hand_FRONT_1536x1024.png"
+    },
+    "wrist_to_palm_anchor_scene_px": {
+      "dangdang": [
+        479,
+        621
+      ],
+      "nyangnyang": [
+        477,
+        623
+      ],
+      "mongmong": [
+        486,
+        623
+      ]
+    },
+    "palm_centers_scene_px": {
+      "dangdang": [
+        464,
+        621
+      ],
+      "nyangnyang": [
+        461,
+        619
+      ],
+      "mongmong": [
+        468,
+        621
+      ]
+    },
+    "handle_grip_scene_region_px": [
+      399,
+      604,
+      505,
+      647
+    ],
+    "reposition_hand_layer": false,
+    "notes": "Each front hand is already on the full 1536x1024 scene canvas; use position (0,0). Curve of rear sleeve is merged with correct_body, which has its old right-lap paw recolored/covered."
+  },
+  "coord_reference": "spec/hitboxes_and_drag_coordinates.json",
+  "version": "8.0-final-clean"
+}
