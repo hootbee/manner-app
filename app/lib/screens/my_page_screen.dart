@@ -27,7 +27,7 @@ class _MyPageScreenState extends State<MyPageScreen>
   double _angle = 0;
   static const _ink = Color(0xFF191D1A);
   static const _menus = [
-    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 분야의 성장 현황을 확인해요.'),
+    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 영역의 성장 현황을 확인해요.'),
     (Icons.share_outlined, '스탯 공유', '나의 성장을 친구들에게 공유해요.'),
     (Icons.settings_outlined, '설정', '계정 및 앱 설정을 관리해보세요.'),
   ];
