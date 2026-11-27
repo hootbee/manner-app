@@ -63,7 +63,11 @@ class PartnerGrowthScreen extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: 126,
-                        child: PartnerArtwork(partner: partner, stage: stage),
+                        child: PartnerArtwork(
+                          partner: partner,
+                          stage: stage,
+                          useUpdatedDesign: true,
+                        ),
                       ),
                       Expanded(
                         child: Padding(

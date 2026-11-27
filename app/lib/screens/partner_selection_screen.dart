@@ -79,7 +79,7 @@ class _PartnerSelectionScreenState extends State<PartnerSelectionScreen>
   }
 
   Future<void> _loadImage() async {
-    final data = await rootBundle.load('assets/welcome/characters.webp');
+    final data = await rootBundle.load('assets/welcome/partner_design_v2.png');
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
     final frame = await codec.getNextFrame();
     codec.dispose();
@@ -494,11 +494,13 @@ class _PartnerCarousel extends CustomPainter {
       ),
       background,
     );
-    const sources = [
-      Rect.fromLTWH(35, 290, 425, 620),
-      Rect.fromLTWH(467, 185, 580, 725),
-      Rect.fromLTWH(1055, 320, 475, 590),
-    ];
+    // The last atlas row contains the three selection poses without decorations.
+    final cellWidth = (image?.width ?? 793) / 3;
+    final scale = (image?.height ?? 1983) / 1983;
+    final sources = List.generate(
+      3,
+      (i) => Rect.fromLTWH(i * cellWidth, 1595 * scale, cellWidth, 310 * scale),
+    );
     final figures = List.generate(3, (i) {
       final angle = (i - position) * math.pi * 2 / 3;
       return (
@@ -541,11 +543,14 @@ class _PartnerCarousel extends CustomPainter {
         ..strokeJoin = StrokeJoin.round,
     );
     for (final (x, y, r, p) in [
-      (35.0, 48.0, 8.0, 0.0),
-      (315.0, 51.0, 9.0, 2.0),
-      (115.0, 69.0, 6.0, 4.0),
-      (235.0, 52.0, 6.0, 1.0),
+      (123.0, 48.0, 8.0, 0.0),
+      (237.0, 51.0, 9.0, 2.0),
+      (128.0, 132.0, 6.0, 4.0),
+      (232.0, 145.0, 6.0, 1.0),
     ]) {
+      // Hide the glow while turning; only the centered partner is highlighted.
+      final centered = (position - position.round()).abs() < .001;
+      if (!centered) continue;
       final glow = still ? .7 : (math.sin(time * math.pi * 4 + p) + 1) / 2;
       final radius = r * (.5 + glow * .5);
       final center = Offset(x, y);

@@ -50,10 +50,12 @@ class PartnerArtwork extends StatelessWidget {
     required this.partner,
     this.stage = 3,
     this.showSparkles = true,
+    this.useUpdatedDesign = true,
   });
   final MannerPartner partner;
   final int stage;
   final bool showSparkles;
+  final bool useUpdatedDesign;
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: AmbientMotion(
@@ -68,35 +70,37 @@ class PartnerArtwork extends StatelessWidget {
               offset: Offset(0, wave * 2.2),
               child: Transform.rotate(
                 angle: wave * .014,
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: SizedBox(
-                    width: 512,
-                    height: 512,
-                    child: ClipRect(
-                      child: OverflowBox(
-                        alignment: Alignment.topLeft,
-                        minWidth: 1536,
-                        maxWidth: 1536,
-                        minHeight: 2048,
-                        maxHeight: 2048,
-                        child: Transform.translate(
-                          offset: Offset(
-                            -partner.index * 512.0,
-                            -stage * 512.0,
-                          ),
-                          child: Image.asset(
-                            'assets/welcome/growth_stages.webp',
-                            width: 1536,
-                            height: 2048,
-                            fit: BoxFit.fill,
-                            filterQuality: FilterQuality.high,
+                child: useUpdatedDesign
+                    ? _UpdatedPartnerFigure(partner: partner, stage: stage)
+                    : FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: 512,
+                          height: 512,
+                          child: ClipRect(
+                            child: OverflowBox(
+                              alignment: Alignment.topLeft,
+                              minWidth: 1536,
+                              maxWidth: 1536,
+                              minHeight: 2048,
+                              maxHeight: 2048,
+                              child: Transform.translate(
+                                offset: Offset(
+                                  -partner.index * 512.0,
+                                  -stage * 512.0,
+                                ),
+                                child: Image.asset(
+                                  'assets/welcome/growth_stages.webp',
+                                  width: 1536,
+                                  height: 2048,
+                                  fit: BoxFit.fill,
+                                  filterQuality: FilterQuality.high,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
               ),
             ),
           ],
@@ -104,6 +108,48 @@ class PartnerArtwork extends StatelessWidget {
       },
     ),
   );
+}
+
+/// Crops only the figure; transparent margins keep the source proportions intact.
+class _UpdatedPartnerFigure extends StatelessWidget {
+  const _UpdatedPartnerFigure({required this.partner, required this.stage});
+  final MannerPartner partner;
+  final int stage;
+
+  @override
+  Widget build(BuildContext context) {
+    final top = [160.0, 490.0, 835.0, 1205.0][stage];
+    final height = [225.0, 255.0, 280.0, 295.0][stage];
+    return Padding(
+      padding: const EdgeInsets.all(6),
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: SizedBox(
+          width: 793 / 3,
+          height: height,
+          child: ClipRect(
+            child: OverflowBox(
+              alignment: Alignment.topLeft,
+              minWidth: 793,
+              maxWidth: 793,
+              minHeight: 1983,
+              maxHeight: 1983,
+              child: Transform.translate(
+                offset: Offset(-partner.index * 793 / 3, -top),
+                child: Image.asset(
+                  'assets/welcome/partner_design_v2.png',
+                  width: 793,
+                  height: 1983,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _Sparkles extends CustomPainter {

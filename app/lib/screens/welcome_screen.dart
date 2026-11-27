@@ -33,6 +33,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   );
   ui.Image? _reference;
   ui.Image? _characters;
+  ui.Image? _welcomeDog;
   bool? _reduceMotion;
 
   @override
@@ -42,7 +43,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       'assets/welcome/design_reference.webp',
       (image) => _reference = image,
     );
-    _load('assets/welcome/characters.webp', (image) => _characters = image);
+    _load(
+      'assets/welcome/partner_design_v2.png',
+      (image) => _characters = image,
+    );
+    _load(
+      'assets/welcome/welcome_dog_reference.png',
+      (image) => _welcomeDog = image,
+    );
   }
 
   Future<void> _load(String path, void Function(ui.Image) assign) async {
@@ -71,7 +79,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     if (_reduceMotion == true) {
       _entrance.value = 1;
       _ambient.stop();
-    } else if (_reference != null && _characters != null) {
+    } else if (_reference != null &&
+        _characters != null &&
+        _welcomeDog != null) {
       _entrance.forward();
       if (!_ambient.isAnimating) _ambient.repeat();
     }
@@ -83,6 +93,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _ambient.dispose();
     _reference?.dispose();
     _characters?.dispose();
+    _welcomeDog?.dispose();
     super.dispose();
   }
 
@@ -194,6 +205,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 child: CustomPaint(
                                   painter: _Cast(
                                     _characters,
+                                    _welcomeDog,
                                     _ambient.value,
                                     _reduceMotion ?? false,
                                   ),
@@ -383,39 +395,56 @@ class _Logo extends CustomPainter {
 }
 
 class _Cast extends CustomPainter {
-  const _Cast(this.image, this.time, this.still);
+  const _Cast(this.image, this.dog, this.time, this.still);
   final ui.Image? image;
+  final ui.Image? dog;
   final double time;
   final bool still;
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.save();
+    canvas.clipRect(Offset.zero & size);
     canvas.scale(size.width / 360, size.height / 300);
     if (image != null) {
       // Independent sprites let each character breathe at its own rhythm.
       const boxes = [
-        Rect.fromLTWH(-4, 100, 134, 196),
-        Rect.fromLTWH(88, 28, 200, 250),
-        Rect.fromLTWH(245, 118, 122, 152),
+        Rect.fromLTWH(-24, 113, 166, 350),
+        Rect.fromLTWH(65, 22, 230, 400),
+        Rect.fromLTWH(236, 108, 166, 350),
       ];
-      const sources = [
-        Rect.fromLTWH(35, 290, 425, 620),
-        Rect.fromLTWH(467, 185, 580, 725),
-        Rect.fromLTWH(1055, 320, 475, 590),
-      ];
-      for (final index in [0, 2, 1]) {
+      final sourceWidth = image!.width / 3;
+      final sourceScale = image!.height / 1983;
+      // Portrait composition: dog behind, side partners overlap its shoulders.
+      // Full sprites extend below the foreground so only their upper bodies show.
+      for (final index in [1, 0, 2]) {
         final phase = time * math.pi * 2 + index * 1.9;
         final bob = still ? 0.0 : math.sin(phase) * 2.4;
         canvas.save();
         final box = boxes[index];
+        final source = Rect.fromLTWH(
+          index * sourceWidth,
+          1595 * sourceScale,
+          sourceWidth,
+          310 * sourceScale,
+        );
+        final fitted = applyBoxFit(BoxFit.contain, source.size, box.size);
+        final destination = Alignment.topCenter.inscribe(
+          fitted.destination,
+          box,
+        );
         canvas.translate(box.center.dx, box.bottom + bob);
         canvas.rotate(still ? 0 : math.sin(phase) * 0.012);
         canvas.translate(-box.center.dx, -box.bottom);
+        if (index == 1 && dog != null) {
+          paintWelcomeReferenceDog(canvas, dog!);
+          canvas.restore();
+          continue;
+        }
         canvas.drawImageRect(
           image!,
-          sources[index],
-          box,
+          source,
+          destination,
           Paint()..filterQuality = FilterQuality.high,
         );
         canvas.restore();
@@ -456,8 +485,92 @@ class _Cast extends CustomPainter {
   @override
   bool shouldRepaint(_Cast oldDelegate) =>
       image != oldDelegate.image ||
+      dog != oldDelegate.dog ||
       time != oldDelegate.time ||
       still != oldDelegate.still;
+}
+
+/// Isolates the reference dog without the neighboring monkey from the source.
+void paintWelcomeReferenceDog(Canvas canvas, ui.Image dog) {
+  // Sample the approved illustration itself, preserving its face and expression.
+  // Clip in reference coordinates so no surrounding UI/background is rendered.
+  final silhouette = Path()
+    ..moveTo(244, 794)
+    ..cubicTo(238, 746, 259, 699, 298, 674)
+    ..cubicTo(304, 650, 321, 632, 355, 632)
+    ..cubicTo(375, 603, 415, 597, 451, 605)
+    ..cubicTo(478, 611, 473, 633, 455, 646)
+    ..cubicTo(481, 636, 513, 650, 523, 675)
+    ..cubicTo(551, 667, 580, 686, 589, 713)
+    ..cubicTo(604, 725, 609, 737, 608, 749)
+    ..lineTo(570, 793)
+    ..lineTo(548, 820)
+    ..lineTo(529, 850)
+    ..lineTo(520, 879)
+    ..lineTo(530, 896)
+    ..lineTo(550, 932)
+    ..lineTo(550, 1117)
+    ..lineTo(258, 1117)
+    ..lineTo(276, 895)
+    ..cubicTo(253, 876, 238, 843, 244, 794)
+    ..close();
+  canvas.save();
+  canvas.translate(82, 44);
+  canvas.scale(196 / 395);
+  canvas.translate(-235, -600);
+  // Those parts are hidden by the monkey in the reference. Complete them
+  // behind the clean crop so the independently placed partner leaves no hole.
+  final coat = Path()
+    ..moveTo(500, 869)
+    ..cubicTo(570, 869, 594, 926, 608, 981)
+    ..lineTo(622, 1117)
+    ..lineTo(480, 1117)
+    ..close();
+  canvas.drawPath(coat, Paint()..color = const Color(0xFF30302F));
+  canvas.drawPath(
+    coat,
+    Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6,
+  );
+  final ear = Path()
+    ..moveTo(578, 722)
+    ..cubicTo(639, 730, 650, 817, 603, 856)
+    ..cubicTo(588, 879, 548, 884, 535, 853)
+    ..close();
+  canvas.drawPath(ear, Paint()..color = const Color(0xFFFEFEFE));
+  canvas.save();
+  canvas.clipPath(silhouette, doAntiAlias: true);
+  canvas.drawImage(
+    dog,
+    Offset.zero,
+    Paint()..filterQuality = FilterQuality.high,
+  );
+  canvas.restore();
+  // Cover the clipped edge from the reference with a complete rounded ear.
+  final repairedEar = Path()
+    ..moveTo(580, 714)
+    ..cubicTo(604, 722, 624, 747, 630, 776)
+    ..cubicTo(640, 819, 619, 854, 592, 862)
+    ..cubicTo(570, 869, 545, 858, 530, 841)
+    ..cubicTo(530, 821, 540, 795, 550, 770)
+    ..close();
+  canvas.drawPath(repairedEar, Paint()..color = const Color(0xFFFEFEFE));
+  final repairedOutline = Path()
+    ..moveTo(580, 714)
+    ..cubicTo(604, 722, 624, 747, 630, 776)
+    ..cubicTo(640, 819, 619, 854, 592, 862)
+    ..cubicTo(570, 869, 553, 858, 546, 841);
+  canvas.drawPath(
+    repairedOutline,
+    Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7
+      ..strokeCap = StrokeCap.round,
+  );
+  canvas.restore();
 }
 
 class _Backdrop extends CustomPainter {

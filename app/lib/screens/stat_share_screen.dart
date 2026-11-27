@@ -38,6 +38,13 @@ class _StatShareScreenState extends State<StatShareScreen> {
 
   Future<void> _prepare() async {
     try {
+      var imageFailed = false;
+      await precacheImage(
+        const AssetImage('assets/welcome/partner_design_v2.png'),
+        context,
+        onError: (error, stack) => imageFailed = true,
+      );
+      if (imageFailed) throw StateError('character image unavailable');
       if (!mounted) return;
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) return;
