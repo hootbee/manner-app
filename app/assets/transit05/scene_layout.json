@@ -1,0 +1,197 @@
+{
+  "background": "assets/background/scene_background.webp",
+  "sceneDescription": "서울 시내버스 정류장에서 컵 음료와 밀폐된 물병을 들고 기다리는 상황",
+  "initialBodyHeight": 1,
+  "footAnchor": [
+    0,
+    0
+  ],
+  "characters": {
+    "dog": {
+      "referenceBodyHeight": 1,
+      "referenceFeetWidth": 1,
+      "poses": {
+        "tired": {
+          "asset": "assets/characters/character_dangdang.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        },
+        "thinking": {
+          "asset": "assets/characters/character_dangdang.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        },
+        "positive": {
+          "asset": "assets/characters/character_dangdang.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        }
+      }
+    },
+    "cat": {
+      "referenceBodyHeight": 1,
+      "referenceFeetWidth": 1,
+      "poses": {
+        "tired": {
+          "asset": "assets/characters/character_nyangnyang.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        },
+        "thinking": {
+          "asset": "assets/characters/character_nyangnyang.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        },
+        "positive": {
+          "asset": "assets/characters/character_nyangnyang.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        }
+      }
+    },
+    "monkey": {
+      "referenceBodyHeight": 1,
+      "referenceFeetWidth": 1,
+      "poses": {
+        "tired": {
+          "asset": "assets/characters/character_mongmong.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        },
+        "thinking": {
+          "asset": "assets/characters/character_mongmong.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        },
+        "positive": {
+          "asset": "assets/characters/character_mongmong.webp",
+          "sourceSize": [
+            1536,
+            1024
+          ],
+          "sourceFoot": [
+            0,
+            0
+          ],
+          "sourceFeetWidth": 1,
+          "alphaBounds": [
+            0,
+            0,
+            1536,
+            1024
+          ]
+        }
+      }
+    }
+  },
+  "profiles": {
+    "dog": "assets/subway01/dog_thinking.png",
+    "cat": "assets/subway01/cat_thinking.png",
+    "monkey": "assets/subway01/monkey_thinking.png"
+  },
+  "staticCharacter": true
+}

@@ -1,0 +1,127 @@
+{
+  "problemId": "transit_05_basic",
+  "renderedLayers": [
+    "assets/background/scene_background.png",
+    "assets/characters/character_{selectedCharacter}.png"
+  ],
+  "selectedCharacter": "mongmong|dangdang|nyangnyang",
+  "states": {
+    "initial": {
+      "selectedOption": null,
+      "graded": false,
+      "primaryButton": "제출하기",
+      "primaryButtonEnabled": false,
+      "hintAvailable": true,
+      "mockup": "mockups/initial.png"
+    },
+    "selected": {
+      "selectedOption": "A|B|C",
+      "graded": false,
+      "primaryButton": "제출하기",
+      "primaryButtonEnabled": true,
+      "hintAvailable": true,
+      "mockup": "mockups/selected_b.png"
+    },
+    "hint_1": {
+      "selectedOption": "retain_previous",
+      "graded": false,
+      "hintStage": 1,
+      "hintButton": "다음 힌트 보기",
+      "primaryButton": "제출하기",
+      "mockup": "mockups/hint_1.png"
+    },
+    "hint_2": {
+      "selectedOption": "retain_previous",
+      "graded": false,
+      "hintStage": 2,
+      "hintButton": null,
+      "primaryButton": "제출하기",
+      "mockup": "mockups/hint_2.png"
+    },
+    "correct_b": {
+      "selectedOption": "B",
+      "graded": true,
+      "isSuccess": true,
+      "primaryButton": "해설 보기",
+      "hintAvailable": false,
+      "mockup": "mockups/correct_b.png"
+    },
+    "wrong_a": {
+      "selectedOption": "A",
+      "graded": true,
+      "isSuccess": false,
+      "primaryButton": "다시 시도하기",
+      "hintAvailable": true,
+      "mockup": "mockups/wrong_a.png"
+    },
+    "wrong_c": {
+      "selectedOption": "C",
+      "graded": true,
+      "isSuccess": false,
+      "primaryButton": "다시 시도하기",
+      "hintAvailable": true,
+      "mockup": "mockups/wrong_c.png"
+    },
+    "retry_reset": {
+      "selectedOption": null,
+      "graded": false,
+      "resetSelection": true,
+      "preserveTotalAttempts": true,
+      "primaryButton": "제출하기",
+      "primaryButtonEnabled": false,
+      "mockup": "mockups/initial.png"
+    },
+    "final_failure_before_reveal": {
+      "isSuccess": false,
+      "allAttemptsUsed": true,
+      "primaryButton": "정답 확인",
+      "hintAvailable": false,
+      "autoRevealAnswer": false,
+      "mockup": "mockups/final_failure_before_reveal.png"
+    },
+    "solution_revealed": {
+      "selectedOption": "B",
+      "isSuccess": false,
+      "primaryButton": "해설 보기",
+      "awardXp": false,
+      "awardCompletionAsSuccess": false,
+      "mockup": "mockups/solution_revealed.png"
+    },
+    "explanation_basic": {
+      "contentPath": "education_content_transit05.md",
+      "detailExpanded": false,
+      "selectedCharacterProfile": true,
+      "primaryButton": "다음 문제로 이동",
+      "secondaryButton": "문제 다시 풀기"
+    },
+    "explanation_expanded": {
+      "contentPath": "education_content_transit05.md",
+      "detailExpanded": true,
+      "selectedCharacterProfile": true,
+      "primaryButton": "다음 문제로 이동",
+      "secondaryButton": "문제 다시 풀기"
+    }
+  },
+  "grading": "Only on user tap 제출하기",
+  "maxAttempts": 4,
+  "note": "Any image under mockups is a visual guide. UI text, options, buttons, hint bubbles and feedback must be Flutter widgets.",
+  "initialByCharacter": {
+    "mongmong": {
+      "mockup": "mockups/initial.png",
+      "situationKey": "mongmong",
+      "characterAsset": "assets/characters/character_mongmong.png"
+    },
+    "dangdang": {
+      "mockup": "mockups/initial_dangdang.png",
+      "situationKey": "dangdang",
+      "characterAsset": "assets/characters/character_dangdang.png"
+    },
+    "nyangnyang": {
+      "mockup": "mockups/initial_nyangnyang.png",
+      "situationKey": "nyangnyang",
+      "characterAsset": "assets/characters/character_nyangnyang.png"
+    }
+  },
+  "situationContentPath": "problem_choice_transit05.json#/situationByCharacter",
+  "visualChangeScope": "Only Mongmong right-tail direction and character-specific initial situation text; all selected/grade/hint/final-failure UX statuses preserved."
+}

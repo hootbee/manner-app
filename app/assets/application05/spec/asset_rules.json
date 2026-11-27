@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "lesson_id": "transit05_application",
+  "rendering_approach": "B_COMPLETE_SCENE_PER_CHARACTER",
+  "status": "ART_APPROVED_BY_USER_TECHNICAL_HANDOFF_PENDING_FLUTTER_TEST",
+  "scene_canvas_px": {
+    "width": 900,
+    "height": 400,
+    "aspect_ratio": "9:4",
+    "origin": "top_left"
+  },
+  "scene_includes": {
+    "bus_environment": true,
+    "bus_driver_and_passengers": true,
+    "selected_main_character": true,
+    "pizza_box": true,
+    "original_rounded_illustration_border": true
+  },
+  "scene_excludes": [
+    "MANNERS logo/header",
+    "progress indicator",
+    "title",
+    "description",
+    "answer cards",
+    "hint/instruction capsule",
+    "submit/hint buttons",
+    "answer feedback"
+  ],
+  "scene_images": {
+    "mongmong": {
+      "path": "assets/scenes/scene_mongmong.png",
+      "character_name": "몽몽이"
+    },
+    "dangdang": {
+      "path": "assets/scenes/scene_dangdang.png",
+      "character_name": "댕댕이"
+    },
+    "nyangnyang": {
+      "path": "assets/scenes/scene_nyangnyang.png",
+      "character_name": "냥냥이"
+    }
+  },
+  "flutter_display": {
+    "widget": "Image.asset",
+    "box_fit": "contain",
+    "layout": "AspectRatio(aspectRatio: 9 / 4, child: Image.asset(scenePath, fit: BoxFit.contain))",
+    "do_not_add_duplicate_border": true,
+    "do_not_composite_separate_background_or_character": true,
+    "keep_source_colors_and_image_geometry": true,
+    "responsive_note": "Maintain aspect ratio; use same scene box for all three characters. Do not crop using BoxFit.cover."
+  },
+  "asset_provenance": "All scene images are direct crops of user-approved full-screen PNGs, uniformly resampled to 900x400. No inpainting/redesign was performed. See QA_REPORT_ko.md for source dimensions and crop rectangles.",
+  "external_common_ui": "Reuse existing approved Flutter Choice UI widgets and common hint/O-X feedback."
+}
