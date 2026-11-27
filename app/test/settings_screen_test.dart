@@ -33,6 +33,8 @@ void main() {
       await tester.tap(find.text('회원 탈퇴'));
       await tester.pumpAndSettle();
       expect(find.text('정말로 탈퇴하시겠습니까?'), findsOneWidget);
+      expect(find.textContaining('코인'), findsNothing);
+      expect(find.textContaining('보유한 배지'), findsOneWidget);
       await tester.tap(find.text('취소'));
       await tester.pumpAndSettle();
       expect(find.byType(AlertDialog), findsNothing);
