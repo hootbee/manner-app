@@ -40,7 +40,7 @@ class _StatShareScreenState extends State<StatShareScreen> {
     try {
       var imageFailed = false;
       await precacheImage(
-        const AssetImage('assets/welcome/growth_stages.webp'),
+        const AssetImage('assets/welcome/partner_design_v2.png'),
         context,
         onError: (error, stack) => imageFailed = true,
       );
