@@ -10,7 +10,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final stats = ValueNotifier<List<AreaStat>>([
-      for (final area in ['대화', '식사', '공공장소', '대중교통', '학교·직장', '디지털'])
+      for (final area in ['연애', '친구', '어른·가족', '직장', '공공장소', '메시지'])
         AreaStat(area, 0),
     ]);
     addTearDown(stats.dispose);
@@ -25,16 +25,16 @@ void main() {
     );
     expect(
       find.bySemanticsLabel(
-        '매너 스탯: 대화 0점, 식사 0점, 공공장소 0점, 대중교통 0점, 학교·직장 0점, 디지털 0점',
+        '매너 스탯: 연애 0점, 친구 0점, 어른·가족 0점, 직장 0점, 공공장소 0점, 메시지 0점',
       ),
       findsOneWidget,
     );
     stats.value = [for (final s in stats.value) AreaStat(s.area, 100)];
     await tester.pumpAndSettle();
     expect(find.text('100점'), findsWidgets);
-    await tester.tap(find.text('식사').first);
+    await tester.tap(find.text('친구').first);
     await tester.pumpAndSettle();
-    expect(find.text('식사 분야'), findsOneWidget);
+    expect(find.text('친구 영역'), findsOneWidget);
     await tester.ensureVisible(find.text('매너 파트너의 한마디'));
     expect(tester.takeException(), isNull);
   });
