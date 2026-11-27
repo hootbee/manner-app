@@ -1,3 +1,5 @@
+import 'backend.dart';
+import 'fake/fake_backend.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +8,7 @@ import 'screens/welcome_screen.dart';
 import 'screens/transport_progress.dart';
 import 'screens/partner_selection_screen.dart';
 
-/// UI preview: deliberately starts without initializing the backend.
+/// UI preview: fake data only; no live service initialization.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
@@ -19,6 +21,9 @@ Future<void> main() async {
     ),
   );
   await TransportProgress.instance.load();
+  backend = FakeBackend.preset(
+    const String.fromEnvironment('FAKE', defaultValue: 'guest'),
+  );
   runApp(const MannersPrototype());
 }
 

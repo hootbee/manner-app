@@ -1,3 +1,5 @@
+import '../backend.dart';
+import 'manner_stats_screen.dart';
 import 'partner_artwork.dart';
 
 import 'dart:math' as math;
@@ -25,7 +27,7 @@ class _MyPageScreenState extends State<MyPageScreen>
   double _angle = 0;
   static const _ink = Color(0xFF191D1A);
   static const _menus = [
-    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 분야의 성장 현황을 확인해요.'),
+    (Icons.bar_chart_rounded, '나의 매너 스탯', '6개 영역의 성장 현황을 확인해요.'),
     (Icons.share_outlined, '스탯 공유', '나의 성장을 친구들에게 공유해요.'),
     (Icons.settings_outlined, '설정', '계정 및 앱 설정을 관리해보세요.'),
   ];
@@ -223,7 +225,21 @@ class _MyPageScreenState extends State<MyPageScreen>
                         ),
                       ),
                       trailing: const Icon(Icons.chevron_right, size: 20),
-                      onTap: () => _notice(_menus[i].$2),
+                      onTap: () {
+                        if (i == 0) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => MannerStatsScreen(
+                                stats: backend.stats,
+                                partner: widget.partner,
+                                preview: widget.preview,
+                              ),
+                            ),
+                          );
+                        } else {
+                          _notice(_menus[i].$2);
+                        }
+                      },
                     ),
                   ],
                 ],
