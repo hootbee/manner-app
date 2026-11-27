@@ -82,6 +82,14 @@ class FakeBackend implements Backend {
         levelProgress: _xp % 100 / 100,
       );
 
+  int _previewTopicXp = 0;
+  /// Isolated prototype topic rewards; does not change the live backend.
+  void setPreviewTopicXp(int total) {
+    _xp += total - _previewTopicXp;
+    _previewTopicXp = total;
+    _home.value = _build();
+  }
+
   void _addXp(int xp) {
     _xp += xp;
     _home.value = _build();
@@ -91,6 +99,7 @@ class FakeBackend implements Backend {
   void _signedOut() {
     _account.value = null;
     _xp = 0;
+    _previewTopicXp = 0;
     _streak = 0;
     _done = false;
     _home.value = _build();
