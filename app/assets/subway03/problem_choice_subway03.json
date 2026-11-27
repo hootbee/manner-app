@@ -1,0 +1,55 @@
+{
+  "problem_id": "subway_03_basic",
+  "category": "대중교통",
+  "progress_label": "03/20",
+  "type": "choice",
+  "status": "art_approval_needed_for_layered_runtime",
+  "title": "임산부 배려석이 비어 있다면 어떻게 해야 할까요?",
+  "situation": "서울 지하철에 탑승했어요. 조금 피곤하지만 서 있는 데 어려움은 없어요. 일반 좌석은 모두 차 있고, 임산부 배려석만 비어 있어요.",
+  "instruction": "가장 권장되는 배려 행동을 선택해 주세요.",
+  "choices": [
+    {
+      "id": "A",
+      "text": "일단 앉았다가 임산부가 보이면 양보한다."
+    },
+    {
+      "id": "B",
+      "text": "배려석을 비워 두고 안전하게 서 있는다."
+    },
+    {
+      "id": "C",
+      "text": "임산부 배지를 단 사람이 보일 때만 자리를 비워 준다."
+    }
+  ],
+  "correct_choice_id": "B",
+  "feedback": {
+    "B": "좋아요! 임산부가 필요할 때 편하게 이용할 수 있도록 배려석을 비워 두었어요.",
+    "A": "임산부가 보이면 양보하는 것도 배려지만, 서울 지하철에서는 배려석을 미리 비워 두는 것을 권장해요.",
+    "C": "임산부 배지를 항상 가지고 있거나 착용하는 것은 아니에요. 배지가 보일 때만 양보하려 하면 도움이 필요한 사람을 놓칠 수 있어요."
+  },
+  "hints": [
+    {
+      "step": 1,
+      "text": "임신 초기에는 겉모습만으로 임산부인지 알아보기 어려울 수 있어요. 어떤 배려가 필요할까요?"
+    },
+    {
+      "step": 2,
+      "text": "임산부가 직접 부탁하지 않아도 편하게 앉을 수 있도록 하려면 어떻게 해야 할까요?"
+    }
+  ],
+  "attempts": {
+    "max_valid_submissions": 4,
+    "hint_counts_as_attempt": false,
+    "selection_change_counts_as_attempt": false,
+    "final_failure_success_reward": false
+  },
+  "submit_on_choice": false,
+  "submit_button": "제출하기",
+  "post_correct_button": "해설 보기",
+  "post_wrong_buttons": [
+    "힌트 보기",
+    "다시 시도하기"
+  ],
+  "fail_button": "정답 확인",
+  "legal_nature": "서울 지하철에서 권장하는 배려 행동; 착석 자체에 대한 전국 공통 형사 처벌로 설명하지 않음"
+}

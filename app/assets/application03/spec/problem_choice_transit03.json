@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "revision": "2026-11-26",
+  "review_status": "ART_QA_PENDING",
+  "problem_id": "transit03_application",
+  "category": "대중교통",
+  "learning_topic": "임산부 배려석 이용자를 겉모습만으로 판단하지 않기",
+  "section": "application",
+  "progress_label": "응용 03/20 · 2/2",
+  "problem_type": "choice",
+  "title": "배려석에 앉은 승객, 어떻게 해야 할까요?",
+  "situation": [
+    "지하철 임산부 배려석에 젊어 보이는 승객이 앉아 있어요.",
+    "임산부 배지는 보이지 않고, 옆 승객이 그 모습을 보고 의아해해요."
+  ],
+  "speech_bubble": "저 자리, 괜찮은 걸까?",
+  "instruction": "가장 배려 있는 행동을 선택해 주세요.",
+  "choices": [
+    {
+      "id": "A",
+      "text": "상대가 민망하지 않도록 조용히 임산부인지 물어본다.",
+      "correct": false,
+      "feedback": "조용히 묻더라도 임신 여부를 설명하거나 증명해야 한다는 부담을 줄 수 있어요."
+    },
+    {
+      "id": "B",
+      "text": "옆 승객에게 보이지 않는 사정이 있을 수 있다고 말한다.",
+      "correct": true,
+      "feedback": "맞아요! 보이지 않는 사정을 존중하고 섣불리 판단하지 않는 것이 배려예요."
+    },
+    {
+      "id": "C",
+      "text": "상대방에게 임산부 배려석이라는 사실을 정중히 알려준다.",
+      "correct": false,
+      "feedback": "정중한 말이라도 상대방에게 자격을 증명하거나 자리를 비우라는 압박이 될 수 있어요."
+    }
+  ],
+  "correct_choice_id": "B",
+  "interaction": {
+    "initial_selection": null,
+    "submit_enabled_when": "selected_choice_id != null && !is_evaluating && attempts_used < 4",
+    "evaluate_on": "submit_button_click_only",
+    "evaluate_on_selection": false,
+    "max_valid_submissions": 4,
+    "retry_count": 3,
+    "initial_attempt_count": 1,
+    "invalid_interaction_deducts_attempt": false,
+    "hint_deducts_attempt": false,
+    "on_correct": "common_correct_popup_then_explanation_basic",
+    "on_wrong_before_limit": "common_wrong_popup_then_retry",
+    "on_wrong_at_limit": "final_failure_then_answer_reveal",
+    "answer_reveal_is_success": false,
+    "answer_reveal_awards_xp": false,
+    "wrong_choice_reselection_policy": "allow_reselect_after_feedback",
+    "common_haptics_sfx": "reuse_existing_flutter_common_assets_do_not_duplicate"
+  },
+  "states": {
+    "initial": {
+      "selected_choice": null,
+      "submit_enabled": false
+    },
+    "selected": {
+      "selected_choice": "A|B|C",
+      "submit_enabled": true
+    },
+    "correct": {
+      "trigger": "submit B",
+      "judgement": "correct",
+      "show_common_popup": true
+    },
+    "wrong": {
+      "trigger": "submit A or C while attempts_used < 4",
+      "judgement": "wrong",
+      "show_common_popup": true
+    },
+    "retry": {
+      "trigger": "wrong with attempts_used < 4",
+      "selected_choice": null,
+      "submit_enabled": false
+    },
+    "final_failure": {
+      "trigger": "wrong with attempts_used == 4",
+      "answer_reveal_available": true,
+      "success": false,
+      "award_xp": 0
+    },
+    "hint_1": {
+      "hint_index": 1,
+      "allow_next_hint": true
+    },
+    "hint_2": {
+      "hint_index": 2,
+      "allow_next_hint": false
+    },
+    "explanation_basic": {
+      "content_ref": "content/education_content_transit03.md#기본-해설-초안"
+    },
+    "explanation_detail": {
+      "content_ref": "content/education_content_transit03.md#자세한-해설-초안"
+    }
+  },
+  "content_is_draft": true,
+  "hint_content": {
+    "hint_1": "겉모습과 배지만으로 누군가의 상황을 알 수 있을까요?",
+    "hint_2": "상대에게 확인을 요구하기보다, 보이지 않는 사정을 존중하는 행동을 생각해 보세요."
+  },
+  "next_screen_on_explanation": "existing_shared_topic_completion_flow_after_basic_and_application",
+  "sources": [
+    {
+      "org": "서울특별시",
+      "title": "임산부배려석 안내",
+      "year": 2024,
+      "url": "https://news.seoul.go.kr/traffic/archives/27958"
+    },
+    {
+      "org": "찾기쉬운 생활법령정보",
+      "title": "도시철도, 철도 및 광역전철: 임산부 배려석",
+      "year": 2026,
+      "url": "https://m.easylaw.go.kr/MOB/CsmInfoRetrieve.laf?ccfNo=2&cciNo=2&cnpClsNo=1&csmSeq=2860"
+    },
+    {
+      "org": "서울특별시",
+      "title": "지하철 분홍좌석은 임산부배려석 입니다",
+      "year": 2015,
+      "url": "https://mediahub.seoul.go.kr/archives/894957"
+    }
+  ]
+}
