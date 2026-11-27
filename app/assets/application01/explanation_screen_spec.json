@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "id": "application_explanation_common",
+  "implementation": "Flutter widgets + transparent profile assets, NOT flat screenshot",
+  "reference_preview": "previews/explanation_approved.png",
+  "content": "spec/application_explanation_01.json",
+  "reuse_component": "basic_explanation_screen",
+  "difference_from_basic": "brief content for application; no long Q&A, expandable explanation, or added separate title",
+  "header": {
+    "component": "existing_Flutter_learning_header",
+    "keep_app_logo": true,
+    "category": "대중교통",
+    "progress": "01/20",
+    "step": "응용 · 2/2",
+    "new_large_screen_title": false
+  },
+  "layout_dp": {
+    "canvas_scrolling": "SafeArea + scrollable Column, bottom CTA respecting safe insets",
+    "outer_horizontal_padding": 16,
+    "vertical_gap_after_header": 16,
+    "card_horizontal_padding": 16,
+    "card_vertical_padding_min": 16,
+    "card_vertical_padding_max": 20,
+    "card_gap": 12,
+    "card_radius": 16,
+    "card_height": "intrinsic/wrapContent, NEVER fixed",
+    "character_speech_row_gap": 12,
+    "profile_box_diameter": 60,
+    "button_height": 48,
+    "button_corner_radius": 24,
+    "bottom_safe_padding": 16,
+    "text_body_line_height_ratio": 1.5,
+    "max_content_width_on_tablet": 440
+  },
+  "typography": {
+    "font": "Pretendard (fallback: Noto Sans KR)",
+    "card_heading_sp": 18,
+    "card_heading_weight": 700,
+    "body_sp": 14,
+    "body_weight": 400,
+    "character_speech_sp": 15,
+    "button_sp": 16,
+    "button_weight": 700
+  },
+  "colors": {
+    "page": "#FFFFFF",
+    "card": "#F7F8FA",
+    "text": "#222831",
+    "secondary": "#737D8C",
+    "border": "#E5E9EF",
+    "button": "#1B1E1B",
+    "button_text": "#FFFFFF"
+  },
+  "character_profile": {
+    "selected_character_dynamic": true,
+    "character_png_paths": {
+      "dangdang": "runtime/explanation/profiles/dangdang_profile_rgba_256.png",
+      "nyangnyang": "runtime/explanation/profiles/nyangnyang_profile_rgba_256.png",
+      "mongmong": "runtime/explanation/profiles/mongmong_profile_rgba_256.png"
+    },
+    "circular_clip": true,
+    "image_fit": "contain",
+    "never_crop_face_or_ears": true
+  },
+  "section_order": [
+    "core_manner",
+    "why_important",
+    "practical_tip",
+    "learning_key",
+    "character_speech"
+  ],
+  "button": {
+    "label": "학습 완료",
+    "route": "/learning/transit/01/completion"
+  },
+  "reference_only_not_runtime": [
+    "previews/explanation_approved.png"
+  ]
+}

@@ -1,0 +1,136 @@
+[
+  {
+    "state": "initial",
+    "layers": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "backpack_initial_layer.png",
+      "dog_default.png",
+      "strap_front_overlay.png",
+      "monkey_uncomfortable.png"
+    ],
+    "effects": [],
+    "button": null
+  },
+  {
+    "state": "dragging",
+    "layers": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "backpack_drag.png (at initial x/y + pointer delta, below dog until travel>20px)",
+      "dog_default.png",
+      "monkey_uncomfortable.png"
+    ],
+    "effects": [],
+    "button": "힌트 보기"
+  },
+  {
+    "state": "hint_1",
+    "layers": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "backpack_initial_layer.png",
+      "dog_default.png",
+      "strap_front_overlay.png",
+      "monkey_uncomfortable.png"
+    ],
+    "effects": [],
+    "button": "힌트 보기"
+  },
+  {
+    "state": "hint_2",
+    "layers": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "backpack_initial_layer.png",
+      "dog_default.png",
+      "strap_front_overlay.png",
+      "monkey_uncomfortable.png"
+    ],
+    "effects": [],
+    "button": "힌트 보기"
+  },
+  {
+    "state": "correct_just_judged",
+    "layers": [
+      "background.png",
+      "cat_comfortable.png",
+      "dog_front_pose.png",
+      "backpack_correct_layer.png",
+      "dog_front_hands_overlay.png",
+      "monkey_comfortable.png"
+    ],
+    "effects": [
+      "effect_correct.png"
+    ],
+    "button": "힌트 보기"
+  },
+  {
+    "state": "correct_complete",
+    "layers": [
+      "background.png",
+      "cat_comfortable.png",
+      "dog_front_pose.png",
+      "backpack_correct_layer.png",
+      "dog_front_hands_overlay.png",
+      "monkey_comfortable.png"
+    ],
+    "effects": [],
+    "button": "해설 보기"
+  },
+  {
+    "state": "wrong_just_judged",
+    "layers": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "dog_default.png",
+      "monkey_blocked.png",
+      "backpack_wrong_layer.png"
+    ],
+    "effects": [
+      "effect_wrong.png"
+    ],
+    "button": "힌트 보기"
+  },
+  {
+    "state": "wrong_complete",
+    "layers": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "dog_default.png",
+      "monkey_blocked.png",
+      "backpack_wrong_layer.png"
+    ],
+    "effects": [],
+    "button": [
+      "힌트 보기",
+      "다시 시도하기"
+    ]
+  },
+  {
+    "state": "retry_reset",
+    "layers": [
+      "background.png",
+      "cat_uncomfortable.png",
+      "backpack_initial_layer.png",
+      "dog_default.png",
+      "strap_front_overlay.png",
+      "monkey_uncomfortable.png"
+    ],
+    "effects": [],
+    "button": "힌트 보기"
+  },
+  {
+    "state": "final_failure",
+    "layers": [
+      "background.png",
+      "cat_comfortable.png",
+      "dog_front_pose.png",
+      "backpack_correct_layer.png",
+      "dog_front_hands_overlay.png",
+      "monkey_comfortable.png"
+    ],
+    "effects": [],
+    "button": "힌트 보기"
+  }
+]

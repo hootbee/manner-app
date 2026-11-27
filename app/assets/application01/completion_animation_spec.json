@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "screen": "completion_reward_common",
+  "implementation": "Flutter AnimationController / TweenSequence; no prerendered GIF; time-based relative to completion result screen entry",
+  "start_condition": "Both basic+application learning flow finished; reward grant resolved idempotently; no active result modal; permission for animation.",
+  "sequence_ms": [
+    {
+      "name": "screen_fade",
+      "start": 0,
+      "duration": 200,
+      "property": "root opacity 0→1",
+      "easing": "easeOut"
+    },
+    {
+      "name": "character_enter",
+      "start": 120,
+      "duration": 320,
+      "property": "character translateY +24dp→0dp, opacity 0→1, scale 0.92→1",
+      "easing": "easeOutBack mild overshoot <=1.04"
+    },
+    {
+      "name": "character_cheer",
+      "start": 430,
+      "duration": 360,
+      "property": "character translateY 0→-7dp→0, rotation -2°→+2°→0",
+      "repeat": false
+    },
+    {
+      "name": "confetti_burst",
+      "start": 480,
+      "duration": 650,
+      "property": "gold/gray sprites emit outward from left/right of character; slight fall; fade to 0.6 then hold",
+      "count": 12,
+      "must_not_cover_text": true
+    },
+    {
+      "name": "xp_reveal",
+      "start": 800,
+      "duration": 300,
+      "property": "XP number scale 0.85→1.06→1, opacity 0→1",
+      "when": "all, including +0 but do not show award as new on review"
+    },
+    {
+      "name": "xp_progress_tween",
+      "start": 1050,
+      "duration": 650,
+      "property": "animate progress previous fraction→new fraction, from authoritative before/after XP data",
+      "on_level_up": "handle progress wrap as a separate sequence when threshold crossed"
+    },
+    {
+      "name": "idle_result_hold",
+      "start": 1700,
+      "duration": null,
+      "property": "no further looping; show screen unchanged until CTA tap"
+    }
+  ],
+  "z_order_back_to_front": [
+    "page",
+    "header",
+    "cards",
+    "confetti_behind_character",
+    "celebration_character",
+    "confetti_front_non_occluding",
+    "xp_numeric_flutter_text",
+    "CTA"
+  ],
+  "sprite_configuration": {
+    "asset_paths": {
+      "confetti_gold": "runtime/completion/decor/confetti_gold.png",
+      "confetti_gray": "runtime/completion/decor/confetti_gray.png",
+      "sparkle_gold": "runtime/completion/decor/sparkle_gold.png",
+      "ribbon_gold": "runtime/completion/decor/ribbon_gold.png",
+      "ribbon_gray": "runtime/completion/decor/ribbon_gray.png",
+      "burst_gold": "runtime/completion/decor/burst_gold.png"
+    },
+    "count_total_initial": 12,
+    "colors": [
+      "#ECB241",
+      "#B7BABC"
+    ],
+    "spawn_bounds_relative_to_hero": {
+      "left": -0.35,
+      "right": 1.35,
+      "top": -0.2,
+      "bottom": 0.8
+    },
+    "repetition": "small finite bursts only, no endless particle loop"
+  },
+  "sound_coordination": {
+    "new_completion_sfx_file": null,
+    "existing_judgement_audio": [
+      "common/result_popup/popup_correct.mp3",
+      "common/result_popup/popup_wrong.mp3"
+    ],
+    "policy": "No automatic new completion sound. Wait until O/X popup and its audio have completed or been dismissed, then start completion animation. Never overlap existing judgement SFX; avoid duplicate play on repeated enter.",
+    "audio_optional": true
+  },
+  "accessibility": {
+    "reduce_motion": "Disable bounce/rotation/confetti movement. Show static character, reward and final gauge immediately; optional short 100ms fade only.",
+    "announce": "Speak state title and awarded XP once on page enter.",
+    "confetti_decorative_semantics_hidden": true
+  },
+  "lifecycle": {
+    "on_page_background": "pause controller",
+    "on_page_dispose": "dispose controller, no background animation",
+    "on_page_reenter": "do not issue a second reward; replay small visual intro optional once at most per user action",
+    "on_cta": "navigation only after reward state persisted; do not auto_navigate"
+  },
+  "level_transition_condition": "Do NOT infer threshold from preview; threshold from actual user level policy",
+  "flutter_suggested_implementation": "AnimatedOpacity + SlideTransition + ScaleTransition + RotationTransition + AnimatedBuilder; Stack/Positioned for decor; TweenAnimationBuilder<double> for progress"
+}
